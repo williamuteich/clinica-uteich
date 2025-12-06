@@ -13,7 +13,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="space-y-4">
             <div className="flex flex-col items-center md:items-start gap-4">
-              <img src="/logoFooter.png" alt="Uteich Odontologia" className="h-16 w-auto" />
+              <img src={`${import.meta.env.BASE_URL}logoFooter.png`} alt="Uteich Odontologia" className="h-16 w-auto" />
               <p className="text-sm text-primary-foreground/80 text-center md:text-left max-w-xs leading-relaxed">
                 Cuidando do seu sorriso com excelência e dedicação. Tecnologia de ponta e atendimento humanizado.
               </p>

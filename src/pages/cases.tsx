@@ -4,6 +4,12 @@ import { SEO } from "@/components/SEO";
 import { clinicInfo } from "@/data/services";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { useState } from "react";
+import imgClareamentoAntes from "@/assets/img_Clareamento_antes.jpg";
+import imgClareamentoDepois from "@/assets/img_Clareamento_depois.jpg";
+import imgEsteticaAntes from "@/assets/img_esteticaDental_antes.jpg";
+import imgEsteticaDepois from "@/assets/img_esteticaDental_depois.jpg";
+import imgImplanteAntes from "@/assets/img_implante_antes.jpg";
+import imgImplanteDepois from "@/assets/img_implante_depois.jpg";
 
 const cases = [
   {
@@ -11,24 +17,24 @@ const cases = [
     title: "Limpeza Profunda",
     testimonial: "Sempre tive vergonha do meu sorriso amarelado. Após o clareamento na Uteich, minha autoestima mudou completamente! O resultado superou minhas expectativas.",
     treatments: ["Limpeza Profunda", "Profilaxia"],
-    imageBefore: "/src/assets/img_Clareamento_antes.jpg",
-    imageAfter: "/src/assets/img_Clareamento_depois.jpg"
+    imageBefore: imgClareamentoAntes,
+    imageAfter: imgClareamentoDepois
   },
   {
     id: 2,
     title: "Estética Dental e Clareamento",
     testimonial: "Remoção de cárie nos dentes da frente.",
     treatments: ["Restauração Estética", "Resina Composta"],
-    imageBefore: "/src/assets/img_esteticaDental_antes.jpg",
-    imageAfter: "/src/assets/img_esteticaDental_depois.jpg"
+    imageBefore: imgEsteticaAntes,
+    imageAfter: imgEsteticaDepois
   },
   {
     id: 3,
     title: "Implante Dentário",
     testimonial: "Perdi um dente frontal e tinha dois debaixo quebrados. O implante ficou perfeito, ninguém nota a diferença. Voltei a sorrir sem medo!",
     treatments: ["Implante Unitário", "Coroa de Porcelana"],
-    imageBefore: "/src/assets/img_implante_antes.jpg",
-    imageAfter: "/src/assets/img_implante_depois.jpg"
+    imageBefore: imgImplanteAntes,
+    imageAfter: imgImplanteDepois
   }
 ];
 

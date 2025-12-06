@@ -52,7 +52,7 @@ const Index = () => {
           }}
         />
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-background" style={{
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-background hidden lg:block" style={{
           clipPath: "ellipse(80% 100% at 50% 100%)"
         }} />
 
@@ -98,16 +98,16 @@ const Index = () => {
 
               <div className="grid grid-cols-3 gap-6 pt-8">
                 <div>
-                  <p className="text-3xl font-bold text-dental-sky xl:text-white">24h</p>
-                  <p className="text-sm text-foreground/70 xl:text-white/90">Emergências</p>
+                  <p className="text-3xl font-bold text-white">24h</p>
+                  <p className="text-sm text-white/90">Emergências</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-dental-sky xl:text-white">7+</p>
-                  <p className="text-sm text-foreground/70 xl:text-white/90">Especialidades</p>
+                  <p className="text-3xl font-bold text-white">7+</p>
+                  <p className="text-sm text-white/90">Especialidades</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-dental-sky xl:text-white">100%</p>
-                  <p className="text-sm text-foreground/70 xl:text-white/90">Satisfação</p>
+                  <p className="text-3xl font-bold text-white">100%</p>
+                  <p className="text-sm text-white/90">Satisfação</p>
                 </div>
               </div>
             </div>
