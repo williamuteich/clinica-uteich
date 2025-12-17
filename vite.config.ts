@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
   },
   plugins: [react()],
-  base: "/clinica-uteich/",
+  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

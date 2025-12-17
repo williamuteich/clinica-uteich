@@ -5,9 +5,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
 
@@ -15,6 +12,11 @@ import atendimento24hrs from "@/assets/banners/atendimento_24hrs.png";
 import clinicaEspecializada from "@/assets/banners/clinica_especializada.png";
 import promoSexta from "@/assets/banners/promo_sexta.png";
 import inauguracao from "@/assets/banners/inauguracao.png";
+
+import atendimento24hrsMobile from "@/assets/banners/atendimento_24hrs_mobile.png";
+import clinicaEspecializadaMobile from "@/assets/banners/clinica_especializada_mobile.png";
+import promoSextaMobile from "@/assets/banners/promo_sexta_mobile.png";
+import inauguracaoMobile from "@/assets/banners/inauguracao_mobile.png";
 
 interface BannerData {
   id: number;
@@ -24,7 +26,8 @@ interface BannerData {
   ctaText: string;
   ctaLink: string;
   bgGradient: string;
-  image?: string;
+  image: string;
+  mobileImage: string;
 }
 
 const banners: BannerData[] = [
@@ -37,6 +40,7 @@ const banners: BannerData[] = [
     ctaLink: "/agendamento",
     bgGradient: "linear-gradient(135deg, hsl(193 65% 32%) 0%, hsl(195 60% 38%) 100%)",
     image: atendimento24hrs,
+    mobileImage: atendimento24hrsMobile,
   },
   {
     id: 2,
@@ -47,6 +51,7 @@ const banners: BannerData[] = [
     ctaLink: "/sobre",
     bgGradient: "linear-gradient(135deg, hsl(195 60% 38%) 0%, hsl(193 70% 54%) 100%)",
     image: clinicaEspecializada,
+    mobileImage: clinicaEspecializadaMobile,
   },
   {
     id: 3,
@@ -57,6 +62,7 @@ const banners: BannerData[] = [
     ctaLink: "/agendamento",
     bgGradient: "linear-gradient(135deg, hsl(193 70% 54%) 0%, hsl(193 70% 72%) 100%)",
     image: promoSexta,
+    mobileImage: promoSextaMobile,
   },
   {
     id: 4,
@@ -67,6 +73,7 @@ const banners: BannerData[] = [
     ctaLink: "/agendamento",
     bgGradient: "linear-gradient(135deg, hsl(193 65% 32%) 0%, hsl(195 60% 38%) 100%)",
     image: inauguracao,
+    mobileImage: inauguracaoMobile,
   },
 ];
 
@@ -76,7 +83,7 @@ export function PromoBanner() {
   );
 
   return (
-    <section className="w-full bg-muted/30 border-y border-border/50">
+    <section className="w-full bg-muted/30 border-y border-border/50 hidden md:block">
       <Carousel
         plugins={[plugin.current]}
         className="w-full"
@@ -91,15 +98,14 @@ export function PromoBanner() {
           {banners.map((banner) => (
             <CarouselItem key={banner.id} className="pl-0">
               <div className="relative w-full overflow-hidden">
-                <img
-                  src={banner.image}
-                  alt={banner.title}
-                  className="w-full h-auto object-cover"
-                  style={{
-                    aspectRatio: "3/1",
-                    minHeight: "200px",
-                  }}
-                />
+                <picture>
+                  <source media="(max-width: 768px)" srcSet={banner.mobileImage} />
+                  <img
+                    src={banner.image}
+                    alt={banner.title}
+                    className="w-full h-auto object-cover aspect-auto md:aspect-[3/1] md:min-h-[200px]"
+                  />
+                </picture>
               </div>
             </CarouselItem>
           ))}

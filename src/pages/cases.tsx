@@ -43,10 +43,12 @@ const Cases = () => {
   const [showBefore, setShowBefore] = useState(true);
 
   const nextCase = () => {
+    setShowBefore(true);
     setCurrentCase((prev) => (prev + 1) % cases.length);
   };
 
   const prevCase = () => {
+    setShowBefore(true);
     setCurrentCase((prev) => (prev - 1 + cases.length) % cases.length);
   };
 
@@ -91,7 +93,10 @@ const Cases = () => {
                 {cases.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => setCurrentCase(index)}
+                    onClick={() => {
+                      setShowBefore(true);
+                      setCurrentCase(index);
+                    }}
                     className={`h-2 rounded-full transition-all ${index === currentCase
                       ? 'w-8 bg-primary'
                       : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
