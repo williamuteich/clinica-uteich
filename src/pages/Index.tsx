@@ -96,18 +96,18 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="grid grid-cols-3 gap-6 pt-8">
+              <div className="grid grid-cols-3 gap-4 pt-6 max-w-xs sm:max-w-sm md:max-w-md">
                 <div>
-                  <p className="text-3xl font-bold text-white">24h</p>
-                  <p className="text-sm text-white/90">Emergências</p>
+                  <p className="text-2xl md:text-3xl font-bold text-white">24h</p>
+                  <p className="text-xs md:text-sm text-white/90">Emergências</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">7+</p>
-                  <p className="text-sm text-white/90">Especialidades</p>
+                  <p className="text-2xl md:text-3xl font-bold text-white">7+</p>
+                  <p className="text-xs md:text-sm text-white/90">Especialidades</p>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-white">100%</p>
-                  <p className="text-sm text-white/90">Satisfação</p>
+                  <p className="text-2xl md:text-3xl font-bold text-white">100%</p>
+                  <p className="text-xs md:text-sm text-white/90">Satisfação</p>
                 </div>
               </div>
             </div>
@@ -154,12 +154,12 @@ const Index = () => {
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16 animate-fade-in">
-            <span className="text-dental-light font-medium text-sm uppercase tracking-wider">Nossos Serviços</span>
+            <span className="text-primary font-medium text-sm uppercase tracking-wider">Nossos Serviços</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4 mb-6">
               Tratamentos completos para sua{" "}
               <span className="text-primary">saúde bucal</span>
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-foreground/80">
               Oferecemos uma gama completa de tratamentos odontológicos com profissionais qualificados e equipamentos modernos.
             </p>
           </div>
@@ -205,7 +205,7 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-fade-in-left">
               <div>
-                <span className="text-dental-light font-medium text-sm uppercase tracking-wider">Por que nos escolher</span>
+                <span className="text-primary font-medium text-sm uppercase tracking-wider">Por que nos escolher</span>
                 <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4">
                   Excelência em cada{" "}
                   <span className="text-primary">detalhe</span>
@@ -225,7 +225,7 @@ const Index = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <p className="text-sm text-foreground/80">{item.desc}</p>
                     </div>
                   </div>
                 ))}
