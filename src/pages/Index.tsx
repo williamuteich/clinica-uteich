@@ -68,12 +68,12 @@ const Index = () => {
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Seu sorriso merece o{" "}
+                Dentista em Cachoeirinha: seu sorriso merece o{" "}
                 <span className="text-dental-sky">melhor cuidado</span>
               </h1>
 
               <p className="text-lg md:text-xl text-primary-foreground/90 max-w-lg">
-                Tecnologia de ponta e atendimento humanizado para transformar seu sorriso.
+                Tecnologia de ponta e atendimento humanizado em Cachoeirinha para transformar seu sorriso.
                 Agende sua avaliação gratuita.
               </p>
 

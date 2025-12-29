@@ -41,7 +41,7 @@ const Services = () => {
 
         <div className="container mx-auto px-4 relative z-10 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-6 animate-fade-in">
-            Nossos Serviços
+            Tratamentos odontológicos em Cachoeirinha
           </h1>
           <p className="text-lg text-primary-foreground/90 max-w-2xl mx-auto animate-fade-in animation-delay-200">
             Oferecemos tratamentos odontológicos completos com tecnologia de ponta e profissionais qualificados.
