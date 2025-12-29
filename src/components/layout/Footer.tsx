@@ -19,10 +19,22 @@ export function Footer() {
               </p>
             </div>
             <div className="flex gap-4 pt-2">
-              <a href={clinicInfo.social.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors">
+              <a
+                href={clinicInfo.social.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors"
+                aria-label="Visitar Instagram da Uteich Odontologia"
+              >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href={clinicInfo.social.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors">
+              <a
+                href={clinicInfo.social.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors"
+                aria-label="Visitar Facebook da Uteich Odontologia"
+              >
                 <Facebook className="w-5 h-5" />
               </a>
               <a
@@ -30,6 +42,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors"
+                aria-label="Falar com a Uteich Odontologia pelo WhatsApp"
               >
                 <FaWhatsapp className="w-5 h-5" />
               </a>

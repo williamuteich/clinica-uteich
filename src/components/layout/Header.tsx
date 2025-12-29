@@ -55,6 +55,7 @@ export function Header() {
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
