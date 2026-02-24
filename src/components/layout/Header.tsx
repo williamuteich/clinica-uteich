@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { clinicInfo } from "@/data/services";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,9 @@ export function Header() {
               <Phone className="w-4 h-4" />
               {clinicInfo.whatsappFormatted}
             </a>
+            <Button asChild variant="ghost" size="icon" title="Área Administrativa">
+              <Link to="/admin"><Lock className="w-4 h-4" /></Link>
+            </Button>
             <Button asChild>
               <Link to="/agendamento">Agendar Consulta</Link>
             </Button>
@@ -84,6 +87,9 @@ export function Header() {
                 Agendar Consulta
               </Link>
             </Button>
+            <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-2">
+              <Lock className="w-4 h-4" /> Área Administrativa
+            </Link>
           </nav>
         </div>
       )}
