@@ -64,11 +64,16 @@ export function AgendaTab() {
   const [deleting, setDeleting] = useState(false);
 
   const today = new Date().toISOString().split("T")[0];
+  const todayDisplay = today.split("-").reverse().join("/");
+  const oneYearLaterDisplay = (() => {
+    const d = new Date(); d.setFullYear(d.getFullYear() + 1);
+    return d.toISOString().split("T")[0].split("-").reverse().join("/");
+  })();
   const [filterName, setFilterName] = useState("");
   const [filterCpf, setFilterCpf] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [filterDateFrom, setFilterDateFrom] = useState(today);
-  const [filterDateTo, setFilterDateTo] = useState(today);
+  const [filterDateFrom, setFilterDateFrom] = useState(todayDisplay);
+  const [filterDateTo, setFilterDateTo] = useState(oneYearLaterDisplay);
   const [showFilters, setShowFilters] = useState(false);
 
   const [startOpen, setStartOpen] = useState(false);
@@ -419,7 +424,12 @@ export function AgendaTab() {
   };
 
   const filtered = appointments.filter((a) => {
-    const p = patients.find((pt) => pt.id === a.patient_id);
+    // try by patient_id first, then fall back to phone match (for appointments without a linked patient)
+    let p = patients.find((pt) => pt.id === a.patient_id);
+    if (!p && a.phone) {
+      const rawPhone = unmask(a.phone);
+      p = patients.find((pt) => pt.phone === rawPhone);
+    }
     if (filterName && !a.patient_name.toLowerCase().includes(filterName.toLowerCase())) return false;
     if (filterCpf) {
       const rawFilter = unmask(filterCpf);
@@ -427,8 +437,10 @@ export function AgendaTab() {
       if (!patientCpf.includes(rawFilter)) return false;
     }
     if (filterStatus !== "all" && a.status !== filterStatus) return false;
-    if (filterDateFrom && a.date < filterDateFrom) return false;
-    if (filterDateTo && a.date > filterDateTo) return false;
+    const isoFrom = dateDisplayToISO(filterDateFrom);
+    const isoTo = dateDisplayToISO(filterDateTo);
+    if (isoFrom && a.date < isoFrom) return false;
+    if (isoTo && a.date > isoTo) return false;
     return true;
   });
 
@@ -499,15 +511,15 @@ export function AgendaTab() {
             </div>
             <div>
               <Label className="text-xs">Data Início</Label>
-              <Input type="date" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} className="h-8 text-sm" />
+              <Input value={filterDateFrom} onChange={(e) => setFilterDateFrom(maskDate(e.target.value))} placeholder="dd/mm/aaaa" maxLength={10} className="h-8 text-sm" />
             </div>
             <div>
               <Label className="text-xs">Data Fim</Label>
-              <Input type="date" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} className="h-8 text-sm" />
+              <Input value={filterDateTo} onChange={(e) => setFilterDateTo(maskDate(e.target.value))} placeholder="dd/mm/aaaa" maxLength={10} className="h-8 text-sm" />
             </div>
           </div>
           <div className="mt-2 flex justify-end">
-            <Button variant="ghost" size="sm" onClick={() => { setFilterName(""); setFilterCpf(""); setFilterStatus("all"); setFilterDateFrom(today); setFilterDateTo(today); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setFilterName(""); setFilterCpf(""); setFilterStatus("all"); setFilterDateFrom(todayDisplay); setFilterDateTo(oneYearLaterDisplay); }}>
               Limpar Filtros
             </Button>
           </div>
