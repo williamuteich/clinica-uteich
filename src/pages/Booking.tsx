@@ -244,18 +244,18 @@ const Booking = () => {
                         const month = dateObj.toLocaleDateString('pt-BR', { month: 'long' });
 
                         return (
-                          <Button
+                          <button
                             key={date}
                             onClick={() => handleDateSelect(date)}
                             className={`p-3 rounded-xl text-center transition-all ${selectedDate === date
                               ? 'gradient-card text-primary-foreground'
-                              : 'bg-card hover:bg-muted'
+                              : 'bg-card text-foreground hover:bg-muted'
                               }`}
                           >
                             <div className="text-xs uppercase">{dayName}</div>
                             <div className="text-xl font-bold">{dayNum}</div>
                             <div className="text-xs">{month}</div>
-                          </Button>
+                          </button>
                         );
                       })}
                     </div>
