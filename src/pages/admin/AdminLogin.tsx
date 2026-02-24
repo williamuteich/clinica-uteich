@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Turnstile } from "@/components/Turnstile";
 
 interface Props {
   onLogin: () => void;
@@ -13,6 +14,7 @@ export function AdminLogin({ onLogin }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +61,13 @@ export function AdminLogin({ onLogin }: Props) {
                 placeholder="••••••••"
               />
             </div>
-            <Button type="submit" className="w-full mt-2" disabled={loading}>
+            <div className="flex justify-center py-2">
+              <Turnstile
+                siteKey="0x4AAAAAACMyfG61zPTQ60uU"
+                onSuccess={(token) => setTurnstileToken(token)}
+              />
+            </div>
+            <Button type="submit" className="w-full mt-2" disabled={loading || !turnstileToken}>
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>

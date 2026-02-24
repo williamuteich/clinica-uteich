@@ -25,6 +25,12 @@ export const maskDate = (value: string): string => {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 };
 
+export const maskTime = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}:${digits.slice(2)}`;
+};
+
 export const dateDisplayToISO = (display: string): string => {
   const [d, m, y] = display.split("/");
   if (!d || !m || !y || y.length < 4) return "";

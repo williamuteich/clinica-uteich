@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { clinicInfo } from "@/data/services";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { maskCPF, maskPhone, maskCEP, maskDate, maskCurrency, formatCurrency, dateDisplayToISO, isoToDateDisplay, unmask, isValidCPF, isValidPhone, isValidCEP, fetchAddressByCEP } from "@/lib/masks";
+import { maskCPF, maskPhone, maskCEP, maskDate, maskCurrency, maskTime, formatCurrency, dateDisplayToISO, isoToDateDisplay, unmask, isValidCPF, isValidPhone, isValidCEP, fetchAddressByCEP } from "@/lib/masks";
 
 interface Patient {
   id: string; name: string; cpf: string; phone: string | null;
@@ -528,7 +528,7 @@ export function AgendaTab() {
                 <div><Label>Data de Nascimento</Label><Input value={form.birth_date} onChange={(e) => setForm({ ...form, birth_date: maskDate(e.target.value) })} placeholder="dd/mm/aaaa" maxLength={10} /></div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><Label>Data do Agendamento *</Label><Input value={form.date} onChange={(e) => setForm({ ...form, date: maskDate(e.target.value) })} placeholder="dd/mm/aaaa" maxLength={10} /></div>
-                  <div><Label>Horário *</Label><Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
+                  <div><Label>Horário *</Label><Input type="text" value={form.time} onChange={(e) => setForm({ ...form, time: maskTime(e.target.value) })} placeholder="00:00" maxLength={5} /></div>
                 </div>
                 <div><Label>Motivo</Label><Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="Ex: Limpeza, Avaliação..." /></div>
                 <div><Label>Valor Total</Label><Input value={form.totalValue} onChange={(e) => setForm({ ...form, totalValue: maskCurrency(e.target.value) })} placeholder="R$ 0,00" /></div>
@@ -800,7 +800,7 @@ export function AgendaTab() {
             <p className="text-sm text-muted-foreground">Confirme e complete os dados do paciente:</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div><Label>Data do Agendamento</Label><Input value={confirmDate} onChange={(e) => setConfirmDate(maskDate(e.target.value))} placeholder="dd/mm/aaaa" maxLength={10} /></div>
-              <div><Label>Horário</Label><Input type="time" value={confirmTime} onChange={(e) => setConfirmTime(e.target.value)} /></div>
+              <div><Label>Horário</Label><Input type="text" value={confirmTime} onChange={(e) => setConfirmTime(maskTime(e.target.value))} placeholder="00:00" maxLength={5} /></div>
             </div>
             <div>
               <Label>CPF</Label>

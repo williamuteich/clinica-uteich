@@ -12,6 +12,7 @@ import { Calendar, Clock, User, Phone, FileText, CheckCircle, ArrowRight, ArrowL
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingSuccessDialog } from "@/components/BookingSuccessDialog";
+import { Turnstile } from "@/components/Turnstile";
 
 const Booking = () => {
   const [searchParams] = useSearchParams();
@@ -26,6 +27,7 @@ const Booking = () => {
     phone: "",
     notes: ""
   });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleServiceSelect = (serviceId: string) => {
     setSelectedService(serviceId);
@@ -242,7 +244,7 @@ const Booking = () => {
                         const month = dateObj.toLocaleDateString('pt-BR', { month: 'long' });
 
                         return (
-                          <button
+                          <Button
                             key={date}
                             onClick={() => handleDateSelect(date)}
                             className={`p-3 rounded-xl text-center transition-all ${selectedDate === date
@@ -253,7 +255,7 @@ const Booking = () => {
                             <div className="text-xs uppercase">{dayName}</div>
                             <div className="text-xl font-bold">{dayNum}</div>
                             <div className="text-xs">{month}</div>
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
@@ -360,7 +362,14 @@ const Booking = () => {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                  <div className="flex justify-center py-2">
+                    <Turnstile
+                      siteKey="0x4AAAAAACMyfG61zPTQ60uU"
+                      onSuccess={(token) => setTurnstileToken(token)}
+                    />
+                  </div>
+
+                  <Button type="submit" size="lg" className="w-full" disabled={submitting || !turnstileToken}>
                     {submitting ? "Aguarde..." : "Confirmar Agendamento"}
                     {!submitting && <ArrowRight className="w-5 h-5" />}
                   </Button>
