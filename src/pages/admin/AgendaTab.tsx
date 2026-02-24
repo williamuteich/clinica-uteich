@@ -153,9 +153,16 @@ export function AgendaTab() {
 
     setSubmitting(true);
     const rawPhone = unmask(form.phone);
+    const rawCpf = unmask(form.cpf);
+    let pId = null;
+
+    if (rawCpf && rawCpf.length === 11) {
+      const { data: existing } = await supabase.from("patients").select("id").eq("cpf", rawCpf).maybeSingle();
+      if (existing) pId = existing.id;
+    }
 
     const { data: newApp } = await supabase.from("appointments").insert({
-      patient_id: null,
+      patient_id: pId,
       patient_name: form.patientName,
       phone: rawPhone,
       date: isoDate,
@@ -165,13 +172,6 @@ export function AgendaTab() {
     }).select("id").single();
 
     if (newApp && form.totalValue) {
-      const rawCpf = unmask(form.cpf);
-      let pId = null;
-      if (rawCpf && rawCpf.length === 11) {
-        const { data: existing } = await supabase.from("patients").select("id").eq("cpf", rawCpf).maybeSingle();
-        if (existing) pId = existing.id;
-      }
-
       if (pId) {
         await supabase.from("attendances").insert({
           appointment_id: newApp.id,
@@ -398,6 +398,7 @@ export function AgendaTab() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
+    await supabase.from("attendances").delete().eq("appointment_id", deleteId);
     await supabase.from("appointments").delete().eq("id", deleteId);
     toast({ title: "Agendamento removido" });
     setDeleteId(null);

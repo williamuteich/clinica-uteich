@@ -6,13 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Pencil, Trash2, Search, Loader2, FileText, Phone, MapPin } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { toast } from "@/hooks/use-toast";
-import { maskCPF, maskPhone, maskCEP, maskDate, dateDisplayToISO, isoToDateDisplay, unmask, isValidCPF, isValidPhone, isValidCEP, fetchAddressByCEP } from "@/lib/masks";
+import { maskCPF, maskPhone, maskCEP, maskDate, dateDisplayToISO, isoToDateDisplay, unmask, isValidCPF, isValidPhone, isValidCEP, fetchAddressByCEP, formatCurrency } from "@/lib/masks";
 
 interface Patient {
   id: string;
@@ -36,6 +37,34 @@ interface MedicalRecord {
   professional: string;
 }
 
+interface Appointment {
+  id: string;
+  date: string;
+  time: string;
+  reason: string | null;
+  status: string;
+}
+
+interface UnifiedRecord {
+  id: string;
+  type: 'appointment' | 'medical_record';
+  date: string; // ISO or YYYY-MM-DD
+  time?: string;
+  title: string;
+  description: string | null;
+  status?: string;
+  professional?: string;
+  value?: number;
+}
+
+interface Attendance {
+  id: string;
+  patient_id: string;
+  appointment_id?: string;
+  date: string;
+  total_value: number;
+}
+
 const emptyForm = { cpf: "", name: "", birth_date: "", phone: "", cep: "", state: "", city: "", street: "", number: "" };
 
 export function PatientsTab() {
@@ -52,7 +81,7 @@ export function PatientsTab() {
 
   const [recordsOpen, setRecordsOpen] = useState(false);
   const [recordsPatient, setRecordsPatient] = useState<Patient | null>(null);
-  const [records, setRecords] = useState<MedicalRecord[]>([]);
+  const [records, setRecords] = useState<UnifiedRecord[]>([]);
   const [loadingRecords, setLoadingRecords] = useState(false);
 
   const reload = async () => {
@@ -122,6 +151,13 @@ export function PatientsTab() {
   const handleDelete = async () => {
     if (!deleteId) return;
     setDeleting(true);
+    // Delete dependent records first to avoid foreign key conflicts
+    await Promise.all([
+      supabase.from("medical_records").delete().eq("patient_id", deleteId),
+      supabase.from("attendances").delete().eq("patient_id", deleteId),
+      supabase.from("appointments").delete().eq("patient_id", deleteId),
+    ]);
+
     await supabase.from("patients").delete().eq("id", deleteId);
     toast({ title: "Paciente removido" });
     setDeleteId(null);
@@ -133,12 +169,61 @@ export function PatientsTab() {
     setRecordsPatient(p);
     setRecordsOpen(true);
     setLoadingRecords(true);
-    const { data } = await supabase
-      .from("medical_records")
-      .select("*")
-      .eq("patient_id", p.id)
-      .order("date", { ascending: false });
-    setRecords(data || []);
+
+    const [recordsRes, appsRes, attRes] = await Promise.all([
+      supabase.from("medical_records").select("*").eq("patient_id", p.id),
+      supabase.from("appointments").select("*")
+        .or(`patient_id.eq.${p.id},phone.eq.${p.phone || 'none'}`)
+        .neq("status", "em_atendimento"),
+      supabase.from("attendances").select("*").eq("patient_id", p.id)
+    ]);
+
+    const unified: UnifiedRecord[] = [];
+    const attendances: Attendance[] = attRes.data || [];
+    const medicalRecords = recordsRes.data || [];
+    const allAppointments = appsRes.data || [];
+
+    const appointments = allAppointments.filter(a =>
+      a.patient_id === p.id || (!a.patient_id && a.phone === p.phone)
+    );
+
+    medicalRecords.forEach((r: MedicalRecord) => {
+      const att = attendances.find(a => !a.appointment_id && a.date === r.date.split('T')[0]);
+      unified.push({
+        id: r.id,
+        type: 'medical_record',
+        date: r.date,
+        title: r.procedures,
+        description: r.notes,
+        professional: r.professional,
+        value: att?.total_value
+      });
+    });
+
+    appointments.forEach((a: Appointment) => {
+      const att = attendances.find(at => at.appointment_id === a.id);
+      unified.push({
+        id: a.id,
+        type: 'appointment',
+        date: a.date,
+        time: a.time,
+        title: a.reason || "Consulta",
+        description: null,
+        status: a.status,
+        value: att?.total_value || (attRes.data?.find(at => at.date === a.date && at.time === a.time)?.total_value)
+      });
+    });
+
+    const parseDate = (r: UnifiedRecord) => {
+      if (r.type === 'appointment') {
+        return new Date(`${r.date}T${r.time || '12:00:00'}`);
+      }
+      return new Date(r.date);
+    };
+
+    unified.sort((a, b) => parseDate(b).getTime() - parseDate(a).getTime());
+
+    setRecords(unified);
     setLoadingRecords(false);
   };
 
@@ -191,7 +276,7 @@ export function PatientsTab() {
               ))}
             </div>
           ) : isMobile ? (
-            /* Mobile card view */
+
             <div className="space-y-3">
               {filtered.length === 0 && (
                 <p className="text-center text-muted-foreground py-8">Nenhum paciente encontrado</p>
@@ -211,8 +296,8 @@ export function PatientsTab() {
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openRecordsModal(p)}>
                         <FileText className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(p)}>
-                        <Pencil className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(p.id)}>
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -268,7 +353,12 @@ export function PatientsTab() {
                             </Button>
                           </a>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(p)}><Pencil className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleEdit(p)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteId(p.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -279,7 +369,6 @@ export function PatientsTab() {
         </div>
       </CardContent>
 
-      {/* Prontuário Modal */}
       <Dialog open={recordsOpen} onOpenChange={setRecordsOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4 sm:mx-auto">
           <DialogHeader>
@@ -287,7 +376,6 @@ export function PatientsTab() {
           </DialogHeader>
           {recordsPatient && (
             <div className="space-y-4">
-              {/* Patient info */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm border rounded-lg p-4 bg-muted/30">
                 <div><span className="font-medium text-muted-foreground">Nome:</span> {recordsPatient.name}</div>
                 <div><span className="font-medium text-muted-foreground">CPF:</span> {maskCPF(recordsPatient.cpf)}</div>
@@ -300,7 +388,6 @@ export function PatientsTab() {
                 </div>
               </div>
 
-              {/* Records list */}
               <div>
                 <h3 className="font-semibold text-sm mb-3">Histórico de Atendimentos</h3>
                 {loadingRecords ? (
@@ -317,17 +404,53 @@ export function PatientsTab() {
                 ) : (
                   <div className="space-y-3">
                     {records.map((r) => {
-                      const dateObj = new Date(r.date);
-                      const dateStr = dateObj.toLocaleDateString("pt-BR");
-                      const timeStr = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+                      const isApp = r.type === 'appointment';
+                      let dateStr = "Data Inválida";
+                      let timeStr = isApp ? r.time : "";
+
+                      try {
+                        let dateObj: Date;
+                        if (isApp) {
+                          const [y, m, d] = r.date.split('-');
+                          dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+                        } else {
+                          dateObj = new Date(r.date);
+                          if (!timeStr) {
+                            timeStr = dateObj.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+                          }
+                        }
+
+                        if (!isNaN(dateObj.getTime())) {
+                          dateStr = dateObj.toLocaleDateString("pt-BR");
+                        }
+                      } catch (e) {
+                        console.error("Error parsing date:", r.date, e);
+                      }
+
+                      const statusLabels: Record<string, string> = {
+                        agendado: "Agendado",
+                        confirmado: "Confirmado",
+                        concluido: "Concluído",
+                        cancelado: "Cancelado",
+                      };
+
                       return (
-                        <div key={r.id} className="border rounded-lg p-4 space-y-1">
+                        <div key={r.id} className="border-b border-dashed pb-3 last:border-0 last:pb-0 space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-sm">{dateStr} às {timeStr}</span>
-                            <span className="text-xs text-muted-foreground">{r.professional}</span>
+                            <span className="font-semibold text-sm text-muted-foreground">{dateStr} {timeStr ? `às ${timeStr}` : ''}</span>
+                            {r.status && r.status !== 'concluido' && (
+                              <Badge variant="outline" className="text-[10px] h-5 font-normal capitalize">{statusLabels[r.status] || r.status}</Badge>
+                            )}
                           </div>
-                          <p className="text-sm font-medium text-primary">{r.procedures}</p>
-                          {r.notes && <p className="text-sm text-muted-foreground">{r.notes}</p>}
+                          <div className="flex justify-between items-start gap-2">
+                            <p className="text-sm font-medium flex-1 capitalize">{r.title.toLowerCase()}</p>
+                            {r.value !== undefined && r.value !== null && r.value > 0 && (
+                              <span className="text-sm border rounded px-1.5 py-0.5 bg-green-50 text-green-700 font-bold whitespace-nowrap">
+                                {formatCurrency(r.value)}
+                              </span>
+                            )}
+                          </div>
+                          {r.description && <p className="text-xs text-muted-foreground line-clamp-2">{r.description}</p>}
                         </div>
                       );
                     })}
