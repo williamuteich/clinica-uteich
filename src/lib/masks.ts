@@ -18,7 +18,6 @@ export const maskCEP = (value: string): string => {
   return digits.replace(/(\d{5})(\d)/, "$1-$2");
 };
 
-/** Formats as dd/mm/yyyy while typing */
 export const maskDate = (value: string): string => {
   const digits = value.replace(/\D/g, "").slice(0, 8);
   if (digits.length <= 2) return digits;
@@ -26,14 +25,12 @@ export const maskDate = (value: string): string => {
   return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 };
 
-/** Converts dd/mm/yyyy → yyyy-mm-dd (for saving to Supabase) */
 export const dateDisplayToISO = (display: string): string => {
   const [d, m, y] = display.split("/");
   if (!d || !m || !y || y.length < 4) return "";
   return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
 };
 
-/** Converts yyyy-mm-dd → dd/mm/yyyy (for displaying stored ISO dates) */
 export const isoToDateDisplay = (iso: string): string => {
   if (!iso) return "";
   const [y, m, d] = iso.split("-");
@@ -43,11 +40,28 @@ export const isoToDateDisplay = (iso: string): string => {
 
 export const unmask = (value: string): string => value.replace(/\D/g, "");
 
+export const maskCurrency = (value: string): string => {
+  const digits = unmask(value);
+  if (!digits) return "";
+  const amount = parseFloat(digits) / 100;
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(amount);
+};
+
+export const formatCurrency = (value: number | null | undefined): string => {
+  if (value === null || value === undefined) return "R$ 0,00";
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};
+
 export const isValidCPF = (value: string): boolean => unmask(value).length === 11;
 export const isValidPhone = (value: string): boolean => unmask(value).length === 11;
 export const isValidCEP = (value: string): boolean => unmask(value).length === 8;
 
-/** Validates a dd/mm/yyyy date string */
 export const isValidDate = (display: string): boolean => {
   const iso = dateDisplayToISO(display);
   if (!iso) return false;

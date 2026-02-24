@@ -17,7 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { clinicInfo } from "@/data/services";
 import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { maskCPF, maskPhone, maskCEP, maskDate, dateDisplayToISO, isoToDateDisplay, unmask, isValidCPF, isValidPhone, isValidCEP, fetchAddressByCEP } from "@/lib/masks";
+import { maskCPF, maskPhone, maskCEP, maskDate, maskCurrency, formatCurrency, dateDisplayToISO, isoToDateDisplay, unmask, isValidCPF, isValidPhone, isValidCEP, fetchAddressByCEP } from "@/lib/masks";
 
 interface Patient {
   id: string; name: string; cpf: string; phone: string | null;
@@ -57,7 +57,7 @@ export function AgendaTab() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ patientName: "", phone: "", date: "", time: "", reason: "", cpf: "", birth_date: "" });
+  const [form, setForm] = useState({ patientName: "", phone: "", date: "", time: "", reason: "", cpf: "", birth_date: "", totalValue: "" });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -65,15 +65,15 @@ export function AgendaTab() {
 
   const today = new Date().toISOString().split("T")[0];
   const todayDisplay = today.split("-").reverse().join("/");
-  const oneYearLaterDisplay = (() => {
-    const d = new Date(); d.setFullYear(d.getFullYear() + 1);
+  const nextWeekDisplay = (() => {
+    const d = new Date(); d.setDate(d.getDate() + 7);
     return d.toISOString().split("T")[0].split("-").reverse().join("/");
   })();
   const [filterName, setFilterName] = useState("");
   const [filterCpf, setFilterCpf] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterDateFrom, setFilterDateFrom] = useState(todayDisplay);
-  const [filterDateTo, setFilterDateTo] = useState(oneYearLaterDisplay);
+  const [filterDateTo, setFilterDateTo] = useState(nextWeekDisplay);
   const [showFilters, setShowFilters] = useState(false);
 
   const [startOpen, setStartOpen] = useState(false);
@@ -84,15 +84,22 @@ export function AgendaTab() {
   }>({ name: "", phone: "", cpf: "", city: "", state: "", street: "", cep: "", number: "", birth_date: "" });
   const [confirmDate, setConfirmDate] = useState("");
   const [confirmTime, setConfirmTime] = useState("");
+  const [confirmValue, setConfirmValue] = useState("");
   const [startSubmitting, setStartSubmitting] = useState(false);
   const [confirmCpfSearching, setConfirmCpfSearching] = useState(false);
 
   const [finishOpen, setFinishOpen] = useState(false);
   const [finishAppointment, setFinishAppointment] = useState<Appointment | null>(null);
   const [procedures, setProcedures] = useState([{ name: "" }]);
-  const [totalValue, setTotalValue] = useState(0);
+  const [totalValue, setTotalValue] = useState("");
   const [notes, setNotes] = useState("");
   const [finishSubmitting, setFinishSubmitting] = useState(false);
+
+  const parseCurrency = (val: string) => {
+    const raw = unmask(val);
+    if (!raw) return 0;
+    return parseFloat(raw) / 100;
+  };
 
   const reload = async () => {
     setLoading(true);
@@ -118,7 +125,7 @@ export function AgendaTab() {
           cpf: masked,
           patientName: existing.name,
           phone: existing.phone ? maskPhone(existing.phone) : prev.phone,
-          birth_date: existing.birth_date || prev.birth_date,
+          birth_date: existing.birth_date ? isoToDateDisplay(existing.birth_date) : prev.birth_date,
         }));
         toast({ title: "Paciente encontrado! Dados preenchidos." });
       }
@@ -147,7 +154,7 @@ export function AgendaTab() {
     setSubmitting(true);
     const rawPhone = unmask(form.phone);
 
-    await supabase.from("appointments").insert({
+    const { data: newApp } = await supabase.from("appointments").insert({
       patient_id: null,
       patient_name: form.patientName,
       phone: rawPhone,
@@ -155,10 +162,30 @@ export function AgendaTab() {
       time: form.time,
       reason: form.reason,
       status: "agendado",
-    });
+    }).select("id").single();
+
+    if (newApp && form.totalValue) {
+      const rawCpf = unmask(form.cpf);
+      let pId = null;
+      if (rawCpf && rawCpf.length === 11) {
+        const { data: existing } = await supabase.from("patients").select("id").eq("cpf", rawCpf).maybeSingle();
+        if (existing) pId = existing.id;
+      }
+
+      if (pId) {
+        await supabase.from("attendances").insert({
+          appointment_id: newApp.id,
+          patient_id: pId,
+          date: isoDate,
+          time: form.time,
+          total_value: parseCurrency(form.totalValue),
+          procedures: [],
+        });
+      }
+    }
 
     toast({ title: "Agendamento criado" });
-    setForm({ patientName: "", phone: "", date: "", time: "", reason: "", cpf: "", birth_date: "" });
+    setForm({ patientName: "", phone: "", date: "", time: "", reason: "", cpf: "", birth_date: "", totalValue: "" });
     setOpen(false);
     setSubmitting(false);
     reload();
@@ -184,6 +211,8 @@ export function AgendaTab() {
     });
     setConfirmDate(isoToDateDisplay(a.date));
     setConfirmTime(a.time);
+    const val = getAttendanceValue(a);
+    setConfirmValue(val !== null && val !== undefined ? val.toString() : "");
     setStartOpen(true);
   };
 
@@ -199,7 +228,7 @@ export function AgendaTab() {
           cpf: masked,
           name: existing.name,
           phone: existing.phone || "",
-          birth_date: existing.birth_date || "",
+          birth_date: existing.birth_date ? isoToDateDisplay(existing.birth_date) : "",
           cep: existing.cep || "",
           state: existing.state || "",
           city: existing.city || "",
@@ -281,6 +310,26 @@ export function AgendaTab() {
       status: "confirmado",
     }).eq("id", startAppointment.id);
 
+    if (targetPatientId) {
+      const val = parseCurrency(confirmValue);
+      const { data: existingAtt } = await supabase.from("attendances").select("id").eq("appointment_id", startAppointment.id).maybeSingle();
+
+      if (existingAtt) {
+        await supabase.from("attendances").update({
+          total_value: val,
+        }).eq("id", existingAtt.id);
+      } else {
+        await supabase.from("attendances").insert({
+          appointment_id: startAppointment.id,
+          patient_id: targetPatientId,
+          date: isoConfirmDate || startAppointment.date,
+          time: confirmTime,
+          total_value: val,
+          procedures: [],
+        });
+      }
+    }
+
     toast({ title: "Dados confirmados com sucesso" });
     setStartOpen(false);
     setStartSubmitting(false);
@@ -296,7 +345,8 @@ export function AgendaTab() {
   const openFinishModal = (a: Appointment) => {
     setFinishAppointment(a);
     setProcedures([{ name: "" }]);
-    setTotalValue(0);
+    const val = getAttendanceValue(a);
+    setTotalValue(val !== null && val !== undefined ? formatCurrency(val) : "");
     setNotes("");
     setFinishOpen(true);
   };
@@ -318,7 +368,7 @@ export function AgendaTab() {
       appointment_id: finishAppointment.id,
       date, time,
       procedures: validProcs,
-      total_value: totalValue,
+      total_value: parseCurrency(totalValue),
       notes,
     });
 
@@ -391,21 +441,28 @@ export function AgendaTab() {
   const getAttendanceValue = (a: Appointment) => {
     const att = attendances.find((at) => at.appointment_id === a.id);
     if (att) return att.total_value;
+    if (!a.patient_id) return null;
     const fallback = attendances.find((at) => at.patient_id === a.patient_id && !at.appointment_id);
     return fallback?.total_value;
   };
 
   const exportCSV = () => {
-    const headers = ["Data", "Hora", "Valor", "CPF", "Nome", "CEP", "Estado", "Cidade", "Rua", "Número"];
+    const headers = ["Data", "Hora", "Valor", "Motivo", "CPF", "Nome", "Telefone", "CEP", "Estado", "Cidade", "Rua", "Número"];
     const rows = filtered.map((a) => {
-      const p = patients.find((pt) => pt.id === a.patient_id);
-      const val = a.status === "concluido" ? (getAttendanceValue(a) ?? 0).toFixed(2) : "";
+      let p = patients.find((pt) => pt.id === a.patient_id);
+      if (!p && a.phone) {
+        const rawPhone = unmask(a.phone);
+        p = patients.find((pt) => pt.phone && unmask(pt.phone) === rawPhone);
+      }
+      const val = getAttendanceValue(a);
       return [
         new Date(a.date + "T12:00:00").toLocaleDateString("pt-BR"),
         a.time,
-        val,
+        formatCurrency(val),
+        a.reason || "",
         p?.cpf ? maskCPF(p.cpf) : "",
-        a.patient_name,
+        a.patient_name || p?.name || "",
+        a.phone ? maskPhone(a.phone) : (p?.phone ? maskPhone(p.phone) : ""),
         p?.cep ? maskCEP(p.cep) : "",
         p?.state || "",
         p?.city || "",
@@ -413,7 +470,7 @@ export function AgendaTab() {
         p?.number || "",
       ].map(v => `"${v}"`).join(";");
     });
-    const csv = "\uFEFF" + [headers.join(";"), ...rows].join("\n");
+    const csv = "\uFEFF" + [headers.join(";"), ...rows].join("\r\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -424,7 +481,6 @@ export function AgendaTab() {
   };
 
   const filtered = appointments.filter((a) => {
-    // try by patient_id first, then fall back to phone match (for appointments without a linked patient)
     let p = patients.find((pt) => pt.id === a.patient_id);
     if (!p && a.phone) {
       const rawPhone = unmask(a.phone);
@@ -474,6 +530,8 @@ export function AgendaTab() {
                   <div><Label>Horário *</Label><Input type="time" value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} /></div>
                 </div>
                 <div><Label>Motivo</Label><Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="Ex: Limpeza, Avaliação..." /></div>
+                <div><Label>Valor Total</Label><Input value={form.totalValue} onChange={(e) => setForm({ ...form, totalValue: maskCurrency(e.target.value) })} placeholder="R$ 0,00" /></div>
+
                 <Button onClick={handleSubmit} disabled={submitting} className="mt-2">
                   {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Agendar
@@ -519,7 +577,7 @@ export function AgendaTab() {
             </div>
           </div>
           <div className="mt-2 flex justify-end">
-            <Button variant="ghost" size="sm" onClick={() => { setFilterName(""); setFilterCpf(""); setFilterStatus("all"); setFilterDateFrom(todayDisplay); setFilterDateTo(oneYearLaterDisplay); }}>
+            <Button variant="ghost" size="sm" onClick={() => { setFilterName(""); setFilterCpf(""); setFilterStatus("all"); setFilterDateFrom(todayDisplay); setFilterDateTo(nextWeekDisplay); }}>
               Limpar Filtros
             </Button>
           </div>
@@ -571,9 +629,9 @@ export function AgendaTab() {
                       </div>
                     )}
                     {a.reason && <div>Motivo: {a.reason}</div>}
-                    {a.status === "concluido" && (
+                    {getAttendanceValue(a) !== null && getAttendanceValue(a) !== undefined && (
                       <div className="font-medium text-green-700">
-                        Valor: R$ {(getAttendanceValue(a) ?? 0).toFixed(2)}
+                        Valor: {formatCurrency(getAttendanceValue(a))}
                       </div>
                     )}
                   </div>
@@ -605,6 +663,16 @@ export function AgendaTab() {
                         <CheckCircle className="w-3 h-3 mr-1" /> Finalizar
                       </Button>
                     )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="icon" onClick={() => setDeleteId(a.id)} className="h-8 w-8 text-destructive hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Excluir agendamento</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               ))}
@@ -633,9 +701,9 @@ export function AgendaTab() {
                     <TableCell>{a.phone ? maskPhone(a.phone) : ""}</TableCell>
                     <TableCell>{a.reason}</TableCell>
                     <TableCell>
-                      {a.status === "concluido" ? (
+                      {getAttendanceValue(a) !== null && getAttendanceValue(a) !== undefined ? (
                         <span className="font-medium text-green-700">
-                          R$ {(getAttendanceValue(a) ?? 0).toFixed(2)}
+                          {formatCurrency(getAttendanceValue(a))}
                         </span>
                       ) : (
                         <span className="text-muted-foreground text-xs">—</span>
@@ -688,6 +756,16 @@ export function AgendaTab() {
                             <CheckCircle className="w-3 h-3 mr-1" /> Finalizar Atendimento
                           </Button>
                         )}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" onClick={() => setDeleteId(a.id)} className="h-8 w-8 text-destructive hover:text-destructive">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Excluir agendamento</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -744,6 +822,8 @@ export function AgendaTab() {
               <div className="col-span-2"><Label>Rua</Label><Input value={patientData.street} onChange={(e) => setPatientData({ ...patientData, street: e.target.value })} /></div>
               <div><Label>Número</Label><Input value={patientData.number} onChange={(e) => setPatientData({ ...patientData, number: e.target.value })} /></div>
             </div>
+            <div><Label>Valor Total</Label><Input value={confirmValue} onChange={(e) => setConfirmValue(maskCurrency(e.target.value))} placeholder="R$ 0,00" /></div>
+
             <Button onClick={handleStartSubmit} disabled={startSubmitting} className="mt-2">
               {startSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Confirmar Dados
@@ -772,7 +852,7 @@ export function AgendaTab() {
                 ))}
               </div>
             </div>
-            <div><Label>Valor Total (R$)</Label><Input type="number" value={totalValue || ""} onChange={(e) => setTotalValue(parseFloat(e.target.value) || 0)} placeholder="0.00" /></div>
+            <div><Label>Valor Total</Label><Input value={totalValue} onChange={(e) => setTotalValue(maskCurrency(e.target.value))} placeholder="R$ 0,00" /></div>
             <div><Label>Observações</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Notas sobre o atendimento..." /></div>
             <Button onClick={handleFinishSubmit} disabled={finishSubmitting} className="mt-2">
               {finishSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
