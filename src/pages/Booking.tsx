@@ -6,15 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { services, clinicInfo, filterAvailableTimeSlots } from "@/data/services";
+import { services } from "@/data/services";
+import { TimeSlotPicker } from "@/components/TimeSlotPicker";
 import { Calendar, Clock, User, Phone, FileText, CheckCircle, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { BookingSuccessDialog } from "@/components/BookingSuccessDialog";
 
 const Booking = () => {
   const [searchParams] = useSearchParams();
   const initialService = searchParams.get("servico") || "";
 
-  const [step, setStep] = useState(initialService ? 2 : 1);
+  const [step, setStep] = useState(1);
   const [selectedService, setSelectedService] = useState(initialService);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
@@ -58,7 +61,10 @@ const Booking = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [submitting, setSubmitting] = useState(false);
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [successData, setSuccessData] = useState({ serviceName: "", date: "", time: "", patientName: "" });
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.phone) {
@@ -70,27 +76,46 @@ const Booking = () => {
       return;
     }
 
+    setSubmitting(true);
+
     const service = services.find(s => s.id === selectedService);
-    const dateObj = new Date(selectedDate + 'T12:00:00');
-    const formattedDate = dateObj.toLocaleDateString('pt-BR');
+    const reason = formData.notes
+      ? `${service?.name}: ${formData.notes}`
+      : service?.name || "";
 
-    const message = encodeURIComponent(
-      `Olá, gostaria de confirmar meu agendamento:\n\n` +
-      `*Nome:* ${formData.name}\n` +
-      `*Serviço:* ${service?.name}\n` +
-      `*Data:* ${formattedDate}\n` +
-      `*Hora:* ${selectedTime}\n` +
-      `*Telefone:* ${formData.phone}\n` +
-      (formData.notes ? `*Observações:* ${formData.notes}` : '')
-    );
-
-    const whatsappUrl = `https://wa.me/55${clinicInfo.whatsapp.replace(/\D/g, '')}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-
-    toast({
-      title: "Redirecionando para o WhatsApp",
-      description: "Complete seu agendamento pelo WhatsApp.",
+    const { error } = await supabase.from("appointments").insert({
+      patient_name: formData.name,
+      phone: formData.phone,
+      date: selectedDate,
+      time: selectedTime,
+      reason,
+      status: "agendado",
     });
+
+    setSubmitting(false);
+
+    if (error) {
+      toast({
+        title: "Erro ao agendar",
+        description: "Não foi possível confirmar seu agendamento. Tente novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSuccessData({
+      serviceName: service?.name || "",
+      date: selectedDate,
+      time: selectedTime,
+      patientName: formData.name,
+    });
+    setSuccessDialogOpen(true);
+
+    setStep(1);
+    setSelectedService("");
+    setSelectedDate("");
+    setSelectedTime("");
+    setFormData({ name: "", phone: "", notes: "" });
   };
 
   const generateDates = () => {
@@ -99,9 +124,7 @@ const Booking = () => {
     for (let i = 0; i <= 30; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
-      if (date.getDay() !== 0) {
-        dates.push(date.toISOString().split('T')[0]);
-      }
+      dates.push(date.toISOString().split('T')[0]);
     }
     return dates;
   };
@@ -123,7 +146,7 @@ const Booking = () => {
 
         <div className="container mx-auto px-4 relative z-10 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4 animate-fade-in">
-            Agendar consulta odontológica em Cachoeirinha
+            Agendar Consulta
           </h1>
           <p className="text-lg text-primary-foreground/90 max-w-2xl mx-auto animate-fade-in animation-delay-200">
             Escolha o serviço, data e horário de sua preferência.
@@ -162,26 +185,26 @@ const Booking = () => {
                         onClick={() => handleServiceSelect(service.id)}
                         className={`p-6 rounded-2xl text-left transition-all duration-300 ${selectedService === service.id
                           ? isEmergency
-                            ? 'bg-red-600 text-white shadow-hover scale-[1.02]'
-                            : 'gradient-card text-primary-foreground shadow-hover scale-[1.02]'
+                            ? 'bg-red-500 text-white shadow-hover'
+                            : 'gradient-card text-primary-foreground shadow-hover'
                           : isEmergency
-                            ? 'bg-red-500 text-white shadow-card hover:shadow-hover hover:-translate-y-1'
+                            ? 'bg-card border-2 border-red-500 shadow-card hover:shadow-hover hover:-translate-y-1'
                             : 'bg-card shadow-card hover:shadow-hover hover:-translate-y-1'
                           }`}
                       >
                         <h3 className={`font-semibold mb-2 ${selectedService === service.id
                           ? ''
                           : isEmergency
-                            ? 'text-white'
+                            ? 'text-red-600'
                             : 'text-foreground'
                           }`}>
                           {service.name}
                         </h3>
-                        <p className={`text-sm ${selectedService === service.id || isEmergency ? 'text-white/90' : 'text-muted-foreground'}`}>
+                        <p className={`text-sm ${selectedService === service.id ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>
                           {service.description}
                         </p>
-                        <div className={`mt-3 text-sm ${selectedService === service.id || isEmergency ? 'text-white/80' : 'text-muted-foreground'}`}>
-                          <Clock className={`w-4 h-4 inline mr-1 ${selectedService === service.id || isEmergency ? 'text-white/80' : ''}`} />
+                        <div className={`mt-3 text-sm ${selectedService === service.id ? 'text-dental-sky' : 'text-muted-foreground'}`}>
+                          <Clock className="w-4 h-4 inline mr-1" />
                           ~{service.duration} min
                         </div>
                       </button>
@@ -216,7 +239,7 @@ const Booking = () => {
                         const dateObj = new Date(date + 'T12:00:00');
                         const dayName = dateObj.toLocaleDateString('pt-BR', { weekday: 'short' });
                         const dayNum = dateObj.getDate();
-                        const month = dateObj.toLocaleDateString('pt-BR', { month: 'short' });
+                        const month = dateObj.toLocaleDateString('pt-BR', { month: 'long' });
 
                         return (
                           <button
@@ -242,20 +265,12 @@ const Booking = () => {
                       Horário
                     </Label>
                     {selectedDate ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {filterAvailableTimeSlots(selectedDate, selectedService).map((time) => (
-                          <button
-                            key={time}
-                            onClick={() => handleTimeSelect(time)}
-                            className={`p-3 rounded-xl text-center transition-all ${selectedTime === time
-                              ? 'gradient-card text-primary-foreground'
-                              : 'bg-card hover:bg-muted'
-                              }`}
-                          >
-                            {time}
-                          </button>
-                        ))}
-                      </div>
+                      <TimeSlotPicker
+                        selectedDate={selectedDate}
+                        selectedService={selectedService}
+                        selectedTime={selectedTime}
+                        onTimeSelect={handleTimeSelect}
+                      />
                     ) : (
                       <div className="bg-muted rounded-xl p-8 text-center text-muted-foreground">
                         Selecione uma data primeiro
@@ -345,9 +360,9 @@ const Booking = () => {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full">
-                    Confirmar pelo WhatsApp
-                    <ArrowRight className="w-5 h-5" />
+                  <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                    {submitting ? "Aguarde..." : "Confirmar Agendamento"}
+                    {!submitting && <ArrowRight className="w-5 h-5" />}
                   </Button>
                 </form>
               </div>
@@ -355,6 +370,11 @@ const Booking = () => {
           </div>
         </div>
       </section>
+      <BookingSuccessDialog
+        open={successDialogOpen}
+        onClose={() => setSuccessDialogOpen(false)}
+        data={successData}
+      />
     </Layout>
   );
 };

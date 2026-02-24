@@ -52,7 +52,7 @@ const Index = () => {
           }}
         />
 
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-background hidden lg:block" style={{
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-background" style={{
           clipPath: "ellipse(80% 100% at 50% 100%)"
         }} />
 
@@ -61,28 +61,24 @@ const Index = () => {
 
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12">
-            <div className="text-primary-foreground space-y-6 animate-fade-in py-4 md:py-0">
+            <div className="text-primary-foreground space-y-6 animate-fade-in">
               <div className="inline-flex items-center gap-2 bg-card/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
                 <Sparkles className="w-4 h-4 text-dental-sky" />
                 <span>Promoções de Inauguração</span>
               </div>
 
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Dentista em Cachoeirinha para aliviar sua dor e cuidar do seu{" "}
-                <span className="text-dental-sky">sorriso</span>
+                Seu sorriso merece o{" "}
+                <span className="text-dental-sky">melhor cuidado</span>
               </h1>
 
               <p className="text-lg md:text-xl text-primary-foreground/90 max-w-lg">
-                Atendimento humanizado em Cachoeirinha, com soluções rápidas para dor de dente, urgências e tratamentos completos.
-                Conforto, tecnologia e um plano de tratamento pensado para você. Avaliação gratuita e emergência 24h.
+                Tecnologia de ponta e atendimento humanizado para transformar seu sorriso.
+                Agende sua avaliação gratuita.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  className="bg-red-600 text-white font-semibold border border-red-600 hover:bg-white hover:text-red-600 hover:border-red-600 shadow-button hover:shadow-hover hover:-translate-y-0.5"
-                  asChild
-                >
+                <Button variant="hero" size="lg" asChild>
                   <a
                     href={`https://wa.me/55${clinicInfo.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Olá! Preciso de atendimento de emergência 24h.')}`}
                     target="_blank"
@@ -91,25 +87,25 @@ const Index = () => {
                     Emergência 24h
                   </a>
                 </Button>
-                <Button className="bg-[#1d7087] border-[#1d7087] hover:bg-white hover:border-[#1d7087] hover:text-[#1d7087] " variant="hero-outline" size="lg" asChild>
+                <Button variant="hero-outline" size="lg" asChild>
                   <Link to="/servicos">Nossos Serviços</Link>
                 </Button>
               </div>
 
-              {/*<div className="grid grid-cols-3 gap-4 pt-6 max-w-xs sm:max-w-sm md:max-w-md">
+              <div className="grid grid-cols-3 gap-6 pt-8">
                 <div>
-                  <p className="text-2xl md:text-3xl font-bold text-white">24h</p>
-                  <p className="text-xs md:text-sm text-white/90">Emergências</p>
+                  <p className="text-3xl font-bold text-dental-sky xl:text-white">24h</p>
+                  <p className="text-sm text-foreground/70 xl:text-white/90">Emergências</p>
                 </div>
                 <div>
-                  <p className="text-2xl md:text-3xl font-bold text-white">7+</p>
-                  <p className="text-xs md:text-sm text-white/90">Especialidades</p>
+                  <p className="text-3xl font-bold text-dental-sky xl:text-white">7+</p>
+                  <p className="text-sm text-foreground/70 xl:text-white/90">Especialidades</p>
                 </div>
                 <div>
-                  <p className="text-2xl md:text-3xl font-bold text-white">100%</p>
-                  <p className="text-xs md:text-sm text-white/90">Satisfação</p>
+                  <p className="text-3xl font-bold text-dental-sky xl:text-white">100%</p>
+                  <p className="text-sm text-foreground/70 xl:text-white/90">Satisfação</p>
                 </div>
-              </div>*/}
+              </div>
             </div>
 
             <div className="relative hidden lg:block animate-fade-in animation-delay-200">
@@ -147,57 +143,19 @@ const Index = () => {
         </div>
       </section>
 
-      {/* <div className="mt-12 lg:mt-16">
+      <div className="mt-12 lg:mt-16">
         <PromoBanner />
-      </div> */}
-
-      <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Como chegar na nossa clínica em Cachoeirinha
-            </h2>
-            <p className="text-foreground/80">
-              {clinicInfo.address}
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            <div className="w-full rounded-2xl overflow-hidden shadow-card h-64 md:h-72 lg:h-80">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3457.0406543085855!2d-51.097172723567276!3d-29.94950922688222!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x951973fde9c6e975%3A0x157ef3478ae21af1!2sR.%20Papa%20Jo%C3%A3o%20XXIII%2C%2080%20-%20Vila%20Cachoeirinha%2C%20Cachoeirinha%20-%20RS%2C%2094910-170!5e0!3m2!1spt-BR!2sbr!4v1767583541831!5m2!1spt-BR!2sbr"
-                style={{ border: 0 }}
-                loading="lazy"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full h-full"
-              />
-            </div>
-
-            <div className="flex justify-center">
-              <Button asChild size="lg">
-                <a
-                  href="https://www.google.com/maps/dir/?api=1&destination=Rua+Papa+Jo%C3%A3o+XXIII,+80,+Cachoeirinha+-+RS"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Ver rota no Google Maps
-                </a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+      </div>
 
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16 animate-fade-in">
-            <span className="text-primary font-medium text-sm uppercase tracking-wider">Nossos Serviços</span>
+            <span className="text-dental-light font-medium text-sm uppercase tracking-wider">Nossos Serviços</span>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4 mb-6">
               Tratamentos completos para sua{" "}
               <span className="text-primary">saúde bucal</span>
             </h2>
-            <p className="text-foreground/80">
+            <p className="text-muted-foreground">
               Oferecemos uma gama completa de tratamentos odontológicos com profissionais qualificados e equipamentos modernos.
             </p>
           </div>
@@ -243,7 +201,7 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-fade-in-left">
               <div>
-                <span className="text-primary font-medium text-sm uppercase tracking-wider">Por que nos escolher</span>
+                <span className="text-dental-light font-medium text-sm uppercase tracking-wider">Por que nos escolher</span>
                 <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4">
                   Excelência em cada{" "}
                   <span className="text-primary">detalhe</span>
@@ -263,7 +221,7 @@ const Index = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">{item.title}</h3>
-                      <p className="text-sm text-foreground/80">{item.desc}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
                     </div>
                   </div>
                 ))}

@@ -90,17 +90,11 @@ export const emergency24hTimeSlots = [
   "21:00", "21:30", "22:00", "22:30", "23:00", "23:30"
 ];
 
-export const filterAvailableTimeSlots = (date: string, serviceId?: string) => {
+export const filterAvailableTimeSlots = (date: string, _serviceId?: string) => {
   const selectedDateObj = new Date(date + 'T12:00:00');
   const today = new Date();
-  const dayOfWeek = selectedDateObj.getDay();
 
-  let slotsForDay;
-  if (serviceId === 'emergencia') {
-    slotsForDay = emergency24hTimeSlots;
-  } else {
-    slotsForDay = dayOfWeek === 6 ? saturdayTimeSlots : weekdayTimeSlots;
-  }
+  const slotsForDay = emergency24hTimeSlots;
 
   if (selectedDateObj.toDateString() === today.toDateString()) {
     const currentHour = today.getHours();

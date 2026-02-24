@@ -41,7 +41,7 @@ const Services = () => {
 
         <div className="container mx-auto px-4 relative z-10 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-6 animate-fade-in">
-            Tratamentos odontológicos em Cachoeirinha
+            Nossos Serviços
           </h1>
           <p className="text-lg text-primary-foreground/90 max-w-2xl mx-auto animate-fade-in animation-delay-200">
             Oferecemos tratamentos odontológicos completos com tecnologia de ponta e profissionais qualificados.
@@ -54,38 +54,26 @@ const Services = () => {
           <div className="grid md:grid-cols-2 gap-8">
             {services.map((service, index) => {
               const Icon = iconMap[service.icon] || Stethoscope;
-              const isEmergency = service.id === 'emergencia';
               return (
                 <div
                   key={service.id}
-                  className={`group rounded-3xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 animate-fade-in ${isEmergency
-                    ? 'bg-red-600'
-                    : 'bg-card'
-                    }`}
+                  className="group bg-card rounded-3xl overflow-hidden shadow-card hover:shadow-hover transition-all duration-300 animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="p-8">
                     <div className="flex items-start gap-6">
-                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300 ${isEmergency
-                        ? 'bg-white/20'
-                        : 'gradient-card'
-                        }`}>
-                        <Icon className={`w-8 h-8 ${isEmergency ? 'text-white' : 'text-primary-foreground'}`} />
+                      <div className="w-16 h-16 rounded-2xl gradient-card flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="w-8 h-8 text-primary-foreground" />
                       </div>
                       <div className="flex-1">
-                        <h3 className={`text-xl font-bold mb-2 ${isEmergency ? 'text-white' : 'text-foreground'}`}>{service.name}</h3>
-                        <p className={`mb-4 ${isEmergency ? 'text-white/90' : 'text-muted-foreground'}`}>{service.description}</p>
+                        <h3 className="text-xl font-bold text-foreground mb-2">{service.name}</h3>
+                        <p className="text-muted-foreground mb-4">{service.description}</p>
                         <div className="flex items-center justify-between">
-                          <div className={`flex items-center gap-2 text-sm ${isEmergency ? 'text-white/80' : 'text-muted-foreground'}`}>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Clock className="w-4 h-4" />
                             <span>~{service.duration} min</span>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={isEmergency ? 'border-white text-white hover:bg-white hover:text-red-600 bg-transparent' : ''}
-                            asChild
-                          >
+                          <Button variant="outline" size="sm" asChild>
                             <Link to={`/agendamento?servico=${service.id}`} className="inline-flex items-center gap-2">
                               Agendar
                               <ArrowRight className="w-4 h-4" />

@@ -22,7 +22,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logoHeader.png`} alt="Uteich Odontologia" className="h-16 w-auto" />
+            <img src="/logoHeader.png" alt="Uteich Odontologia" className="h-16 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -55,7 +55,6 @@ export function Header() {
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? "Fechar menu de navegação" : "Abrir menu de navegação"}
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

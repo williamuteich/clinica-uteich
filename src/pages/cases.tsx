@@ -4,12 +4,6 @@ import { SEO } from "@/components/SEO";
 import { clinicInfo } from "@/data/services";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { useState } from "react";
-import imgClareamentoAntes from "@/assets/img_Clareamento_antes.jpg";
-import imgClareamentoDepois from "@/assets/img_Clareamento_depois.jpg";
-import imgEsteticaAntes from "@/assets/img_esteticaDental_antes.jpg";
-import imgEsteticaDepois from "@/assets/img_esteticaDental_depois.jpg";
-import imgImplanteAntes from "@/assets/img_implante_antes.jpg";
-import imgImplanteDepois from "@/assets/img_implante_depois.jpg";
 
 const cases = [
   {
@@ -17,24 +11,24 @@ const cases = [
     title: "Limpeza Profunda",
     testimonial: "Sempre tive vergonha do meu sorriso amarelado. Após o clareamento na Uteich, minha autoestima mudou completamente! O resultado superou minhas expectativas.",
     treatments: ["Limpeza Profunda", "Profilaxia"],
-    imageBefore: imgClareamentoAntes,
-    imageAfter: imgClareamentoDepois
+    imageBefore: "/src/assets/img_Clareamento_antes.jpg",
+    imageAfter: "/src/assets/img_Clareamento_depois.jpg"
   },
   {
     id: 2,
     title: "Estética Dental e Clareamento",
     testimonial: "Remoção de cárie nos dentes da frente.",
     treatments: ["Restauração Estética", "Resina Composta"],
-    imageBefore: imgEsteticaAntes,
-    imageAfter: imgEsteticaDepois
+    imageBefore: "/src/assets/img_esteticaDental_antes.jpg",
+    imageAfter: "/src/assets/img_esteticaDental_depois.jpg"
   },
   {
     id: 3,
     title: "Implante Dentário",
     testimonial: "Perdi um dente frontal e tinha dois debaixo quebrados. O implante ficou perfeito, ninguém nota a diferença. Voltei a sorrir sem medo!",
     treatments: ["Implante Unitário", "Coroa de Porcelana"],
-    imageBefore: imgImplanteAntes,
-    imageAfter: imgImplanteDepois
+    imageBefore: "/src/assets/img_implante_antes.jpg",
+    imageAfter: "/src/assets/img_implante_depois.jpg"
   }
 ];
 
@@ -43,12 +37,10 @@ const Cases = () => {
   const [showBefore, setShowBefore] = useState(true);
 
   const nextCase = () => {
-    setShowBefore(true);
     setCurrentCase((prev) => (prev + 1) % cases.length);
   };
 
   const prevCase = () => {
-    setShowBefore(true);
     setCurrentCase((prev) => (prev - 1 + cases.length) % cases.length);
   };
 
@@ -93,10 +85,7 @@ const Cases = () => {
                 {cases.map((_, index) => (
                   <button
                     key={index}
-                    onClick={() => {
-                      setShowBefore(true);
-                      setCurrentCase(index);
-                    }}
+                    onClick={() => setCurrentCase(index)}
                     className={`h-2 rounded-full transition-all ${index === currentCase
                       ? 'w-8 bg-primary'
                       : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'

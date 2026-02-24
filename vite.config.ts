@@ -8,7 +8,6 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
   },
   plugins: [react()],
-  base: "/",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
