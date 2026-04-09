@@ -192,7 +192,7 @@ const About = () => {
                   </li>
                 </ul>
                 <Button variant="hero" size="lg" className="w-full" asChild>
-                  <Link to="/cases">Ver Cases de Sucesso</Link>
+                  <Link to="/agendamento">Agendar Avaliação</Link>
                 </Button>
               </div>
             </div>

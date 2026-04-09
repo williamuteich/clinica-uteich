@@ -18,7 +18,7 @@ const Booking = () => {
   const [searchParams] = useSearchParams();
   const initialService = searchParams.get("servico") || "";
 
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(initialService ? 2 : 1);
   const [selectedService, setSelectedService] = useState(initialService);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");

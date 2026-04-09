@@ -40,10 +40,8 @@ export function Footer() {
             <h4 className="text-lg font-semibold">Links Rápidos</h4>
             <nav className="flex flex-col gap-3">
               <Link to="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Início</Link>
-              <Link to="/servicos" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Serviços</Link>
               <Link to="/sobre" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Sobre Nós</Link>
               <Link to="/agendamento" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Agendamento</Link>
-              <Link to="/cases" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Cases</Link>
             </nav>
           </div>
 

@@ -15,7 +15,8 @@ import {
   Clock,
   Award,
   Heart,
-  AlertCircle
+  AlertCircle,
+  Phone
 } from "lucide-react";
 import heroImage from "@/assets/hero-dental.jpg";
 import bgPatientImage from "@/assets/img_pacient.jpg";
@@ -30,8 +31,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles,
   Wrench,
 };
-
-import { PromoBanner } from "@/components/PromoBanner";
 
 const Index = () => {
   return (
@@ -62,11 +61,6 @@ const Index = () => {
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid lg:grid-cols-2 gap-12">
             <div className="text-primary-foreground space-y-6 animate-fade-in">
-              <div className="inline-flex items-center gap-2 bg-card/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm">
-                <Sparkles className="w-4 h-4 text-dental-sky" />
-                <span>Promoções de Inauguração</span>
-              </div>
-
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                 Seu sorriso merece o{" "}
                 <span className="text-dental-sky">melhor cuidado</span>
@@ -83,7 +77,9 @@ const Index = () => {
                     href={`https://wa.me/55${clinicInfo.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Olá! Preciso de atendimento de emergência 24h.')}`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="inline-flex items-center"
                   >
+                    <Phone className="w-5 h-5 mr-2" />
                     Emergência 24h
                   </a>
                 </Button>
@@ -143,9 +139,6 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="mt-12 lg:mt-16">
-        <PromoBanner />
-      </div>
 
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
@@ -182,13 +175,25 @@ const Index = () => {
                   <h3 className={`text-lg font-semibold mb-2 ${isEmergency ? 'text-red-600' : 'text-foreground'
                     }`}>{service.name}</h3>
                   <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
-                  <Link
-                    to={`/agendamento?servico=${service.id}`}
-                    className="text-sm font-medium text-primary hover:text-dental-light transition-colors inline-flex items-center gap-1"
-                  >
-                    Agendar
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </Link>
+                  {service.id === 'emergencia' ? (
+                    <a
+                      href={`https://wa.me/55${clinicInfo.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent('Olá! Preciso de atendimento de emergência 24h.')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors inline-flex items-center gap-1"
+                    >
+                      Agendar
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </a>
+                  ) : (
+                    <Link
+                      to={`/agendamento?servico=${service.id}`}
+                      className="text-sm font-medium text-primary hover:text-dental-light transition-colors inline-flex items-center gap-1"
+                    >
+                      Agendar
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </Link>
+                  )}
                 </div>
               );
             })}
@@ -198,9 +203,9 @@ const Index = () => {
 
       <section className="py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-fade-in-left">
-              <div>
+          <div className="max-w-5xl mx-auto items-center">
+            <div className="space-y-12 animate-fade-in-left">
+              <div className="text-center">
                 <span className="text-dental-light font-medium text-sm uppercase tracking-wider">Por que nos escolher</span>
                 <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-4">
                   Excelência em cada{" "}
@@ -208,50 +213,28 @@ const Index = () => {
                 </h2>
               </div>
 
-              <div className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-8">
                 {[
                   { icon: Clock, title: "Atendimento 24h", desc: "Emergências atendidas a qualquer hora + horário normal Seg-Sex 8h-20h, Sáb 9h-18h" },
                   { icon: Award, title: "Profissionais Qualificados", desc: "Equipe especializada e em constante atualização" },
                   { icon: Heart, title: "Atendimento Humanizado", desc: "Cuidado personalizado para cada paciente" },
                   { icon: CheckCircle, title: "Tecnologia Avançada", desc: "Equipamentos modernos para melhores resultados" },
                 ].map((item, index) => (
-                  <div key={index} className="flex gap-4 items-start">
-                    <div className="w-12 h-12 rounded-xl bg-dental-pale flex items-center justify-center flex-shrink-0">
-                      <item.icon className="w-6 h-6 text-primary" />
+                  <div key={index} className="flex gap-4 items-start bg-card p-6 rounded-2xl shadow-sm border border-border">
+                    <div className="w-14 h-14 rounded-xl bg-dental-pale flex items-center justify-center flex-shrink-0">
+                      <item.icon className="w-7 h-7 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-foreground">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                      <h3 className="font-semibold text-lg text-foreground">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground mt-2">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <Button size="lg" asChild>
-                <Link to="/sobre">Conheça Nossa Clínica</Link>
-              </Button>
-            </div>
-
-            <div className="relative animate-fade-in-right">
-              <div className="bg-gradient-to-br from-dental-teal to-dental-medium p-8 rounded-3xl text-primary-foreground">
-                <h3 className="text-2xl font-bold mb-6">Promoção de Inauguração</h3>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-dental-sky" />
-                    <span>Avaliação gratuita</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-dental-sky" />
-                    <span>Clareamento com desconto especial</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-dental-sky" />
-                    <span>Condições especiais para implantes</span>
-                  </li>
-                </ul>
-                <p className="text-sm text-primary-foreground/80 mb-4">Promoção válida até 31/12/2025</p>
-                <Button variant="hero" size="lg" className="w-full" asChild>
-                  <Link to="/agendamento">Aproveitar Promoção</Link>
+              <div className="text-center mt-10">
+                <Button size="lg" asChild>
+                  <Link to="/sobre">Conheça Nossa Clínica</Link>
                 </Button>
               </div>
             </div>
@@ -281,7 +264,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>
+    </Layout >
   );
 };
 

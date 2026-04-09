@@ -7,10 +7,8 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/", label: "Início" },
-  { href: "/servicos", label: "Serviços" },
   { href: "/sobre", label: "Sobre" },
   { href: "/agendamento", label: "Agendar" },
-  { href: "/cases", label: "Cases" },
 ];
 
 export function Header() {
