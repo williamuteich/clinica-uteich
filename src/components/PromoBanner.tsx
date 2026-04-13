@@ -5,11 +5,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import Autoplay from "embla-carousel-autoplay";
 import { useRef } from "react";
+import { clinicInfo } from "@/data/services";
 
 import atendimento24hrs from "@/assets/banners/atendimento_24hrs.png";
 import clinicaEspecializada from "@/assets/banners/clinica_especializada.png";
@@ -33,8 +32,8 @@ const banners: BannerData[] = [
     title: "Atendimento 24 Horas",
     subtitle: "Sempre à sua disposição",
     description: "Estamos prontos para atender você a qualquer hora, todos os dias da semana.",
-    ctaText: "Agendar Consulta",
-    ctaLink: "/agendamento",
+    ctaText: "Ligar Agora",
+    ctaLink: `tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`,
     bgGradient: "linear-gradient(135deg, hsl(193 65% 32%) 0%, hsl(195 60% 38%) 100%)",
     image: atendimento24hrs,
   },
@@ -91,15 +90,31 @@ export function PromoBanner() {
           {banners.map((banner) => (
             <CarouselItem key={banner.id} className="pl-0">
               <div className="relative w-full overflow-hidden">
-                <img
-                  src={banner.image}
-                  alt={banner.title}
-                  className="w-full h-auto object-cover"
-                  style={{
-                    aspectRatio: "3/1",
-                    minHeight: "200px",
-                  }}
-                />
+                {banner.ctaLink.startsWith('tel:') || banner.ctaLink.startsWith('http') ? (
+                  <a href={banner.ctaLink}>
+                    <img
+                      src={banner.image}
+                      alt={banner.title}
+                      className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
+                      style={{
+                        aspectRatio: "3/1",
+                        minHeight: "200px",
+                      }}
+                    />
+                  </a>
+                ) : (
+                  <Link to={banner.ctaLink}>
+                    <img
+                      src={banner.image}
+                      alt={banner.title}
+                      className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
+                      style={{
+                        aspectRatio: "3/1",
+                        minHeight: "200px",
+                      }}
+                    />
+                  </Link>
+                )}
               </div>
             </CarouselItem>
           ))}

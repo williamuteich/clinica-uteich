@@ -63,10 +63,10 @@ export function Footer() {
                 <MapPin className="w-5 h-5 text-dental-sky flex-shrink-0 mt-0.5" />
                 <span className="text-primary-foreground/80 text-sm">{clinicInfo.address}</span>
               </div>
-              <div className="flex items-center gap-3">
+              <a href={`tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`} className="flex items-center gap-3 hover:text-primary transition-colors cursor-pointer">
                 <Phone className="w-5 h-5 text-dental-sky flex-shrink-0" />
                 <span className="text-primary-foreground/80 text-sm">{clinicInfo.whatsappFormatted}</span>
-              </div>
+              </a>
               <div className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-dental-sky flex-shrink-0" />
                 <span className="text-primary-foreground/80 text-sm">Atendimento {clinicInfo.hours}</span>

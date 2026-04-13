@@ -13,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { BookingSuccessDialog } from "@/components/BookingSuccessDialog";
 import { Turnstile } from "@/components/Turnstile";
+import { clinicInfo } from "@/data/services";
 
 const Booking = () => {
   const [searchParams] = useSearchParams();
@@ -184,7 +185,13 @@ const Booking = () => {
                     return (
                       <button
                         key={service.id}
-                        onClick={() => handleServiceSelect(service.id)}
+                        onClick={() => {
+                          if (isEmergency) {
+                            window.location.href = `tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`;
+                          } else {
+                            handleServiceSelect(service.id);
+                          }
+                        }}
                         className={`p-6 rounded-2xl text-left transition-all duration-300 ${selectedService === service.id
                           ? isEmergency
                             ? 'bg-red-500 text-white shadow-hover'
