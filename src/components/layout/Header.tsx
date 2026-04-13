@@ -41,7 +41,7 @@ export function Header() {
           </nav>
 
           <div className="hidden md:flex items-center gap-4">
-            <a href={`tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
+            <a href={`tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors">
               <Phone className="w-4 h-4" />
               {clinicInfo.whatsappFormatted}
             </a>

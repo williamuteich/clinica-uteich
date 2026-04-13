@@ -187,7 +187,7 @@ const Booking = () => {
                         key={service.id}
                         onClick={() => {
                           if (isEmergency) {
-                            window.location.href = `tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`;
+                            window.location.href = `tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`;
                           } else {
                             handleServiceSelect(service.id);
                           }

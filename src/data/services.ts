@@ -115,6 +115,7 @@ export const clinicInfo = {
   address: "Rua Papa João XXIII, 80 – Vila Cachoeirinha – Cachoeirinha – RS",
   whatsapp: "5199158-1059",
   whatsappFormatted: "(51) 99158-1059",
+  emergencyPhone: "+55 51 99158-1059",
   hours: "Seg-Sex: 8h-20h | Sáb: 9h-18h",
   emergency24h: true,
   emergencyMessage: "Atendimento de emergência disponível 24h",

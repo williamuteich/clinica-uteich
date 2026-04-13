@@ -74,7 +74,7 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <Button variant="hero" size="lg" asChild>
                   <a
-                    href={`tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`}
+                    href={`tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`}
                     className="inline-flex items-center"
                   >
                     <Phone className="w-5 h-5 mr-2" />
@@ -175,7 +175,7 @@ const Index = () => {
                   <p className="text-sm text-muted-foreground mb-4">{service.description}</p>
                   {service.id === 'emergencia' ? (
                     <a
-                      href={`tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`}
+                      href={`tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`}
                       className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors inline-flex items-center gap-1"
                     >
                       Ligar Agora

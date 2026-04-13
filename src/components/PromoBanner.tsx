@@ -33,7 +33,7 @@ const banners: BannerData[] = [
     subtitle: "Sempre à sua disposição",
     description: "Estamos prontos para atender você a qualquer hora, todos os dias da semana.",
     ctaText: "Ligar Agora",
-    ctaLink: `tel:${clinicInfo.whatsapp.replace(/\D/g, '')}`,
+    ctaLink: `tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`,
     bgGradient: "linear-gradient(135deg, hsl(193 65% 32%) 0%, hsl(195 60% 38%) 100%)",
     image: atendimento24hrs,
   },
