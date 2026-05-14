@@ -34,7 +34,7 @@ export default function About() {
                 </div>
                 <div className="order-1 md:order-2">
                     <img
-                        src="/assets/clinic.jpg"
+                        src="/assets/img_pacient.jpg"
                         alt="Interior da clínica Uteich Odontologia"
                         width={1280}
                         height={896}

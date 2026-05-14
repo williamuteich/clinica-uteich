@@ -4,6 +4,7 @@ export interface Service {
   description: string;
   icon: string;
   duration: number;
+  whatsappMessage?: string;
 }
 
 export const services: Service[] = [
@@ -13,6 +14,7 @@ export const services: Service[] = [
     description: "Atendimento de emergência odontológica disponível a qualquer hora do dia ou da noite.",
     icon: "AlertCircle",
     duration: 30,
+    whatsappMessage: "Olá! Preciso de um atendimento de EMERGÊNCIA na Uteich Odontologia.",
   },
   {
     id: "avaliacao",
@@ -20,6 +22,7 @@ export const services: Service[] = [
     description: "Consulta inicial completa para avaliar sua saúde bucal e criar um plano de tratamento personalizado.",
     icon: "ClipboardCheck",
     duration: 30,
+    whatsappMessage: "Olá! Gostaria de agendar minha AVALIAÇÃO GRATUITA na Uteich Odontologia.",
   },
   {
     id: "clinico-geral",
@@ -27,6 +30,7 @@ export const services: Service[] = [
     description: "Tratamentos preventivos e curativos para manter sua saúde bucal em dia.",
     icon: "Stethoscope",
     duration: 45,
+    whatsappMessage: "Olá! Gostaria de agendar uma consulta com um CLÍNICO GERAL na Uteich Odontologia.",
   },
   {
     id: "protese-implante",
@@ -34,6 +38,7 @@ export const services: Service[] = [
     description: "Reabilitação oral com próteses e implantes de alta qualidade para devolver seu sorriso.",
     icon: "Crown",
     duration: 60,
+    whatsappMessage: "Olá! Gostaria de mais informações sobre PRÓTESES E IMPLANTES na Uteich Odontologia.",
   },
   {
     id: "ortodontia",
@@ -41,6 +46,7 @@ export const services: Service[] = [
     description: "Correção do alinhamento dental com aparelhos modernos e eficientes.",
     icon: "Smile",
     duration: 45,
+    whatsappMessage: "Olá! Gostaria de saber mais sobre o tratamento com APARELHO ORTODÔNTICO na Uteich Odontologia.",
   },
   {
     id: "canal",
@@ -48,6 +54,7 @@ export const services: Service[] = [
     description: "Tratamento endodôntico para salvar dentes comprometidos e eliminar dores.",
     icon: "Target",
     duration: 90,
+    whatsappMessage: "Olá! Gostaria de agendar um TRATAMENTO DE CANAL na Uteich Odontologia.",
   },
   {
     id: "estetica",
@@ -55,6 +62,7 @@ export const services: Service[] = [
     description: "Procedimentos estéticos para um sorriso mais branco e harmonioso.",
     icon: "Sparkles",
     duration: 60,
+    whatsappMessage: "Olá! Gostaria de informações sobre ESTÉTICA E CLAREAMENTO DENTAL na Uteich Odontologia.",
   },
   {
     id: "extracao",
@@ -62,6 +70,7 @@ export const services: Service[] = [
     description: "Procedimentos cirúrgicos e restaurações dentárias com técnicas modernas.",
     icon: "Wrench",
     duration: 45,
+    whatsappMessage: "Olá! Gostaria de agendar uma EXTRAÇÃO OU RESTAURAÇÃO na Uteich Odontologia.",
   },
 ];
 
@@ -122,7 +131,8 @@ export const clinicInfo = {
   email: "contato@uteich.com.br",
   social: {
     instagram: "https://www.instagram.com/uteichodontologia/",
-    facebook: "https://www.facebook.com/profile.php?id=61582793833076",
+    facebook: "https://www.facebook.com/people/Uteich-Odontologia/61582793833076/",
   },
+  whatsappLink: "https://api.whatsapp.com/send/?phone=5551991581059&text=Ol%C3%A1%21+Gostaria+de+mais+informa%C3%A7%C3%B5es+sobre+os+servi%C3%A7os+da+Uteich+Odontologia.&type=phone_number&app_absent=0",
   defaultMessage: "Olá! Gostaria de mais informações sobre os serviços da Uteich Odontologia.",
 };

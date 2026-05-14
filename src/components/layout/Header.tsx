@@ -56,7 +56,7 @@ export function Header() {
           </Button>*/}
 
           <Button asChild className="h-8 rounded-none bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground shadow-none hover:bg-primary-deep hover:shadow-none hover:translate-y-0">
-            <Link to="/agendamento">Agendar</Link>
+            <a href={clinicInfo.whatsappLink} target="_blank" rel="noopener noreferrer">Agendar</a>
           </Button>
         </div>
 
@@ -87,9 +87,15 @@ export function Header() {
               </Link>
             ))}
             <Button asChild className="mt-2 rounded-none bg-primary text-primary-foreground hover:bg-primary-deep">
-              <Link to="/agendamento" onClick={() => setIsOpen(false)}>
+              <a href={clinicInfo.whatsappLink} target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)}>
                 Agendar Consulta
-              </Link>
+              </a>
+            </Button>
+            <Button asChild variant="outline" className="mt-1 rounded-none border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700">
+              <a href={`tel:+55${clinicInfo.emergencyPhone}`} onClick={() => setIsOpen(false)}>
+                <Phone className="mr-2 h-4 w-4" />
+                Emergência 24h
+              </a>
             </Button>
             {/*
                BOTÃO mobile PARA REDIRECIONAR PARA A ÁREA ADMINISTRATIVA 

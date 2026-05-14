@@ -1,91 +1,71 @@
-
-import { Link } from "react-router-dom";
-import { MapPin, Phone, Clock, Mail, Instagram, Facebook } from "lucide-react";
+import { Clock, Instagram, Facebook } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { clinicInfo } from "@/data/services";
 
 export function Footer() {
   return (
-    <footer className="bg-primary text-primary-foreground pt-16 pb-8 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+    <footer className="bg-primary-deep text-primary-foreground py-10 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:18px_18px]" />
 
-      <div className="container mx-auto px-4 pt-0 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          <div className="space-y-4">
-            <div className="flex flex-col items-center md:items-start gap-4">
-              <img src="/logoFooter.png" alt="Uteich Odontologia" className="h-16 w-auto" />
-              <p className="text-sm text-primary-foreground/80 text-center md:text-left max-w-xs leading-relaxed">
-                Cuidando do seu sorriso com excelência e dedicação. Tecnologia de ponta e atendimento humanizado.
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between text-center md:text-left">
+          <div className="flex flex-col items-center md:items-start gap-4 md:gap-0">
+            <img src="/logoFooter.png" alt="Uteich Odontologia" className="h-20 w-20 md:h-28 md:w-28 object-contain" />
+            <div className="flex items-center gap-2 text-[11px] text-primary-foreground/70 bg-white/5 px-3 py-1.5 rounded-full">
+              <Clock className="w-3 h-3 text-primary-soft flex-shrink-0" />
+              <span>{clinicInfo.hours}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center md:items-end gap-5">
+            <div className="flex flex-col items-center md:items-end gap-3">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-primary-foreground/40 font-bold">Redes Sociais</span>
+              <div className="flex gap-2.5">
+                <a
+                  href={clinicInfo.social.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all hover:scale-110"
+                  aria-label="Instagram"
+                >
+                  <Instagram className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href={clinicInfo.social.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all hover:scale-110"
+                  aria-label="Facebook"
+                >
+                  <Facebook className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href={clinicInfo.whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-all hover:scale-110"
+                  aria-label="WhatsApp"
+                >
+                  <FaWhatsapp className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+            <div className="flex flex-col items-center md:items-end gap-1">
+              <p className="text-[10px] text-primary-foreground/60 font-medium tracking-wider uppercase">
+                {clinicInfo.doctor}
               </p>
-            </div>
-            <div className="flex gap-4 pt-2">
-              <a href={clinicInfo.social.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors">
-                <Instagram className="w-5 h-5" />
-              </a>
-              <a href={clinicInfo.social.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors">
-                <Facebook className="w-5 h-5" />
-              </a>
-              <a
-                href={`https://wa.me/55${clinicInfo.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(clinicInfo.defaultMessage)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-dental-light/20 flex items-center justify-center hover:bg-dental-light/30 transition-colors"
-              >
-                <FaWhatsapp className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Links Rápidos</h4>
-            <nav className="flex flex-col gap-3">
-              <Link to="/" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Início</Link>
-              <Link to="/sobre" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Sobre Nós</Link>
-              <Link to="/agendamento" className="text-primary-foreground/80 hover:text-primary-foreground transition-colors text-sm">Agendamento</Link>
-            </nav>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Serviços</h4>
-            <nav className="flex flex-col gap-3">
-              <span className="text-primary-foreground/80 text-sm">Clínico Geral</span>
-              <span className="text-primary-foreground/80 text-sm">Prótese e Implante</span>
-              <span className="text-primary-foreground/80 text-sm">Ortodontia</span>
-              <span className="text-primary-foreground/80 text-sm">Estética Dental</span>
-              <span className="text-primary-foreground/80 text-sm">Tratamento de Canal</span>
-            </nav>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Contato</h4>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-dental-sky flex-shrink-0 mt-0.5" />
-                <span className="text-primary-foreground/80 text-sm">{clinicInfo.address}</span>
-              </div>
-              <a href={`tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`} className="flex items-center gap-3 hover:text-primary transition-colors cursor-pointer">
-                <Phone className="w-5 h-5 text-dental-sky flex-shrink-0" />
-                <span className="text-primary-foreground/80 text-sm">{clinicInfo.whatsappFormatted}</span>
-              </a>
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-dental-sky flex-shrink-0" />
-                <span className="text-primary-foreground/80 text-sm">Atendimento {clinicInfo.hours}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-dental-sky flex-shrink-0" />
-                <span className="text-primary-foreground/80 text-sm">{clinicInfo.email}</span>
-              </div>
+              <p className="text-[9px] text-primary-foreground/30 uppercase tracking-[0.2em]">
+                CRO {clinicInfo.cro}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/20 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-primary-foreground/60 text-sm">
-            © {new Date().getFullYear()} Uteich Odontologia. Todos os direitos reservados.
-          </p>
-          <p className="text-primary-foreground/60 text-sm">
-            {clinicInfo.doctor} - CRO {clinicInfo.cro}
-          </p>
+        <div className="border-t border-primary-foreground/10 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4 text-[9px] text-primary-foreground/40 uppercase tracking-widest font-medium">
+          <p>© {new Date().getFullYear()} Uteich Odontologia.</p>
+          <div className="flex gap-4">
+            <p>Todos os direitos reservados.</p>
+          </div>
         </div>
       </div>
     </footer>

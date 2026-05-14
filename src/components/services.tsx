@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { services } from "@/data/services";
+import { services, clinicInfo } from "@/data/services";
 import { AlertCircle, ChevronRight, ClipboardCheck, Crown, Smile, Sparkles, Stethoscope, Target, Wrench } from "lucide-react";
 
 export default function Services() {
@@ -80,6 +79,10 @@ export default function Services() {
         },
     };
 
+    const getWhatsAppLink = (message: string) => {
+        return `https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+    };
+
     return (
         <section id="servicos" className="py-16 md:py-24 bg-[#f4f7f8]">
             <div className="mx-auto max-w-[1050px] px-4">
@@ -121,33 +124,23 @@ export default function Services() {
                                         {service.description}
                                     </p>
                                     <div className={`mt-5 pt-4 border-t border-border/70 flex items-center justify-between text-sm font-semibold ${isEmergency ? 'text-red-600' : 'text-primary'}`}>
-                                        <span>{isEmergency ? 'Ligar agora' : 'Agendar'}</span>
+                                        <span>{isEmergency ? 'Ligar agora' : 'Agendar pelo WhatsApp'}</span>
                                         <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                                     </div>
                                 </div>
                             </div>
                         );
 
-                        if (isEmergency) {
-                            return (
-                                <a
-                                    key={service.id}
-                                    href="tel:+5551991581059"
-                                    className={`group relative overflow-hidden bg-white rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
-                                >
-                                    {cardContent}
-                                </a>
-                            );
-                        }
-
                         return (
-                            <Link
+                            <a
                                 key={service.id}
-                                to="/booking"
-                                className={`group relative overflow-hidden bg-white rounded-none shadow-md hover:shadow-xl transition-all duration-200 border border-border/70 ${accent.ring}`}
+                                href={isEmergency ? `tel:+55${clinicInfo.emergencyPhone}` : getWhatsAppLink(service.whatsappMessage || "")}
+                                target={isEmergency ? undefined : "_blank"}
+                                rel={isEmergency ? undefined : "noopener noreferrer"}
+                                className={`group relative overflow-hidden bg-white rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
                             >
                                 {cardContent}
-                            </Link>
+                            </a>
                         );
                     })}
                 </ul>
