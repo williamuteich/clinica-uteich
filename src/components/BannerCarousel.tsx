@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  Calendar,
   CreditCard,
   Smile,
   ClipboardCheck,
 } from "lucide-react";
+import { clinicInfo } from "@/data/services";
 
 type BannerSlide = {
   badge: string;
@@ -27,7 +26,7 @@ const slides: BannerSlide[] = [
     description:
       "Agende este mês e ganhe avaliação completa + plano de tratamento personalizado.",
     ctaLabel: "Quero agendar",
-    ctaHref: "#contato",
+    ctaHref: `https://wa.me/55${clinicInfo.whatsapp}?text=${encodeURIComponent("Olá! Vi no site e gostaria de agendar minha AVALIAÇÃO ORTODÔNTICA GRATUITA.")}`,
     icon: ClipboardCheck,
     background: "linear-gradient(120deg, var(--primary-deep), var(--primary))",
   },
@@ -37,7 +36,7 @@ const slides: BannerSlide[] = [
     description:
       "Resultado em apenas uma sessão, com tecnologia segura e indolor.",
     ctaLabel: "Saiba mais",
-    ctaHref: "#servicos",
+    ctaHref: `https://wa.me/55${clinicInfo.whatsapp}?text=${encodeURIComponent("Olá! Gostaria de saber mais sobre o CLAREAMENTO DENTAL A LASER.")}`,
     icon: Smile,
     background: "linear-gradient(120deg, var(--primary), var(--primary-soft))",
   },
@@ -47,7 +46,7 @@ const slides: BannerSlide[] = [
     description:
       "Cuide do seu sorriso com flexibilidade no orçamento. Aceitamos diversos cartões.",
     ctaLabel: "Falar com a clínica",
-    ctaHref: "#contato",
+    ctaHref: `https://wa.me/55${clinicInfo.whatsapp}?text=${encodeURIComponent("Olá! Gostaria de saber mais sobre as CONDIÇÕES DE PAGAMENTO facilitadas.")}`,
     icon: CreditCard,
     background: "linear-gradient(120deg, var(--primary-deep), oklch(0.45 0.11 240))",
   },
@@ -62,13 +61,14 @@ export function BannerCarousel() {
 
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % slides.length);
-    }, 3500);
+    }, 4500);
 
     return () => window.clearInterval(interval);
   }, [isPaused]);
 
   return (
     <section
+      id="promocoes"
       aria-label="Promoções e novidades"
       className="py-10 md:py-14 bg-background"
     >
@@ -106,13 +106,15 @@ export function BannerCarousel() {
                       </p>
                     </div>
 
-                    <Link
-                      to={slide.ctaHref}
+                    <a
+                      href={slide.ctaHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="mt-5 md:mt-0 inline-flex items-center justify-center gap-2 bg-white text-primary-deep px-5 py-3 text-sm font-semibold rounded-none hover:bg-primary-soft transition-colors whitespace-nowrap"
                     >
                       {slide.ctaLabel}
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                    </Link>
+                    </a>
                   </div>
                 </article>
               );

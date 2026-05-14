@@ -89,24 +89,24 @@ export default function Services() {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.08 // Slightly faster stagger
+                staggerChildren: 0.08
             }
         }
     };
 
     const itemVariants: Variants = {
-        hidden: { opacity: 0, y: 15 }, // Reduced Y distance
-        visible: { 
-            opacity: 1, 
+        hidden: { opacity: 0, y: 15 },
+        visible: {
+            opacity: 1,
             y: 0,
-            transition: { duration: 0.4, ease: "easeOut" } // Faster duration
+            transition: { duration: 0.4, ease: "easeOut" }
         }
     };
 
     return (
         <section id="servicos" className="py-16 md:py-24 bg-[#f4f7f8]">
             <div className="mx-auto max-w-[1050px] px-4">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-50px" }}
@@ -122,7 +122,7 @@ export default function Services() {
                     </p>
                 </motion.div>
 
-                <motion.ul 
+                <motion.ul
                     variants={containerVariants}
                     initial="hidden"
                     whileInView="visible"
@@ -164,10 +164,10 @@ export default function Services() {
                         );
 
                         return (
-                            <motion.li 
+                            <motion.li
                                 variants={itemVariants}
                                 key={service.id}
-                                className="h-full transform-gpu" // Added transform-gpu
+                                className="h-full transform-gpu"
                             >
                                 <a
                                     href={isEmergency ? `tel:+55${clinicInfo.emergencyPhone}` : getWhatsAppLink(service.whatsappMessage || "")}
