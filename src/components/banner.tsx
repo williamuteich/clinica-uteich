@@ -10,7 +10,7 @@ export default function Banner() {
                 backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
                 backgroundSize: "22px 22px"
             }}></div>
-            <div className="relative mx-auto max-w-6xl px-4 pt-10 pb-12 md:pt-20 md:pb-24 md:grid md:grid-cols-2 md:gap-10 md:items-center">
+            <div className="relative mx-auto max-w-5xl px-4 pt-10 pb-12 md:pt-20 md:pb-24 md:grid md:grid-cols-2 md:gap-10 md:items-center">
                 <div className="text-primary-foreground">
                     <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-3 py-1 text-xs font-medium rounded-none border border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
