@@ -70,7 +70,7 @@ export function Header() {
 
       {isOpen && (
         <div className="border-t border-border bg-background/95 backdrop-blur md:hidden">
-          <nav className="mx-auto flex max-w-[1050px] flex-col gap-4 px-4 py-4">
+          <nav className="mx-auto flex max-w-[1050px] flex-col gap-1 px-4 py-4">
             {navLinks.map((link) => (
               <Link
                 key={link.href}

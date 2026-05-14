@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { MobileContactBar } from "@/components/MobileContactBar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 interface LayoutProps {
@@ -15,6 +16,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <Footer />
+      <MobileContactBar />
       <WhatsAppButton />
     </div>
   );

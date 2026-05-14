@@ -4,7 +4,7 @@ import { clinicInfo } from "@/data/services";
 
 export function Footer() {
   return (
-    <footer className="bg-primary-deep text-primary-foreground py-10 relative overflow-hidden">
+    <footer className="bg-primary-deep text-primary-foreground pt-10 pb-32 md:pb-10 relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:18px_18px]" />
 
       <div className="container mx-auto px-4">
