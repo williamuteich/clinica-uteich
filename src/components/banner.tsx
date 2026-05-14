@@ -1,7 +1,7 @@
 import { clinicInfo } from "@/data/services";
 import { Link } from "react-router-dom";
 import { Phone, Sparkles, Stethoscope } from "lucide-react";
-import heroImage from "@/assets/hero-dental.jpg";
+const heroImage = "/banner/hero-dental.jpg";
 
 export default function Banner() {
     return (
