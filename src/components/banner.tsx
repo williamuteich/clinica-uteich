@@ -1,6 +1,8 @@
 import { clinicInfo } from "@/data/services";
 import { Link } from "react-router-dom";
 import { Phone, CheckCircle, Stethoscope, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
+
 const heroImage = "/banner/hero-dental.jpg";
 
 export default function Banner() {
@@ -11,7 +13,12 @@ export default function Banner() {
                 backgroundSize: "22px 22px"
             }}></div>
             <div className="relative mx-auto max-w-[1050px] px-4 pt-10 pb-12 md:pt-20 md:pb-24 md:grid md:grid-cols-2 md:gap-10 md:items-center">
-                <div className="text-primary-foreground">
+                <motion.div 
+                    initial={{ opacity: 0, x: -30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="text-primary-foreground"
+                >
                     <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-2 py-[1.5px] text-xs font-medium rounded-none border border-white/20">
                         <ShieldCheck className="h-3.5 w-3.5" />
                         CRO {clinicInfo.cro} · Excelência e Confiança
@@ -40,36 +47,35 @@ export default function Banner() {
                         </a>
                     </div>
                     <ul className="mt-4 grid gap-3 max-w-md border-t border-white/15 pt-6">
-                        <li className="flex items-start gap-3">
-                            <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
-                                <CheckCircle className="h-4 w-4 text-[#7ecde8]" />
-                            </span>
-                            <div>
-                                <p className="text-sm font-semibold text-white leading-tight">Avaliação gratuita</p>
-                                <p className="text-xs text-white/70 mt-0.5">Diagnóstico completo sem compromisso</p>
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
-                                <Stethoscope className="h-4 w-4 text-[#7ecde8]" />
-                            </span>
-                            <div>
-                                <p className="text-sm font-semibold text-white leading-tight">Tecnologia digital</p>
-                                <p className="text-xs text-white/70 mt-0.5">Scanner intraoral e raio-x de baixa radiação</p>
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
-                                <ShieldCheck className="h-4 w-4 text-[#7ecde8]" />
-                            </span>
-                            <div>
-                                <p className="text-sm font-semibold text-white leading-tight">Condições facilitadas</p>
-                                <p className="text-xs text-white/70 mt-0.5">Opções de parcelamento em todos os tratamentos</p>
-                            </div>
-                        </li>
+                        {[
+                            { icon: CheckCircle, title: "Avaliação gratuita", desc: "Diagnóstico completo sem compromisso" },
+                            { icon: Stethoscope, title: "Tecnologia digital", desc: "Scanner intraoral e raio-x de baixa radiação" },
+                            { icon: ShieldCheck, title: "Condições facilitadas", desc: "Opções de parcelamento em todos os tratamentos" }
+                        ].map((item, i) => (
+                            <motion.li 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 0.5 + (i * 0.1) }}
+                                key={i} 
+                                className="flex items-start gap-3"
+                            >
+                                <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
+                                    <item.icon className="h-4 w-4 text-[#7ecde8]" />
+                                </span>
+                                <div>
+                                    <p className="text-sm font-semibold text-white leading-tight">{item.title}</p>
+                                    <p className="text-xs text-white/70 mt-0.5">{item.desc}</p>
+                                </div>
+                            </motion.li>
+                        ))}
                     </ul>
-                </div>
-                <div className="mt-10 md:mt-0 relative">
+                </motion.div>
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, x: 20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="mt-10 md:mt-0 relative"
+                >
                     <div className="relative bg-white/95 p-3 rounded-none shadow-[0_24px_60px_-20px_rgba(0,0,0,0.4)]">
                         <img
                             src={heroImage}
@@ -90,7 +96,7 @@ export default function Banner() {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     )

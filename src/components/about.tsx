@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function About() {
     const features = [
@@ -9,9 +10,15 @@ export default function About() {
     ];
 
     return (
-        <section id="sobre" className="py-16 md:py-24">
+        <section id="sobre" className="py-16 md:py-24 overflow-hidden">
             <div className="mx-auto max-w-[1050px] px-4 grid gap-10 md:grid-cols-2 md:items-center">
-                <div className="order-2 md:order-1">
+                <motion.div 
+                    initial={{ opacity: 0, x: -50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    className="order-2 md:order-1"
+                >
                     <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                         Sobre a clínica
                     </span>
@@ -31,8 +38,14 @@ export default function About() {
                             </li>
                         ))}
                     </ul>
-                </div>
-                <div className="order-1 md:order-2">
+                </motion.div>
+                <motion.div 
+                    initial={{ opacity: 0, x: 50 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                    className="order-1 md:order-2"
+                >
                     <img
                         src="/assets/clinic.jpg"
                         alt="Interior da clínica Uteich Odontologia"
@@ -41,7 +54,7 @@ export default function About() {
                         loading="lazy"
                         className="w-full h-auto rounded-none border border-border object-cover aspect-[4/3]"
                     />
-                </div>
+                </motion.div>
             </div>
         </section>
     );

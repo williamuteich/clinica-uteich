@@ -1,5 +1,6 @@
 import { services, clinicInfo } from "@/data/services";
 import { AlertCircle, ChevronRight, ClipboardCheck, Crown, Smile, Sparkles, Stethoscope, Target, Wrench } from "lucide-react";
+import { motion, Variants } from "framer-motion";
 
 export default function Services() {
 
@@ -83,10 +84,35 @@ export default function Services() {
         return `https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
     };
 
+    const containerVariants: Variants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.08 // Slightly faster stagger
+            }
+        }
+    };
+
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: 15 }, // Reduced Y distance
+        visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.4, ease: "easeOut" } // Faster duration
+        }
+    };
+
     return (
         <section id="servicos" className="py-16 md:py-24 bg-[#f4f7f8]">
             <div className="mx-auto max-w-[1050px] px-4">
-                <div className="max-w-2xl">
+                <motion.div 
+                    initial={{ opacity: 0, y: 15 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.5 }}
+                    className="max-w-2xl"
+                >
                     <span className="text-xs font-semibold uppercase tracking-wider text-primary">Nossos serviços</span>
                     <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-primary-deep">
                         Cuidado completo para toda a família
@@ -94,9 +120,15 @@ export default function Services() {
                     <p className="mt-3 text-muted-foreground">
                         7+ especialidades sob o mesmo teto, com tecnologia moderna e profissionais qualificados.
                     </p>
-                </div>
+                </motion.div>
 
-                <ul className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <motion.ul 
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-20px" }}
+                    className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
                     {services.map((service) => {
                         const Icon = iconMap[service.icon] || Stethoscope;
                         const isEmergency = service.id === 'emergencia';
@@ -132,18 +164,23 @@ export default function Services() {
                         );
 
                         return (
-                            <a
+                            <motion.li 
+                                variants={itemVariants}
                                 key={service.id}
-                                href={isEmergency ? `tel:+55${clinicInfo.emergencyPhone}` : getWhatsAppLink(service.whatsappMessage || "")}
-                                target={isEmergency ? undefined : "_blank"}
-                                rel={isEmergency ? undefined : "noopener noreferrer"}
-                                className={`group relative overflow-hidden bg-white rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
+                                className="h-full transform-gpu" // Added transform-gpu
                             >
-                                {cardContent}
-                            </a>
+                                <a
+                                    href={isEmergency ? `tel:+55${clinicInfo.emergencyPhone}` : getWhatsAppLink(service.whatsappMessage || "")}
+                                    target={isEmergency ? undefined : "_blank"}
+                                    rel={isEmergency ? undefined : "noopener noreferrer"}
+                                    className={`group relative overflow-hidden bg-white h-full rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
+                                >
+                                    {cardContent}
+                                </a>
+                            </motion.li>
                         );
                     })}
-                </ul>
+                </motion.ul>
             </div>
         </section>
     )

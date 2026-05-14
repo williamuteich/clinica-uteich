@@ -1,6 +1,7 @@
 import { MessageSquare, ArrowRight, ExternalLink, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const testimonials = [
     {
@@ -142,9 +143,15 @@ export default function Depoiments() {
     const prevSlide = () => setActiveIndex((prev) => Math.max(prev - 1, 0));
 
     return (
-        <section id="depoimentos" className="py-16 md:py-24 bg-[#f4f7f8]">
+        <section id="depoimentos" className="py-16 md:py-24 bg-[#f4f7f8] overflow-hidden">
             <div className="mx-auto max-w-[1050px] px-4">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.6 }}
+                    className="flex flex-col md:flex-row md:items-end justify-between gap-6"
+                >
                     <div className="max-w-xl">
                         <span className="text-xs font-semibold uppercase tracking-wider text-primary flex items-center gap-2">
                             <MessageSquare className="h-3 w-3" />
@@ -171,9 +178,15 @@ export default function Depoiments() {
                             Baseado em 45+ avaliações no Google
                         </p>
                     </div>
-                </div>
+                </motion.div>
 
-                <div className="mt-12 relative group">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.7, delay: 0.2 }}
+                    className="mt-12 relative group"
+                >
                     <div className="overflow-hidden">
                         <div
                             className="flex transition-transform duration-500 ease-out gap-6 items-stretch"
@@ -215,9 +228,15 @@ export default function Depoiments() {
                             />
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
-                <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                    className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"
+                >
                     <Button asChild variant="outline" className="rounded-none border-primary/30 text-primary-deep hover:bg-primary-deep hover:text-white h-11 px-6 text-xs font-bold uppercase tracking-wider transition-colors w-full sm:w-auto">
                         <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
                             Ver todas as avaliações
@@ -230,7 +249,7 @@ export default function Depoiments() {
                             <ExternalLink className="ml-2 h-3.5 w-3.5" />
                         </a>
                     </Button>
-                </div>
+                </motion.div>
             </div>
         </section>
     );
