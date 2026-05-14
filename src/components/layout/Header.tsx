@@ -18,7 +18,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 h-[58px]">
+      <div className="mx-auto flex max-w-[1050px] items-center justify-between px-4 h-[58px]">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <img src="/logoHeader.png" alt="Uteich Odontologia" className="h-10 w-auto md:h-10" />
         </Link>
@@ -70,7 +70,7 @@ export function Header() {
 
       {isOpen && (
         <div className="border-t border-border bg-background/95 backdrop-blur md:hidden">
-          <nav className="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-4">
+          <nav className="mx-auto flex max-w-[1050px] flex-col gap-4 px-4 py-4">
             {navLinks.map((link) => (
               <Link
                 key={link.href}

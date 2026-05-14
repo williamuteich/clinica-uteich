@@ -71,7 +71,7 @@ export function BannerCarousel() {
       aria-label="Promoções e novidades"
       className="py-10 md:py-14 bg-background"
     >
-      <div className="mx-auto max-w-5xl px-4">
+      <div className="mx-auto max-w-[1050px] px-4">
         <div
           className="relative overflow-hidden rounded-none bg-[#0789b7]"
           style={{ boxShadow: "var(--shadow-elevated)" }}

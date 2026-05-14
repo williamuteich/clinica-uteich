@@ -10,7 +10,7 @@ export default function About() {
 
     return (
         <section id="sobre" className="py-16 md:py-24">
-            <div className="mx-auto max-w-5xl px-4 grid gap-10 md:grid-cols-2 md:items-center">
+            <div className="mx-auto max-w-[1050px] px-4 grid gap-10 md:grid-cols-2 md:items-center">
                 <div className="order-2 md:order-1">
                     <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                         Sobre a clínica

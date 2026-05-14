@@ -30,7 +30,7 @@ const testimonials = [
 export default function Depoiments() {
     return (
         <section className="py-16 md:py-24 bg-blue-50">
-            <div className="mx-auto max-w-5xl px-4">
+            <div className="mx-auto max-w-[1050px] px-4">
                 <div className="flex items-end justify-between gap-4 flex-wrap">
                     <div>
                         <span className="text-xs font-semibold uppercase tracking-wider text-primary">
