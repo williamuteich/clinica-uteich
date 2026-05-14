@@ -16,7 +16,7 @@ export default function Services() {
     };
 
     return (
-        <section id="servicos" className="py-16 md:py-24 bg-blue-50">
+        <section id="servicos" className="py-16 md:py-24 bg-[#eaf5f8]">
             <div className="mx-auto max-w-[1050px] px-4">
                 <div className="max-w-2xl">
                     <span className="text-xs font-semibold uppercase tracking-wider text-primary">Nossos serviços</span>

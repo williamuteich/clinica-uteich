@@ -31,7 +31,7 @@ export default function CardAgenda() {
         <section id="contato" className="py-16 md:py-24">
             <div className="mx-auto max-w-[1050px] px-4">
                 <div className="bg-primary-deep text-primary-foreground p-6 md:p-12 rounded-none relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-[0.06] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:18px_18px]"></div>
+                    <div className="absolute inset-0 opacity-[0.1] [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:18px_18px]"></div>
 
                     <div className="relative grid gap-10 md:grid-cols-2">
                         <div>

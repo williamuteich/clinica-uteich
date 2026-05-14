@@ -5,8 +5,8 @@ import heroImage from "@/assets/hero-dental.jpg";
 
 export default function Banner() {
     return (
-        <section id="inicio" className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1a5f7f 0%, #1a92c1 50%, #07aee5 100%)" }}>
-            <div className="absolute inset-0 opacity-[0.07]" style={{
+        <section id="inicio" className="relative overflow-hidden bg-primary-deep">
+            <div className="absolute inset-0 opacity-[0.11]" style={{
                 backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
                 backgroundSize: "22px 22px"
             }}></div>
@@ -18,7 +18,7 @@ export default function Banner() {
                     </span>
                     <h1 className="mt-4 text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
                         Seu sorriso<br />merece o<br />
-                        <span className="text-[#7ecde8]">melhor cuidado.</span>
+                        <span className="text-primary-soft">melhor cuidado.</span>
                     </h1>
                     <p className="mt-5 text-base md:text-base text-white/85 max-w-md">
                         Tecnologia de ponta e atendimento humanizado para transformar seu sorriso. Agende sua avaliação gratuita.

@@ -73,7 +73,7 @@ export function BannerCarousel() {
     >
       <div className="mx-auto max-w-[1050px] px-4">
         <div
-          className="relative overflow-hidden rounded-none bg-[#0789b7]"
+          className="relative overflow-hidden rounded-none bg-primary-deep"
           style={{ boxShadow: "var(--shadow-elevated)" }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -89,7 +89,7 @@ export function BannerCarousel() {
                 <article
                   key={slide.title}
                   className="min-w-full text-primary-foreground p-6 md:py-10 md:px-20"
-                  style={{ background: slide.background || "linear-gradient(120deg, #0f5f86, #0789b7)" }}
+                  style={{ background: slide.background || "linear-gradient(120deg, #0f3d52, #155775)" }}
                 >
                   <div className="md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8">
                     <div>
