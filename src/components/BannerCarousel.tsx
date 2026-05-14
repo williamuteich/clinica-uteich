@@ -53,7 +53,7 @@ const slides: BannerSlide[] = [
 ];
 
 export function BannerCarousel() {
-  const [activeIndex, setActiveIndex] = useState(1);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
@@ -67,10 +67,13 @@ export function BannerCarousel() {
   }, [isPaused]);
 
   return (
-    <section aria-label="Promoções e novidades" className="py-10 md:py-14 bg-background">
+    <section
+      aria-label="Promoções e novidades"
+      className="py-10 md:py-14 bg-background"
+    >
       <div className="mx-auto max-w-6xl px-4">
         <div
-          className="relative overflow-hidden rounded-sm"
+          className="relative overflow-hidden rounded-none bg-[#0789b7]"
           style={{ boxShadow: "var(--shadow-elevated)" }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -85,12 +88,12 @@ export function BannerCarousel() {
               return (
                 <article
                   key={slide.title}
-                  className="min-w-full text-primary-foreground p-6 md:p-10"
-                  style={{ background: slide.background }}
+                  className="min-w-full text-primary-foreground p-6 md:py-10 md:px-20"
+                  style={{ background: slide.background || "linear-gradient(120deg, #0f5f86, #0789b7)" }}
                 >
                   <div className="md:grid md:grid-cols-[1fr_auto] md:items-center md:gap-8">
                     <div>
-                      <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider rounded-sm border border-white/20">
+                      <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider rounded-none border border-white/20">
                         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
                         {slide.badge}
                       </span>
@@ -104,7 +107,7 @@ export function BannerCarousel() {
 
                     <Link
                       to={slide.ctaHref}
-                      className="mt-5 md:mt-0 inline-flex items-center justify-center gap-2 bg-white text-primary-deep px-5 py-3 text-sm font-semibold rounded-sm hover:bg-primary-soft transition-colors whitespace-nowrap"
+                      className="mt-5 md:mt-0 inline-flex items-center justify-center gap-2 bg-white text-primary-deep px-5 py-3 text-sm font-semibold rounded-none hover:bg-primary-soft transition-colors whitespace-nowrap"
                     >
                       {slide.ctaLabel}
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -118,7 +121,7 @@ export function BannerCarousel() {
           <button
             type="button"
             aria-label="Banner anterior"
-            className="hidden md:grid place-items-center absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 bg-white/15 hover:bg-white/25 text-white rounded-sm border border-white/20"
+            className="hidden md:grid place-items-center absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 bg-white/15 hover:bg-white/25 text-white rounded-none border border-white/20"
             onClick={() => setActiveIndex((current) => (current - 1 + slides.length) % slides.length)}
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -127,7 +130,7 @@ export function BannerCarousel() {
           <button
             type="button"
             aria-label="Próximo banner"
-            className="hidden md:grid place-items-center absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 bg-white/15 hover:bg-white/25 text-white rounded-sm border border-white/20"
+            className="hidden md:grid place-items-center absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 bg-white/15 hover:bg-white/25 text-white rounded-none border border-white/20"
             onClick={() => setActiveIndex((current) => (current + 1) % slides.length)}
           >
             <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -139,7 +142,7 @@ export function BannerCarousel() {
                 key={index}
                 type="button"
                 aria-label={`Ir para banner ${index + 1}`}
-                className={`h-1.5 rounded-sm transition-all ${index === activeIndex ? "w-6 bg-white" : "w-2 bg-white/40"}`}
+                className={`h-1.5 rounded-none transition-all ${index === activeIndex ? "w-6 bg-white" : "w-2 bg-white/40"}`}
                 onClick={() => setActiveIndex(index)}
               />
             ))}
