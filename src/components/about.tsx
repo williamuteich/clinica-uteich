@@ -15,19 +15,19 @@ export default function About() {
                     <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                         Sobre a clínica
                     </span>
-                    <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-primary-deep">
+                    <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight text-primary-deep">
                         Uma clínica pensada para o seu conforto
                     </h2>
-                    <p className="mt-4 text-muted-foreground">
+                    <p className="mt-4 text-muted-foreground text-sm">
                         Há mais de uma década cuidando de sorrisos com excelência técnica e olhar humano. Nosso compromisso é entregar resultados naturais, seguros e duradouros.
                     </p>
                     <ul className="mt-6 space-y-3">
                         {features.map((feature, index) => (
                             <li key={index} className="flex items-start gap-3">
-                                <span className="mt-0.5 h-5 w-5 grid place-items-center bg-primary text-primary-foreground rounded-none shrink-0">
+                                <span className="mt-0.5 h-4 w-4 grid place-items-center bg-primary text-primary-foreground rounded-none shrink-0">
                                     <Check className="h-3 w-3" />
                                 </span>
-                                <span className="text-sm text-foreground">{feature}</span>
+                                <span className="text-xs text-foreground">{feature}</span>
                             </li>
                         ))}
                     </ul>

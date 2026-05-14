@@ -36,7 +36,7 @@ export default function Depoiments() {
                         <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                             Depoimentos
                         </span>
-                        <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-primary-deep">
+                        <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight text-primary-deep">
                             Quem confia, sorri mais
                         </h2>
                     </div>
@@ -50,7 +50,7 @@ export default function Depoiments() {
                                 />
                             ))}
                         </div>
-                        <span className="font-medium text-foreground">4.9/5</span> · 200+ avaliações
+                        <span className="font-medium text-foreground text-xs">4.9/5</span> · 45+ avaliações
                     </div>
                 </div>
 
@@ -64,12 +64,12 @@ export default function Depoiments() {
                                 {[...Array(testimonial.rating)].map((_, i) => (
                                     <Star
                                         key={i}
-                                        className="h-4 w-4 fill-primary text-primary"
+                                        className="h-3 w-3 fill-primary text-primary"
                                         aria-hidden="true"
                                     />
                                 ))}
                             </div>
-                            <blockquote className="mt-4 text-sm text-foreground leading-relaxed">
+                            <blockquote className="mt-4 text-xs text-foreground leading-relaxed">
                                 "{testimonial.text}"
                             </blockquote>
                             <figcaption className="mt-5 pt-4 border-t border-border flex items-center gap-3">

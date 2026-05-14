@@ -38,17 +38,17 @@ export default function CardAgenda() {
                             <span className="text-xs font-semibold uppercase tracking-wider text-white/60">
                                 Agende agora
                             </span>
-                            <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight">
+                            <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight">
                                 Pronto para transformar seu sorriso?
                             </h2>
-                            <p className="mt-3 text-white/80 max-w-md">
+                            <p className="mt-3 text-white/80 max-w-md text-sm">
                                 Avaliação gratuita e sem compromisso. Responda em minutos pelo WhatsApp.
                             </p>
 
                             <div className="mt-6 flex flex-col sm:flex-row gap-3">
                                 <a
                                     href={`https://wa.me/55${clinicInfo.whatsapp}`}
-                                    className="inline-flex items-center justify-center gap-2 bg-white text-primary-deep px-5 py-3.5 text-sm font-semibold rounded-none hover:bg-white/90 transition-colors"
+                                    className="inline-flex items-center justify-center gap-2 bg-white text-primary-deep px-5 py-3.5 text-xs font-semibold rounded-none hover:bg-white/90 transition-colors"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-calendar h-4 w-4">
                                         <path d="M8 2v4"></path>
@@ -60,7 +60,7 @@ export default function CardAgenda() {
                                 </a>
                                 <a
                                     href={`tel:+55${clinicInfo.emergencyPhone}`}
-                                    className="inline-flex items-center justify-center gap-2 border border-white/30 text-white px-5 py-3.5 text-sm font-semibold rounded-none hover:bg-white/10 transition-colors"
+                                    className="inline-flex items-center justify-center gap-2 border border-white/30 text-white px-5 py-3.5 text-xs font-semibold rounded-none hover:bg-white/10 transition-colors"
                                 >
                                     <Phone className="h-4 w-4" />
                                     Ligar agora
@@ -80,9 +80,9 @@ export default function CardAgenda() {
                                             <p className="text-xs uppercase tracking-wider text-white/60">
                                                 {item.label}
                                             </p>
-                                            <p className="mt-0.5 text-white">
+                                            <p className="mt-0.5 text-white text-xs">
                                                 {item.href ? (
-                                                    <a href={item.href} className="hover:text-white/80 transition-colors">
+                                                    <a href={item.href} className="hover:text-white/80 transition-colors text-xs">
                                                         {item.value}
                                                     </a>
                                                 ) : (
