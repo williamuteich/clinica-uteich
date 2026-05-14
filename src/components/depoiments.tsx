@@ -146,8 +146,8 @@ export default function Depoiments() {
         <section id="depoimentos" className="py-16 md:py-24 bg-[#f4f7f8] overflow-hidden">
             <div className="mx-auto max-w-[1050px] px-4">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.6 }}
                     className="flex flex-col md:flex-row md:items-end justify-between gap-6"
@@ -181,16 +181,16 @@ export default function Depoiments() {
                 </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true, margin: "-50px" }}
                     transition={{ duration: 0.7, delay: 0.2 }}
                     className="mt-12 relative group"
                 >
                     <div className="overflow-hidden">
                         <div
-                            className="flex transition-transform duration-500 ease-out gap-6 items-stretch"
-                            style={{ transform: `translateX(-${activeIndex * (100 / visibleCount)}%)` }}
+                            className="flex transition-transform duration-500 ease-out gap-6 items-stretch transform-gpu"
+                            style={{ transform: `translateX(calc(-${activeIndex * (100 / visibleCount)}% - ${activeIndex * (24 / visibleCount)}px))` }}
                         >
                             {testimonials.map((testimonial) => (
                                 <TestimonialCard
@@ -231,8 +231,8 @@ export default function Depoiments() {
                 </motion.div>
 
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                     className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4"

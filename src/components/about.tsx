@@ -13,8 +13,8 @@ export default function About() {
         <section id="sobre" className="py-16 md:py-24 overflow-hidden">
             <div className="mx-auto max-w-[1050px] px-4 grid gap-10 md:grid-cols-2 md:items-center">
                 <motion.div 
-                    initial={{ opacity: 0, x: -50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.7, ease: "easeOut" }}
                     className="order-2 md:order-1"
@@ -40,8 +40,8 @@ export default function About() {
                     </ul>
                 </motion.div>
                 <motion.div 
-                    initial={{ opacity: 0, x: 50 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.7, ease: "easeOut" }}
                     className="order-1 md:order-2"
