@@ -5,8 +5,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar,
-  Gift,
-  Sparkles,
+  CreditCard,
+  Smile,
+  ClipboardCheck,
 } from "lucide-react";
 
 type BannerSlide = {
@@ -27,7 +28,7 @@ const slides: BannerSlide[] = [
       "Agende este mês e ganhe avaliação completa + plano de tratamento personalizado.",
     ctaLabel: "Quero agendar",
     ctaHref: "#contato",
-    icon: Gift,
+    icon: ClipboardCheck,
     background: "linear-gradient(120deg, var(--primary-deep), var(--primary))",
   },
   {
@@ -37,17 +38,17 @@ const slides: BannerSlide[] = [
       "Resultado em apenas uma sessão, com tecnologia segura e indolor.",
     ctaLabel: "Saiba mais",
     ctaHref: "#servicos",
-    icon: Sparkles,
+    icon: Smile,
     background: "linear-gradient(120deg, var(--primary), var(--primary-soft))",
   },
   {
     badge: "Facilidade",
-    title: "Parcelamento em até 12x sem juros",
+    title: "Condições de pagamento facilitadas",
     description:
-      "Cuide do seu sorriso sem comprometer o orçamento. Aceitamos todos os cartões.",
+      "Cuide do seu sorriso com flexibilidade no orçamento. Aceitamos diversos cartões.",
     ctaLabel: "Falar com a clínica",
     ctaHref: "#contato",
-    icon: Calendar,
+    icon: CreditCard,
     background: "linear-gradient(120deg, var(--primary-deep), oklch(0.45 0.11 240))",
   },
 ];

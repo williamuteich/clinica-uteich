@@ -19,7 +19,7 @@ export default function About() {
                         Uma clínica pensada para o seu conforto
                     </h2>
                     <p className="mt-4 text-muted-foreground text-sm">
-                        Há mais de uma década cuidando de sorrisos com excelência técnica e olhar humano. Nosso compromisso é entregar resultados naturais, seguros e duradouros.
+                        Tecnologia de ponta e cuidado especializado para transformar o seu sorriso. Nosso compromisso é entregar resultados naturais, seguros e duradouros com o máximo de conforto.
                     </p>
                     <ul className="mt-6 space-y-3">
                         {features.map((feature, index) => (

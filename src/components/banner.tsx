@@ -1,6 +1,6 @@
 import { clinicInfo } from "@/data/services";
 import { Link } from "react-router-dom";
-import { Phone, Sparkles, Stethoscope } from "lucide-react";
+import { Phone, CheckCircle, Stethoscope, ShieldCheck } from "lucide-react";
 const heroImage = "/banner/hero-dental.jpg";
 
 export default function Banner() {
@@ -13,15 +13,15 @@ export default function Banner() {
             <div className="relative mx-auto max-w-[1050px] px-4 pt-10 pb-12 md:pt-20 md:pb-24 md:grid md:grid-cols-2 md:gap-10 md:items-center">
                 <div className="text-primary-foreground">
                     <span className="inline-flex items-center gap-2 bg-white/15 backdrop-blur px-2 py-[1.5px] text-xs font-medium rounded-none border border-white/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg>
-                        CRO {clinicInfo.cro} · Atendimento humanizado
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                        CRO {clinicInfo.cro} · Excelência e Confiança
                     </span>
                     <h1 className="mt-4 text-4xl md:text-5xl font-bold leading-[1.05] tracking-tight">
                         Seu sorriso<br />merece o<br />
                         <span className="text-primary-soft">melhor cuidado.</span>
                     </h1>
                     <p className="mt-5 text-base md:text-base text-white/85 max-w-md">
-                        Tecnologia de ponta e atendimento humanizado para transformar seu sorriso. Agende sua avaliação gratuita.
+                        Tecnologia avançada e cuidado especializado para transformar seu sorriso. Agende sua avaliação gratuita e sem compromisso.
                     </p>
                     <div className="mt-7 flex flex-col sm:flex-row gap-3">
                         <Link
@@ -42,7 +42,7 @@ export default function Banner() {
                     <ul className="mt-4 grid gap-3 max-w-md border-t border-white/15 pt-6">
                         <li className="flex items-start gap-3">
                             <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-[#7ecde8]" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" x2="9.01" y1="9" y2="9"></line><line x1="15" x2="15.01" y1="9" y2="9"></line></svg>
+                                <CheckCircle className="h-4 w-4 text-[#7ecde8]" />
                             </span>
                             <div>
                                 <p className="text-sm font-semibold text-white leading-tight">Avaliação gratuita</p>
@@ -60,11 +60,11 @@ export default function Banner() {
                         </li>
                         <li className="flex items-start gap-3">
                             <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
-                                <Sparkles className="h-4 w-4 text-[#7ecde8]" />
+                                <ShieldCheck className="h-4 w-4 text-[#7ecde8]" />
                             </span>
                             <div>
-                                <p className="text-sm font-semibold text-white leading-tight">Parcelamos em até 12x</p>
-                                <p className="text-xs text-white/70 mt-0.5">Condições especiais em todos os tratamentos</p>
+                                <p className="text-sm font-semibold text-white leading-tight">Condições facilitadas</p>
+                                <p className="text-xs text-white/70 mt-0.5">Opções de parcelamento em todos os tratamentos</p>
                             </div>
                         </li>
                     </ul>
