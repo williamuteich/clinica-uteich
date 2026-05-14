@@ -1,42 +1,145 @@
-import { MessageSquare, ArrowRight, ExternalLink, BadgeCheck } from "lucide-react";
+import { MessageSquare, ArrowRight, ExternalLink, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
+import { useState, useEffect } from "react";
 
 const testimonials = [
     {
         id: 1,
-        text: "Atendimento incrível, sem dor e com resultado lindo. Recomendo de olhos fechados!",
-        author: "Marina S.",
-        service: "Clareamento",
-        initials: "MS",
+        text: "Minha Mãe , meu esposo foram atendidos .. pessoal gente boa , muito atenciosos simpáticos .... amei e recomendo de olhos fechados .. Pois são seres humanos abençoados",
+        author: "Andreza Valim",
+        image: "/depoimentos/Andreza Valim.png",
         rating: 5,
     },
     {
         id: 2,
-        text: "Coloquei meu implante e o processo foi muito tranquilo. Equipe nota 10.",
-        author: "Rafael P.",
-        service: "Implante",
-        initials: "RP",
+        text: "Ótimo atendimento, serviço muito bom e com preços bem acessíveis",
+        author: "Kelvyn",
+        image: "/depoimentos/Kelvyn.png",
         rating: 5,
     },
     {
         id: 3,
-        text: "Levei meu filho e ele amou. Profissionais carinhosos e ambiente acolhedor.",
-        author: "Camila R.",
-        service: "Odontopediatria",
-        initials: "CR",
+        text: "Entrei em contato às 3h da manhã, prontamente o doutor Lenon respondeu, e me atendeu em 20 minutos após o contato. Eu estava com um dente quebrado que inflamou, muita dor; dr extraiu o dente, problema resolvido. Excelente profissional, gentil e cuidadoso; recomendo!",
+        author: "Valéria Viega",
+        image: "/depoimentos/Valéria Viega.png",
+        rating: 5,
+    },
+    {
+        id: 4,
+        text: "Atendimento diferenciado, precisamos de uma emergência a noite, chegamos lá recepcionista nos atendeu muito bem, simpática, muito profissional, doutor super atencioso, extremamente profissional, educado, super recomendo concerteza ganhou mais um cliente, parabéns pelo atendimento, profissionalismo",
+        author: "Fabricio Viana",
+        image: "/depoimentos/Fabricio Viana.png",
+        rating: 5,
+    },
+    {
+        id: 5,
+        text: "Gostaria de dar meu depoimento sobre o meu atendimento, gostaria de agradecer a esse dr maravilhoso,dr Lenon obrigado pelo atendimento, pela paciência que teve comigo. Atendimento impecável.",
+        author: "Deise Fardin Alves",
+        image: "/depoimentos/Deise Fardin Alves.png",
+        rating: 5,
+    },
+    {
+        id: 6,
+        text: "Somente agradecer esse dentista maravilhoso, minha mãe está com dor de dente vai fazer um mês foi em todos dentistas possíveis, fez mil e um RX e ninguém resolvia o problema, agora por último ela só queria extrair o dente pois não aguentava mais de dor e todos os lugares queriam fazer mais rx , ou tratamento de canal que não tínhamos condições de fazer no momento ele foi o único que atendeu e solucionou o problema prontamente ,Em menos de uma hora..... sem querer enfiar mais serviços e cobranças absurdas 🙏🏻",
+        author: "Gabi Souza",
+        image: "/depoimentos/Gabi Souza.png",
+        rating: 5,
+    },
+    {
+        id: 7,
+        text: "Fui na Ortodontic da Borges. Recebi um atendimento impecável da Karen ! Humanizado e cuidadosa no atendimento !🤎",
+        author: "Bruna Fraga",
+        image: "/depoimentos/Bruna Fraga.png",
+        rating: 5,
+    },
+    {
+        id: 8,
+        text: "Dr. Muito atencioso",
+        author: "Rafael Oliveira",
+        image: "/depoimentos/Rafael Oliveira.png",
         rating: 5,
     },
 ];
 
-// Custom Premium Star Icon
 const PremiumStar = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-primary">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="text-primary">
         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
 );
 
+const TestimonialCard = ({ testimonial, width }: { testimonial: typeof testimonials[0], width: string }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const limit = 200;
+    const shouldTruncate = testimonial.text.length > limit;
+    const displayedText = isExpanded ? testimonial.text : testimonial.text.slice(0, limit) + (shouldTruncate ? "..." : "");
+
+    return (
+        <figure
+            className="bg-white border border-border/50 p-6 md:p-7 rounded-none shadow-sm hover:shadow-md transition-shadow relative flex flex-col flex-shrink-0 h-[380px] md:h-[350px]"
+            style={{ width }}
+        >
+            <div className="flex gap-0.5">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                    <PremiumStar key={i} />
+                ))}
+            </div>
+            <div className="mt-5 flex-grow overflow-y-auto pr-2 custom-scrollbar">
+                <blockquote className="text-[13px] text-foreground/80 leading-relaxed italic">
+                    "{displayedText}"
+                </blockquote>
+                {shouldTruncate && (
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="mt-2 text-[11px] font-bold text-primary hover:underline sticky bottom-0 bg-white py-1 block w-full text-left"
+                    >
+                        {isExpanded ? "Ver menos" : "Ler avaliação completa"}
+                    </button>
+                )}
+            </div>
+            <figcaption className="mt-6 pt-5 border-t border-border/40 flex items-center gap-3">
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-primary/10">
+                    <img
+                        src={testimonial.image}
+                        alt={testimonial.author}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(testimonial.author)}&background=0f3d52&color=fff`;
+                        }}
+                    />
+                </div>
+                <div className="min-w-0">
+                    <p className="text-sm font-bold text-primary-deep leading-none flex items-center gap-1.5 truncate">
+                        {testimonial.author}
+                        <BadgeCheck className="h-3.5 w-3.5 text-primary shrink-0" />
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1.5 uppercase tracking-wider">
+                        Paciente Verificado
+                    </p>
+                </div>
+            </figcaption>
+        </figure>
+    );
+};
+
 export default function Depoiments() {
     const googleMapsUrl = "https://share.google/jo6beS4GzDKh9nSuG";
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [visibleCount, setVisibleCount] = useState(3);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 640) setVisibleCount(1);
+            else if (window.innerWidth < 1024) setVisibleCount(2);
+            else setVisibleCount(3);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const maxIndex = testimonials.length - visibleCount;
+    const nextSlide = () => setActiveIndex((prev) => Math.min(prev + 1, maxIndex));
+    const prevSlide = () => setActiveIndex((prev) => Math.max(prev - 1, 0));
 
     return (
         <section id="depoimentos" className="py-16 md:py-24 bg-[#f4f7f8]">
@@ -51,10 +154,10 @@ export default function Depoiments() {
                             Quem confia, sorri mais
                         </h2>
                         <p className="mt-3 text-muted-foreground text-sm">
-                            Confira o que nossos pacientes dizem sobre sua experiência na Uteich Odontologia. Estas são algumas de nossas avaliações recentes.
+                            Confira o que nossos pacientes dizem sobre sua experiência na Uteich Odontologia. Estas são algumas de nossas avaliações recentes no Google.
                         </p>
                     </div>
-                    
+
                     <div className="flex flex-col items-center md:items-end gap-2">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <div className="flex gap-0.5">
@@ -70,46 +173,58 @@ export default function Depoiments() {
                     </div>
                 </div>
 
-                <div className="mt-12 grid gap-6 md:grid-cols-3">
-                    {testimonials.map((testimonial) => (
-                        <figure
-                            key={testimonial.id}
-                            className="bg-white border border-border/50 p-7 rounded-none shadow-sm hover:shadow-md transition-shadow relative"
+                <div className="mt-12 relative group">
+                    <div className="overflow-hidden">
+                        <div
+                            className="flex transition-transform duration-500 ease-out gap-6 items-stretch"
+                            style={{ transform: `translateX(-${activeIndex * (100 / visibleCount)}%)` }}
                         >
-                            <div className="flex gap-0.5">
-                                {[...Array(testimonial.rating)].map((_, i) => (
-                                    <PremiumStar key={i} />
-                                ))}
-                            </div>
-                            <blockquote className="mt-5 text-sm text-foreground/80 leading-relaxed italic">
-                                "{testimonial.text}"
-                            </blockquote>
-                            <figcaption className="mt-6 pt-5 border-t border-border/40 flex items-center gap-3">
-                                <div className="h-10 w-10 grid place-items-center bg-primary/5 text-primary text-xs font-extrabold rounded-none border border-primary/10">
-                                    {testimonial.initials}
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-primary-deep leading-none flex items-center gap-1.5">
-                                        {testimonial.author}
-                                        <BadgeCheck className="h-3.5 w-3.5 text-primary" />
-                                    </p>
-                                    <p className="text-[11px] text-muted-foreground mt-1.5 uppercase tracking-wider">
-                                        {testimonial.service}
-                                    </p>
-                                </div>
-                            </figcaption>
-                        </figure>
-                    ))}
+                            {testimonials.map((testimonial) => (
+                                <TestimonialCard
+                                    key={testimonial.id}
+                                    testimonial={testimonial}
+                                    width={`calc(${100 / visibleCount}% - ${((visibleCount - 1) * 24) / visibleCount}px)`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {activeIndex > 0 && (
+                        <button
+                            onClick={prevSlide}
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 h-10 w-10 bg-white border border-border shadow-lg rounded-none flex items-center justify-center text-primary-deep hover:bg-primary-deep hover:text-white transition-all z-10 md:flex"
+                        >
+                            <ChevronLeft className="h-5 w-5" />
+                        </button>
+                    )}
+                    {activeIndex < maxIndex && (
+                        <button
+                            onClick={nextSlide}
+                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 h-10 w-10 bg-white border border-border shadow-lg rounded-none flex items-center justify-center text-primary-deep hover:bg-primary-deep hover:text-white transition-all z-10 md:flex"
+                        >
+                            <ChevronRight className="h-5 w-5" />
+                        </button>
+                    )}
+
+                    <div className="mt-8 flex justify-center gap-1.5 md:hidden">
+                        {[...Array(testimonials.length)].map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setActiveIndex(i)}
+                                className={`h-1.5 transition-all rounded-none ${i === activeIndex ? "w-6 bg-primary" : "w-1.5 bg-primary/20"}`}
+                            />
+                        ))}
+                    </div>
                 </div>
 
                 <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-                    <Button asChild variant="outline" className="rounded-none border-primary/30 text-primary-deep hover:bg-primary-deep hover:text-white h-11 px-6 text-xs font-bold uppercase tracking-wider transition-colors">
+                    <Button asChild variant="outline" className="rounded-none border-primary/30 text-primary-deep hover:bg-primary-deep hover:text-white h-11 px-6 text-xs font-bold uppercase tracking-wider transition-colors w-full sm:w-auto">
                         <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
                             Ver todas as avaliações
                             <ArrowRight className="ml-2 h-3.5 w-3.5" />
                         </a>
                     </Button>
-                    <Button asChild className="rounded-none bg-primary text-primary-foreground hover:bg-primary-deep h-11 px-6 text-xs font-bold uppercase tracking-wider shadow-none transition-colors">
+                    <Button asChild className="rounded-none bg-primary text-primary-foreground hover:bg-primary-deep h-11 px-6 text-xs font-bold uppercase tracking-wider shadow-none transition-colors w-full sm:w-auto">
                         <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer">
                             Avaliar no Google
                             <ExternalLink className="ml-2 h-3.5 w-3.5" />
