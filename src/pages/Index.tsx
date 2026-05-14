@@ -16,10 +16,9 @@ import {
   Award,
   Heart,
   AlertCircle,
-  Phone
 } from "lucide-react";
-import heroImage from "@/assets/hero-dental.jpg";
-import bgPatientImage from "@/assets/img_pacient.jpg";
+import BannerCarousel from "@/components/BannerCarousel";
+import Banner from "@/components/banner";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   AlertCircle,
@@ -41,103 +40,8 @@ const Index = () => {
         keywords="dentista cachoeirinha, clínica odontológica 24h, implante dentário, ortodontia, clareamento dental, emergência dentista"
         path="/"
       />
-      <section className="relative min-h-[75vh] lg:min-h-[90vh] flex items-start pt-8 md:pt-24 lg:pt-0 lg:items-center overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `linear-gradient(135deg, rgba(16, 97, 128, 0.95) 0%, rgba(25, 146, 193, 0.90) 50%, rgba(7, 174, 229, 0.85) 100%), url(${bgPatientImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-background" style={{
-          clipPath: "ellipse(80% 100% at 50% 100%)"
-        }} />
-
-        <div className="absolute top-20 left-10 w-64 h-64 bg-dental-sky/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 right-10 w-96 h-96 bg-dental-light/20 rounded-full blur-3xl" />
-
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12">
-            <div className="text-primary-foreground space-y-6 animate-fade-in">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Seu sorriso merece o{" "}
-                <span className="text-dental-sky">melhor cuidado</span>
-              </h1>
-
-              <p className="text-lg md:text-xl text-primary-foreground/90 max-w-lg">
-                Tecnologia de ponta e atendimento humanizado para transformar seu sorriso.
-                Agende sua avaliação gratuita.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button variant="hero" size="lg" asChild>
-                  <a
-                    href={`tel:${clinicInfo.emergencyPhone.replace(/\D/g, '')}`}
-                    className="inline-flex items-center"
-                  >
-                    <Phone className="w-5 h-5 mr-2" />
-                    Emergência 24h
-                  </a>
-                </Button>
-                <Button variant="hero-outline" size="lg" asChild>
-                  <a href="#servicos">Nossos Serviços</a>
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-3 gap-6 pt-8">
-                <div>
-                  <p className="text-3xl font-bold text-dental-sky xl:text-white">24h</p>
-                  <p className="text-sm text-foreground/70 xl:text-white/90">Emergências</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-dental-sky xl:text-white">7+</p>
-                  <p className="text-sm text-foreground/70 xl:text-white/90">Especialidades</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-bold text-dental-sky xl:text-white">100%</p>
-                  <p className="text-sm text-foreground/70 xl:text-white/90">Satisfação</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative hidden lg:block animate-fade-in animation-delay-200">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                <img
-                  src={heroImage}
-                  alt="Dr. Lenon Uteich - Uteich Odontologia"
-                  className="w-full h-[670px] object-cover"
-                  style={{
-                    objectPosition: '50% 30%',
-                    imageRendering: 'crisp-edges',
-                    backfaceVisibility: 'hidden',
-                    transform: 'translateZ(0) scale(1.001)',
-                    filter: 'contrast(1.05) brightness(1.02) saturate(1.1)',
-                    WebkitFontSmoothing: 'antialiased',
-                  }}
-                  fetchPriority="high"
-                  loading="eager"
-                  decoding="async"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-dental-pale flex items-center justify-center">
-                      <Award className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-white">{clinicInfo.doctor}</p>
-                      <p className="text-sm text-white/80">CRO {clinicInfo.cro}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
+      <Banner />
+      <BannerCarousel />
       <section id="servicos" className="py-20 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-16 animate-fade-in">
