@@ -128,7 +128,7 @@ export const clinicInfo = {
   hours: "Seg-Sex: 8h-20h | Sáb: 9h-18h",
   emergency24h: true,
   emergencyMessage: "Atendimento de emergência disponível 24h",
-  email: "contato@uteich.com.br",
+  email: "uteichodontologia@gmail.com",
   social: {
     instagram: "https://www.instagram.com/uteichodontologia/",
     facebook: "https://www.facebook.com/people/Uteich-Odontologia/61582793833076/",

@@ -6,15 +6,36 @@ import { clinicInfo } from "@/data/services";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Início" },
-  { href: "/#servicos", label: "Serviços" },
-  { href: "/sobre", label: "Sobre" },
-  { href: "/#contato", label: "Contato" },
+  { href: "#inicio", label: "Início" },
+  { href: "#servicos", label: "Serviços" },
+  { href: "#sobre", label: "Sobre" },
+  { href: "#depoimentos", label: "Depoimentos" },
+  { href: "#contato", label: "Contato" },
 ];
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith("#") && location.pathname === "/") {
+      e.preventDefault();
+      const element = document.querySelector(href);
+      if (element) {
+        const offset = 80; // Offset for sticky header
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+      }
+      setIsOpen(false);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur">
@@ -25,18 +46,14 @@ export function Header() {
 
         <nav className="hidden items-center gap-7 text-xs font-medium text-foreground/80 md:flex">
           {navLinks.map((link) => (
-            <Link
+            <a
               key={link.href}
-              to={link.href}
-              className={cn(
-                "transition-colors hover:text-primary",
-                location.pathname === link.href
-                  ? "text-primary"
-                  : "text-muted-foreground"
-              )}
+              href={link.href}
+              onClick={(e) => handleLinkClick(e, link.href)}
+              className="transition-colors hover:text-primary text-muted-foreground"
             >
               {link.label}
-            </Link>
+            </a>
           ))}
         </nav>
 
@@ -48,12 +65,6 @@ export function Header() {
             <Phone className="w-4 h-4" />
             {clinicInfo.whatsappFormatted}
           </a>
-
-          {/*
-          BOTÃO PARA REDIRECIONAR PARA A ÁREA ADMINISTRATIVA
-          <Button asChild variant="ghost" size="icon" title="Área Administrativa" className="rounded-none">
-            <Link to="/admin"><Lock className="w-4 h-4" /></Link>
-          </Button>*/}
 
           <Button asChild className="h-8 rounded-none bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground shadow-none hover:bg-primary-deep hover:shadow-none hover:translate-y-0">
             <a href={clinicInfo.whatsappLink} target="_blank" rel="noopener noreferrer">Agendar</a>
@@ -72,19 +83,14 @@ export function Header() {
         <div className="border-t border-border bg-background/95 backdrop-blur md:hidden">
           <nav className="mx-auto flex max-w-[1050px] flex-col gap-1 px-4 py-4">
             {navLinks.map((link) => (
-              <Link
+              <a
                 key={link.href}
-                to={link.href}
-                onClick={() => setIsOpen(false)}
-                className={cn(
-                  "py-2 text-base font-medium transition-colors",
-                  location.pathname === link.href
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                )}
+                href={link.href}
+                onClick={(e) => handleLinkClick(e, link.href)}
+                className="py-2 text-base font-medium transition-colors text-muted-foreground"
               >
                 {link.label}
-              </Link>
+              </a>
             ))}
             <Button asChild className="mt-2 rounded-none bg-primary text-primary-foreground hover:bg-primary-deep">
               <a href={clinicInfo.whatsappLink} target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)}>
@@ -97,12 +103,6 @@ export function Header() {
                 Emergência 24h
               </a>
             </Button>
-            {/*
-               BOTÃO mobile PARA REDIRECIONAR PARA A ÁREA ADMINISTRATIVA 
-            <Link to="/admin" onClick={() => setIsOpen(false)} className="flex items-center gap-2 py-2 text-sm text-muted-foreground transition-colors hover:text-primary">
-              <Lock className="w-4 h-4" /> Área Administrativa
-            </Link>
-            */}
           </nav>
         </div>
       )}
