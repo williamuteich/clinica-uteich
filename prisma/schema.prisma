@@ -1,0 +1,233 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Administrator {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  email     String    @unique
+  name      String?
+  password  String?
+  image     String?
+  active    Boolean   @default(true)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  roleId    String?    @db.ObjectId
+  role      AdminRole? @relation(fields: [roleId], references: [id])
+  logAdmins LogAdmin[]
+}
+
+model AdminRole {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  administrators Administrator[]
+  permissions    AdminRolePermission[]
+}
+
+model AdminPermission {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  resource    String
+  action      String
+  description String?
+
+  roles AdminRolePermission[]
+
+  @@unique([resource, action])
+}
+
+model AdminRolePermission {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminRoleId       String   @db.ObjectId
+  adminPermissionId String   @db.ObjectId
+  createdAt         DateTime @default(now())
+
+  role       AdminRole       @relation(fields: [adminRoleId], references: [id], onDelete: Cascade)
+  permission AdminPermission @relation(fields: [adminPermissionId], references: [id], onDelete: Cascade)
+
+  @@unique([adminRoleId, adminPermissionId])
+}
+
+model LogAdmin {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  administratorId String        @db.ObjectId
+  administrator   Administrator @relation(fields: [administratorId], references: [id], onDelete: Cascade)
+
+  action       String
+  resource     String?
+  resourceId   String?
+  resourceName String?
+
+  url String?
+
+  createdAt DateTime @default(now())
+}
+
+model Patient {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  cpf        String   @unique
+  birthDate  DateTime
+  phone      String
+  zipCode    String
+  state      String
+  city       String
+  street     String
+  number     String
+  complement String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  history      PatientHistory[]
+  anamneses    Anamnese[]
+  odontogram   Odontogram?
+  appointments Appointment[]
+}
+
+model PatientHistory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  patientId   String   @db.ObjectId
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Anamnese {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  patientId String  @db.ObjectId
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  observations String?
+
+  doctorRecommendations String?
+
+  panicOrBehaviorNotes String?
+
+  requiresMedicalClearance Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  diseases    AnamneseDisease[]
+  allergies   AnamneseAllergy[]
+  medications ContinuousMedication[]
+}
+
+model AnamneseDisease {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  anamneseId String   @db.ObjectId
+  anamnese   Anamnese @relation(fields: [anamneseId], references: [id], onDelete: Cascade)
+
+  name String
+
+  observations String?
+}
+
+model AnamneseAllergy {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  anamneseId String   @db.ObjectId
+  anamnese   Anamnese @relation(fields: [anamneseId], references: [id], onDelete: Cascade)
+
+  substance String
+
+  reaction String?
+}
+
+model ContinuousMedication {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  anamneseId String   @db.ObjectId
+  anamnese   Anamnese @relation(fields: [anamneseId], references: [id], onDelete: Cascade)
+
+  medication String
+
+  dosage String?
+
+  frequency String?
+
+  medicalFollowUp String?
+}
+
+model Odontogram {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  patientId String  @unique @db.ObjectId
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teeth Tooth[]
+}
+
+model Tooth {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  odontogramId String     @db.ObjectId
+  odontogram   Odontogram @relation(fields: [odontogramId], references: [id], onDelete: Cascade)
+
+  toothKey   String
+  isCustom   Boolean     @default(false)
+  customName String?
+  status     ToothStatus
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([odontogramId, toothKey])
+}
+
+enum ToothStatus {
+  SAUDAVEL
+  CARIE
+  ENDODONTIA
+  PROTESE
+  IMPLANTE
+  EXTRAIDO
+  RETIDO
+  OUTRO
+}
+
+model Appointment {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  patientId  String?  @db.ObjectId
+  patient    Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  guestName  String?
+
+  scheduledAt    DateTime
+  serviceType    String
+  estimatedValue Float
+  description    String?
+  status         AppointmentStatus @default(PENDENTE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([scheduledAt])
+  @@index([status, scheduledAt])
+}
+
+enum AppointmentStatus {
+  PENDENTE
+  CONFIRMADO
+  CANCELADO
+  REALIZADO
+}

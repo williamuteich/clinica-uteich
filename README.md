@@ -1,120 +1,36 @@
-# Uteich Odontologia - Website
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## 🦷 Sobre o Projeto
+## Getting Started
 
-Website institucional da **Uteich Odontologia** - Clínica odontológica em Cachoeirinha, RS.
+First, run the development server:
 
-**URL**: https://uteichodontologia.com.br
-
-## 🚀 Tecnologias
-
-- **Vite** - Build tool
-- **React** - Framework
-- **TypeScript** - Linguagem
-- **Tailwind CSS** - Estilização
-- **shadcn/ui** - Componentes UI
-- **React Helmet Async** - SEO dinâmico
-- **React Router** - Roteamento
-
-## 📋 Funcionalidades
-
-- ✅ SEO otimizado para Google, Facebook e Instagram
-- ✅ Carrossel de banners com autoplay
-- ✅ Sistema de agendamento online (via WhatsApp)
-- ✅ Galeria de cases antes/depois
-- ✅ Design responsivo e moderno
-- ✅ Integração com WhatsApp
-- ✅ Pré-configurado para Meta Pixel e Google Tag Manager
-
-## 💻 Desenvolvimento Local
-
-### Pré-requisitos
-
-- Node.js 18+ e npm instalados - [instalar com nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-### Instalação
-
-```sh
-# Clonar o repositório
-git clone <URL_DO_REPOSITORIO>
-
-# Navegar até a pasta
-cd uteich-flow
-
-# Instalar dependências
-npm install
-
-# Iniciar servidor de desenvolvimento
+```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-O site estará disponível em `http://localhost:3000`
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## 📦 Build para Produção
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-```sh
-# Gerar build otimizado
-npm run build
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-# Preview do build
-npm run preview
-```
+## Learn More
 
-## 🎯 Estrutura do Projeto
+To learn more about Next.js, take a look at the following resources:
 
-```
-uteich-flow/
-├── public/              # Arquivos estáticos (imagens, logos)
-├── src/
-│   ├── assets/         # Imagens e recursos
-│   ├── components/     # Componentes React
-│   │   ├── layout/    # Header, Footer, Layout
-│   │   └── ui/        # Componentes shadcn/ui
-│   ├── pages/         # Páginas do site
-│   └── data/          # Dados estáticos (serviços, etc)
-└── index.html         # HTML base com placeholders para pixels
-```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## 🔧 Configuração de Anúncios
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-O arquivo `index.html` está pré-configurado com placeholders para:
+## Deploy on Vercel
 
-- **Meta Pixel** (Facebook/Instagram Ads)
-- **Google Tag Manager**
-- **Verificações de domínio**
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Consulte o arquivo `guia_ativacao_pixels.md` para instruções detalhadas de como ativar cada integração.
-
-## 📱 Páginas
-
-- `/` - Home
-- `/servicos` - Serviços odontológicos
-- `/sobre` - Sobre a clínica e Dr. Lenon Uteich
-- `/agendamento` - Agendamento online
-- `/cases` - Cases de sucesso (antes/depois)
-
-## 🎨 Customização
-
-### Cores
-
-As cores principais estão definidas em `src/index.css` usando variáveis CSS:
-
-- `--dental-teal` - Azul principal
-- `--dental-sky` - Azul claro
-- `--dental-pale` - Azul pálido
-
-### Dados da Clínica
-
-Informações como telefone, endereço e horário estão centralizadas em:
-`src/data/services.ts`
-
-## 📞 Contato
-
-**Uteich Odontologia**
-- 📍 Cachoeirinha, RS
-- 📱 WhatsApp: (51) 99999-9999
-- 👨‍⚕️ Dr. Lenon Uteich - CRO 32301
-
-## 📄 Licença
-
-Todos os direitos reservados © 2024 Uteich Odontologia
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
