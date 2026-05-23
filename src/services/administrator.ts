@@ -3,7 +3,7 @@ import { Role, AdminsResponse, AdminFilters } from "@/src/types/dashboard/admins
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
 export async function getUsuariosInit(filters: AdminFilters = { page: 1, limit: 20 }): Promise<{ admins: AdminsResponse; roles: Role[] } | null> {
     const cookie = (await headers()).get("cookie") || "";
