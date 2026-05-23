@@ -63,6 +63,7 @@ export interface Appointment {
   serviceType: string;
   estimatedValue: number;
   status: "PENDENTE" | "CONFIRMADO" | "CANCELADO" | "REALIZADO";
+  description?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { ArrowRight, CreditCard, Smile, ClipboardCheck } from "lucide-react";
 import {
     Carousel,
@@ -18,7 +19,7 @@ const slides: BannerCarouselType[] = [
         description:
             "Agende este mês e ganhe avaliação completa + plano de tratamento personalizado.",
         ctaLabel: "Quero agendar",
-        ctaHref: `https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent("Olá! Vi no site e gostaria de agendar minha AVALIAÇÃO ORTODÔNTICA GRATUITA.")}`,
+        ctaHref: "/agendar?servico=Ortodontia",
         icon: ClipboardCheck,
     },
     {
@@ -27,7 +28,7 @@ const slides: BannerCarouselType[] = [
         description:
             "Resultado em apenas uma sessão, com tecnologia segura e indolor.",
         ctaLabel: "Saiba mais",
-        ctaHref: `https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent("Olá! Gostaria de saber mais sobre o CLAREAMENTO DENTAL A LASER.")}`,
+        ctaHref: "/agendar?servico=Clareamento Dental",
         icon: Smile,
     },
     {
@@ -36,7 +37,7 @@ const slides: BannerCarouselType[] = [
         description:
             "Cuide do seu sorriso com flexibilidade no orçamento. Aceitamos diversos cartões.",
         ctaLabel: "Falar com a clínica",
-        ctaHref: `https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent("Olá! Gostaria de saber mais sobre as CONDIÇÕES DE PAGAMENTO facilitadas.")}`,
+        ctaHref: "/agendar?servico=Consulta de Avaliação",
         icon: CreditCard,
     },
 ];
@@ -82,15 +83,13 @@ export function BannerCarousel() {
                                                     </p>
                                                 </div>
 
-                                                <a
+                                                <Link
                                                     href={slide.ctaHref}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
                                                     className="mt-5 md:mt-0 inline-flex items-center justify-center gap-2 bg-white text-primary-deep px-5 py-3 text-sm font-semibold rounded-none hover:bg-primary-soft transition-colors whitespace-nowrap"
                                                 >
                                                     {slide.ctaLabel}
                                                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                                                </a>
+                                                </Link>
                                             </div>
                                         </article>
                                     </CarouselItem>

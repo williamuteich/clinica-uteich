@@ -70,6 +70,7 @@ export default function AgendaContainer() {
                         status: mappedStatus,
                         isGuest: !apt.patientId || apt.patientId === "",
                         patientId: apt.patientId || undefined,
+                        description: apt.description || undefined,
                     };
                 });
                 setAppointments(mapped);
@@ -99,16 +100,16 @@ export default function AgendaContainer() {
             });
 
             if (!res.ok) throw new Error();
-            fetchAppointments(); // Refresh to ensure sync
+            fetchAppointments();
         } catch (error) {
             console.error("Erro ao atualizar status:", error);
-            fetchAppointments(); // Rollback on error
+            fetchAppointments();
         }
     };
 
     const handleUpdate = async (id: string | number, updatedFields: Partial<Appointment>) => {
         try {
-            const scheduledAt = updatedFields.date && updatedFields.time 
+            const scheduledAt = updatedFields.date && updatedFields.time
                 ? new Date(`${updatedFields.date}T${updatedFields.time}:00`).toISOString()
                 : undefined;
 
@@ -116,10 +117,10 @@ export default function AgendaContainer() {
                 ...(scheduledAt ? { scheduledAt } : {}),
                 ...(updatedFields.procedure ? { serviceType: updatedFields.procedure } : {}),
                 ...(typeof updatedFields.estimatedValue === "number" ? { estimatedValue: updatedFields.estimatedValue } : {}),
-                
-                ...(updatedFields.status ? { 
-                    status: updatedFields.status === "Confirmado" ? "CONFIRMADO" : 
-                            updatedFields.status === "Cancelado" ? "CANCELADO" : "PENDENTE" 
+
+                ...(updatedFields.status ? {
+                    status: updatedFields.status === "Confirmado" ? "CONFIRMADO" :
+                        updatedFields.status === "Cancelado" ? "CANCELADO" : "PENDENTE"
                 } : {}),
             };
 

@@ -61,12 +61,14 @@ async function getAppointmentFromDb(id: string) {
 function mapAppointment(appointment: any): Appointment {
   return {
     id: appointment.id,
-    patientId: appointment.patientId,
-    patientName: appointment.patient?.name || "Paciente",
+    patientId: appointment.patientId || null,
+    patientName: appointment.patient?.name || appointment.guestName || "Paciente",
+    guestName: appointment.guestName || null,
     scheduledAt: appointment.scheduledAt?.toISOString?.() || String(appointment.scheduledAt),
     serviceType: appointment.serviceType,
     estimatedValue: appointment.estimatedValue,
     status: appointment.status,
+    description: appointment.description || null,
     createdAt: appointment.createdAt?.toISOString?.() || String(appointment.createdAt),
     updatedAt: appointment.updatedAt?.toISOString?.() || String(appointment.updatedAt),
   };

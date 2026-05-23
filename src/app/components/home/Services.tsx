@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { motion, Variants } from "framer-motion";
 import { ServiceType } from "@/src/types/home/services";
@@ -293,12 +294,29 @@ export function ServicesHome() {
                                         {service.description}
                                     </p>
                                     <div className={`mt-5 pt-4 border-t border-border/70 flex items-center justify-between text-sm font-semibold ${isEmergency ? 'text-red-600' : 'text-primary'}`}>
-                                        <span>{isEmergency ? 'Ligar agora' : 'Agendar pelo WhatsApp'}</span>
+                                        <span>{isEmergency ? 'Ligar agora' : 'Agendar consulta'}</span>
                                         <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                                     </div>
                                 </div>
                             </div>
                         );
+
+                        if (isEmergency) {
+                            return (
+                                <motion.li
+                                    variants={itemVariants}
+                                    key={service.id}
+                                    className="h-full transform-gpu"
+                                >
+                                    <a
+                                        href="tel:5551991581059"
+                                        className={`group relative overflow-hidden bg-white h-full rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
+                                    >
+                                        {cardContent}
+                                    </a>
+                                </motion.li>
+                            );
+                        }
 
                         return (
                             <motion.li
@@ -306,14 +324,12 @@ export function ServicesHome() {
                                 key={service.id}
                                 className="h-full transform-gpu"
                             >
-                                <a
-                                    href={isEmergency ? "tel:5551991581059" : getWhatsAppLink(service.whatsappMessage || "")}
-                                    target={isEmergency ? undefined : "_blank"}
-                                    rel={isEmergency ? undefined : "noopener noreferrer"}
+                                <Link
+                                    href={`/agendar?servico=${encodeURIComponent(service.name)}`}
                                     className={`group relative overflow-hidden bg-white h-full rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
                                 >
                                     {cardContent}
-                                </a>
+                                </Link>
                             </motion.li>
                         );
                     })}

@@ -72,17 +72,15 @@ export function HeaderHome() {
                         (51) 99158-1059
                     </a>
 
-                    <a
-                        href="https://api.whatsapp.com/send/?phone=5551991581059&text=Ol%C3%A1%21+Gostaria+de+mais+informa%C3%A7%C3%B5es+sobre+os+servi%C3%A7os+da+Uteich+Odontologia.&type=phone_number&app_absent=0"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <Link
+                        href="/agendar"
                         className={cn(
                             buttonVariants({ variant: "default" }),
                             "h-8 rounded-none bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground shadow-none hover:bg-primary-deep hover:shadow-none hover:translate-y-0 inline-flex items-center justify-center"
                         )}
                     >
                         Agendar
-                    </a>
+                    </Link>
                 </div>
 
                 <button
@@ -106,10 +104,8 @@ export function HeaderHome() {
                                 {link.label}
                             </a>
                         ))}
-                        <a
-                            href="https://api.whatsapp.com/send/?phone=5551991581059&text=Ol%C3%A1%21+Gostaria+de+mais+informa%C3%A7%C3%B5es+sobre+os+servi%C3%A7os+da+Uteich+Odontologia.&type=phone_number&app_absent=0"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            href="/agendar"
                             onClick={() => setIsOpen(false)}
                             className={cn(
                                 buttonVariants({ variant: "default" }),
@@ -117,7 +113,7 @@ export function HeaderHome() {
                             )}
                         >
                             Agendar Consulta
-                        </a>
+                        </Link>
                         <a
                             href="tel:5551991581059"
                             onClick={() => setIsOpen(false)}

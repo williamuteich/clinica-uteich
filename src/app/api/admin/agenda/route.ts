@@ -76,6 +76,7 @@ function mapAppointment(appointment: any): Appointment {
     serviceType: appointment.serviceType,
     estimatedValue: appointment.estimatedValue,
     status: appointment.status,
+    description: appointment.description || null,
     createdAt: appointment.createdAt?.toISOString?.() || String(appointment.createdAt),
     updatedAt: appointment.updatedAt?.toISOString?.() || String(appointment.updatedAt),
   };
