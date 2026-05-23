@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { HeaderHome } from "../components/home/HeaderHome";
 import { FooterHome } from "../components/home/FooterHome";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,7 +52,6 @@ const generateTimeSlots = () => {
 const TIME_SLOTS = generateTimeSlots();
 
 function SchedulingForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const initialService = searchParams.get("servico") || "";
 
@@ -89,13 +88,6 @@ function SchedulingForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
-  const [successData, setSuccessData] = useState<{
-    patientName: string;
-    patientMatched: boolean;
-    date: string;
-    time: string;
-    serviceType: string;
-  } | null>(null);
 
   useEffect(() => {
     if (initialService) {
@@ -189,14 +181,11 @@ function SchedulingForm() {
         throw new Error(data.error || "Erro ao agendar consulta");
       }
 
-      setSuccessData({
-        patientName: data.patientName,
-        patientMatched: data.patientMatched,
-        date: selectedDate,
-        time: selectedTime,
-        serviceType,
-      });
-      setStep(3);
+      const whatsappUrl = `https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent(
+        `Olá, acabei de solicitar um agendamento no site!\nNome: ${data.patientName || name}\nServiço: ${serviceType}\nData: ${formatBrazilianDate(selectedDate)}\nHorário: ${selectedTime}`
+      )}&type=phone_number&app_absent=0`;
+
+      window.location.assign(whatsappUrl);
     } catch (err: any) {
       setErrorMessage(err.message || "Erro de conexão com o servidor. Tente novamente.");
     } finally {
@@ -574,67 +563,6 @@ function SchedulingForm() {
                   </motion.div>
                 )}
 
-                {step === 3 && successData && (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="text-center space-y-6"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 mx-auto shadow-inner">
-                      <CheckCircle2 className="h-10 w-10" />
-                    </div>
-
-                    <div className="space-y-2">
-                      <h2 className="text-2xl font-black text-slate-800">Agendamento Solicitado!</h2>
-                      <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                        Recebemos sua solicitação e em breve entraremos em contato para confirmar os detalhes.
-                      </p>
-                    </div>
-
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-left space-y-3.5 max-w-sm mx-auto shadow-inner">
-                      <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Paciente</span>
-                        <span className="text-xs font-black text-slate-700 truncate">{successData.patientName}</span>
-                      </div>
-
-                      <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Procedimento</span>
-                        <span className="text-xs font-semibold text-slate-700">{successData.serviceType}</span>
-                      </div>
-
-                      <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Data</span>
-                        <span className="text-xs font-bold text-slate-700">{formatBrazilianDate(successData.date)}</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Horário</span>
-                        <span className="text-xs font-black text-primary-deep">{successData.time}</span>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto">
-                      <button
-                        onClick={() => router.push("/")}
-                        className="flex-1 h-11 border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all text-xs uppercase tracking-wider cursor-pointer"
-                      >
-                        Ir para Home
-                      </button>
-
-                      <a
-                        href={`https://api.whatsapp.com/send/?phone=5551991581059&text=${encodeURIComponent(
-                          `Olá, acabei de solicitar um agendamento no site!\nNome: ${name}\nServiço: ${serviceType}\nData: ${formatBrazilianDate(selectedDate)}\nHorário: ${selectedTime}`
-                        )}&type=phone_number&app_absent=0`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
-                      >
-                        Notificar WhatsApp
-                      </a>
-                    </div>
-                  </motion.div>
-                )}
               </AnimatePresence>
 
             </div>
