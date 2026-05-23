@@ -88,6 +88,7 @@ function SchedulingForm() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showEmergencyContact, setShowEmergencyContact] = useState(false);
   const [successData, setSuccessData] = useState<{
     patientName: string;
     patientMatched: boolean;
@@ -229,6 +230,8 @@ function SchedulingForm() {
     return false;
   };
 
+  const availableTimeSlots = TIME_SLOTS.filter((timeStr) => !isTimeSlotDisabled(timeStr));
+
   const getMinDate = () => {
     return new Date().toLocaleDateString("en-CA");
   };
@@ -239,10 +242,13 @@ function SchedulingForm() {
 
     const dateObj = new Date(dateStr + "T00:00:00");
     if (dateObj.getDay() === 0) {
-      setErrorMessage("A clínica não realiza atendimentos aos domingos. Por favor, escolha de segunda a sábado.");
+      setErrorMessage("A clínica atende aos domingos somente em casos de emergência.");
+      setShowEmergencyContact(true);
       setSelectedDate("");
+      setSelectedTime("");
     } else {
       setErrorMessage("");
+      setShowEmergencyContact(false);
       setSelectedDate(dateStr);
     }
   };
@@ -341,9 +347,21 @@ function SchedulingForm() {
               )}
 
               {errorMessage && (
-                <div className="mb-6 p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700 animate-in fade-in duration-300">
-                  <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
-                  <p className="text-xs font-semibold leading-relaxed">{errorMessage}</p>
+                <div className="mb-6 space-y-3 animate-in fade-in duration-300">
+                  <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl flex items-start gap-3 text-rose-700">
+                    <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+                    <p className="text-xs font-semibold leading-relaxed">{errorMessage}</p>
+                  </div>
+
+                  {showEmergencyContact && (
+                    <a
+                      href="tel:5551991581059"
+                      className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
+                    >
+                      <Phone className="h-4 w-4" />
+                      Botão de Emergência
+                    </a>
+                  )}
                 </div>
               )}
 
@@ -490,24 +508,24 @@ function SchedulingForm() {
                                 <div key={i} className="h-9 bg-slate-50 border border-slate-100 rounded-lg animate-pulse" />
                               ))}
                             </div>
+                          ) : availableTimeSlots.length === 0 ? (
+                            <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs text-slate-500">
+                              Nenhum horário disponível para esta data.
+                            </div>
                           ) : (
                             <div className="max-h-[160px] overflow-y-auto border border-slate-100 rounded-xl p-2.5 bg-slate-50/50">
                               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                                {TIME_SLOTS.map((timeStr) => {
-                                  const disabled = isTimeSlotDisabled(timeStr);
+                                {availableTimeSlots.map((timeStr) => {
                                   const selected = selectedTime === timeStr;
 
                                   return (
                                     <button
                                       key={timeStr}
                                       type="button"
-                                      disabled={disabled}
                                       onClick={() => setSelectedTime(timeStr)}
                                       className={`h-9 text-xs font-bold rounded-lg border flex items-center justify-center transition-all cursor-pointer ${selected
                                         ? "bg-primary border-primary text-white shadow-sm"
-                                        : disabled
-                                          ? "bg-slate-100 border-slate-150 text-slate-350 cursor-not-allowed opacity-50"
-                                          : "bg-white border-slate-200 text-slate-700 hover:border-primary/50 hover:bg-primary/5"
+                                        : "bg-white border-slate-200 text-slate-700 hover:border-primary/50 hover:bg-primary/5"
                                         }`}
                                     >
                                       {timeStr}
@@ -564,13 +582,13 @@ function SchedulingForm() {
                     className="text-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500 mx-auto shadow-inner">
-                      <CheckCircle2 className="h-10 w-10 animate-bounce" />
+                      <CheckCircle2 className="h-10 w-10" />
                     </div>
 
                     <div className="space-y-2">
                       <h2 className="text-2xl font-black text-slate-800">Agendamento Solicitado!</h2>
                       <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                        Seu agendamento foi registrado com sucesso em nosso sistema de triagem.
+                        Recebemos sua solicitação e em breve entraremos em contato para confirmar os detalhes.
                       </p>
                     </div>
 
@@ -595,15 +613,6 @@ function SchedulingForm() {
                         <span className="text-xs font-black text-primary-deep">{successData.time}</span>
                       </div>
                     </div>
-
-                    {successData.patientMatched && (
-                      <div className="p-3.5 bg-emerald-50 border border-emerald-100 rounded-xl max-w-sm mx-auto text-left flex items-start gap-2.5">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
-                        <p className="text-[11px] text-emerald-800 font-semibold leading-relaxed">
-                          Identificamos seu cadastro! Esta consulta foi integrada automaticamente ao seu histórico clínico.
-                        </p>
-                      </div>
-                    )}
 
                     <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center max-w-sm mx-auto">
                       <button
