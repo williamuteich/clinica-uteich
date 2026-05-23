@@ -79,44 +79,40 @@ async function _PUT(
 
         const { name, description, permissions } = validated.data;
 
-        const role = await prisma.$transaction(async (tx) => {
-            const updatedRole = await tx.adminRole.update({
-                where: { id },
-                data: { name, description },
+        const role = await prisma.adminRole.update({
+            where: { id },
+            data: { name, description },
+        });
+
+        if (permissions) {
+            await prisma.adminRolePermission.deleteMany({
+                where: { adminRoleId: id },
             });
 
-            if (permissions) {
-                await tx.adminRolePermission.deleteMany({
-                    where: { adminRoleId: id },
-                });
-
-                for (const perm of permissions) {
-                    const permission = await tx.adminPermission.upsert({
-                        where: {
-                            resource_action: {
-                                resource: perm.resource,
-                                action: perm.action,
-                            }
-                        },
-                        update: {},
-                        create: {
+            for (const perm of permissions) {
+                const permission = await prisma.adminPermission.upsert({
+                    where: {
+                        resource_action: {
                             resource: perm.resource,
                             action: perm.action,
-                            description: `${perm.action} ${perm.resource}`,
-                        },
-                    });
+                        }
+                    },
+                    update: {},
+                    create: {
+                        resource: perm.resource,
+                        action: perm.action,
+                        description: `${perm.action} ${perm.resource}`,
+                    },
+                });
 
-                    await tx.adminRolePermission.create({
-                        data: {
-                            adminRoleId: updatedRole.id,
-                            adminPermissionId: permission.id,
-                        },
-                    });
-                }
+                await prisma.adminRolePermission.create({
+                    data: {
+                        adminRoleId: role.id,
+                        adminPermissionId: permission.id,
+                    },
+                });
             }
-
-            return updatedRole;
-        });
+        }
 
         revalidateTag("roles-list", "max");
         return NextResponse.json(role);

@@ -65,50 +65,48 @@ async function _POST(request: Request) {
 
         const { name, description, permissions } = validated.data;
 
-        const role = await prisma.$transaction(async (tx) => {
-            const newRole = await tx.adminRole.create({
-                data: { name, description },
-            });
+        const newRole = await prisma.adminRole.create({
+            data: { name, description },
+        });
 
-            for (const perm of permissions) {
-                const permission = await tx.adminPermission.upsert({
-                    where: {
-                        resource_action: {
-                            resource: perm.resource,
-                            action: perm.action,
-                        }
-                    },
-                    update: {},
-                    create: {
+        for (const perm of permissions) {
+            const permission = await prisma.adminPermission.upsert({
+                where: {
+                    resource_action: {
                         resource: perm.resource,
                         action: perm.action,
-                        description: `${perm.action} ${perm.resource}`,
-                    },
-                });
+                    }
+                },
+                update: {},
+                create: {
+                    resource: perm.resource,
+                    action: perm.action,
+                    description: `${perm.action} ${perm.resource}`,
+                },
+            });
 
-                await tx.adminRolePermission.create({
-                    data: {
-                        adminRoleId: newRole.id,
-                        adminPermissionId: permission.id,
-                    },
-                });
-            }
+            await prisma.adminRolePermission.create({
+                data: {
+                    adminRoleId: newRole.id,
+                    adminPermissionId: permission.id,
+                },
+            });
+        }
 
-            return tx.adminRole.findUnique({
-                where: { id: newRole.id },
-                select: {
-                    id: true,
-                    name: true,
-                    description: true,
-                    permissions: {
-                        select: {
-                            permission: {
-                                select: { resource: true, action: true }
-                            }
+        const role = await prisma.adminRole.findUnique({
+            where: { id: newRole.id },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                permissions: {
+                    select: {
+                        permission: {
+                            select: { resource: true, action: true }
                         }
                     }
                 }
-            });
+            }
         });
 
         revalidateTag("roles-list", "max");
