@@ -157,7 +157,7 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
                             className={cn(
                                 "group border rounded-2xl p-5 transition-all duration-300 flex flex-col gap-4 shadow-sm hover:-translate-y-0.5 hover:shadow-lg",
                                 newlyCreatedIds.includes(appt.id)
-                                    ? "bg-gradient-to-br from-blue-50 via-white to-cyan-50 border-blue-200 shadow-blue-100"
+                                    ? "bg-linear-to-br from-blue-50 via-white to-cyan-50 border-blue-200 shadow-blue-100"
                                     : "bg-white border-slate-200 hover:border-slate-300"
                             )}
                         >
