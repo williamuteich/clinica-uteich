@@ -7,82 +7,36 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-    Plus, Loader2, User, Phone, MapPin, CalendarDays
-} from "lucide-react";
+import { Plus, Loader2, User, Phone, CalendarDays } from "lucide-react";
 import { createPaciente } from "@/src/services/pacientes";
 import { toast } from "react-toastify";
 import { CreatePacienteDialogProps } from "@/src/types/dashboard/pacientes";
+import { maskCPF, maskPhone } from "@/src/lib/masks";
+import { AddressFields, type AddressValues } from "@/src/components/shared/address-fields";
 
-async function fetchCep(cep: string) {
-    const clean = cep.replace(/\D/g, "");
-    if (clean.length !== 8) return null;
-    const res = await fetch(`https://viacep.com.br/ws/${clean}/json/`);
-    const data = await res.json();
-    return data.erro ? null : data;
-}
-
-const maskCPF = (value: string) => {
-    return value
-        .replace(/\D/g, "")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-        .replace(/(-\d{2})\d+?$/, "$1");
-};
-
-const maskPhone = (value: string) => {
-    return value
-        .replace(/\D/g, "")
-        .replace(/(\d{2})(\d)/, "($1) $2")
-        .replace(/(\d{4,5})(\d{4})$/, "$1-$2");
-};
-
-const maskCEP = (value: string) => {
-    return value
-        .replace(/\D/g, "")
-        .replace(/(\d{5})(\d)/, "$1-$2")
-        .replace(/(-\d{3})\d+?$/, "$1");
+const EMPTY_ADDRESS: AddressValues = {
+    zipCode: "",
+    state: "",
+    city: "",
+    street: "",
+    number: "",
+    complement: "",
 };
 
 export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogProps) {
     const [open, setOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
-    const [cepLoading, setCepLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const [addressFields, setAddressFields] = useState({
-        state: "",
-        city: "",
-        street: "",
-    });
-    
-    const [masks, setMasks] = useState({
-        cpf: "",
-        phone: "",
-        zipCode: "",
-    });
+    const [cpf, setCpf] = useState("");
+    const [phone, setPhone] = useState("");
+    const [address, setAddress] = useState<AddressValues>(EMPTY_ADDRESS);
 
     const resetForm = () => {
-        setAddressFields({ state: "", city: "", street: "" });
-        setMasks({ cpf: "", phone: "", zipCode: "" });
+        setCpf("");
+        setPhone("");
+        setAddress(EMPTY_ADDRESS);
         setError("");
-    };
-
-    const handleCepBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        if (!val) return;
-        setCepLoading(true);
-        const data = await fetchCep(val);
-        if (data) {
-            setAddressFields({ state: data.uf || "", city: data.localidade || "", street: data.logradouro || "" });
-            setMasks(prev => ({ ...prev, zipCode: maskCEP(val) }));
-        }
-        setCepLoading(false);
-    };
-
-    const handleMaskChange = (e: React.ChangeEvent<HTMLInputElement>, maskFn: (val: string) => string, field: string) => {
-        setMasks(prev => ({ ...prev, [field]: maskFn(e.target.value) }));
     };
 
     const handleAction = (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,19 +44,19 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
         setError("");
 
         const formData = new FormData(e.currentTarget);
-        
+
         startTransition(async () => {
             const payload = {
                 name: formData.get("name") as string,
-                cpf: formData.get("cpf") as string,
+                cpf,
                 birthDate: formData.get("birthDate") as string,
-                phone: formData.get("phone") as string,
-                zipCode: formData.get("zipCode") as string,
-                state: formData.get("state") as string,
-                city: formData.get("city") as string,
-                street: formData.get("street") as string,
-                number: formData.get("number") as string,
-                complement: (formData.get("complement") as string) || undefined,
+                phone,
+                zipCode: address.zipCode,
+                state: address.state,
+                city: address.city,
+                street: address.street,
+                number: address.number,
+                complement: address.complement || undefined,
                 active: true,
             };
 
@@ -152,37 +106,37 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
                             </Label>
                             <Input name="name" placeholder="João da Silva" required className="h-10 bg-white" />
                         </div>
-                        
+
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CPF</Label>
-                            <Input 
-                                name="cpf" 
-                                value={masks.cpf} 
-                                onChange={e => handleMaskChange(e, maskCPF, 'cpf')} 
-                                placeholder="000.000.000-00" 
-                                required 
+                            <Input
+                                name="cpf"
+                                value={cpf}
+                                onChange={(e) => setCpf(maskCPF(e.target.value))}
+                                placeholder="000.000.000-00"
+                                required
                                 className="h-10 bg-white"
                                 maxLength={14}
                             />
                         </div>
-                        
+
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                                 <CalendarDays className="h-3.5 w-3.5 text-slate-400" /> Nascimento
                             </Label>
                             <Input name="birthDate" type="date" required className="h-10 bg-white" />
                         </div>
-                        
+
                         <div className="col-span-2 space-y-1.5">
                             <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
                                 <Phone className="h-3 w-3 text-blue-600" /> Telefone / WhatsApp
                             </Label>
-                            <Input 
-                                name="phone" 
-                                value={masks.phone} 
-                                onChange={e => handleMaskChange(e, maskPhone, 'phone')} 
-                                placeholder="(51) 99999-9999" 
-                                required 
+                            <Input
+                                name="phone"
+                                value={phone}
+                                onChange={(e) => setPhone(maskPhone(e.target.value))}
+                                placeholder="(51) 99999-9999"
+                                required
                                 className="h-10 bg-white"
                                 maxLength={15}
                             />
@@ -191,78 +145,18 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
 
                     <div className="border-t pt-4">
                         <p className="text-xs font-bold text-slate-800 flex items-center gap-1 mb-4">
-                            <MapPin className="h-3.5 w-3.5 text-blue-600" /> Endereço Residencial
+                            Endereço Residencial
                         </p>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">CEP</Label>
-                                <div className="relative">
-                                    <Input 
-                                        name="zipCode" 
-                                        value={masks.zipCode} 
-                                        onChange={e => handleMaskChange(e, maskCEP, 'zipCode')} 
-                                        placeholder="00000-000" 
-                                        onBlur={handleCepBlur} 
-                                        required 
-                                        className="h-10 bg-white pr-9"
-                                    />
-                                    {cepLoading && <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-blue-500" />}
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Estado (UF)</Label>
-                                <Input 
-                                    name="state" 
-                                    value={addressFields.state} 
-                                    onChange={e => setAddressFields(p => ({ ...p, state: e.target.value }))} 
-                                    placeholder="RS" 
-                                    required 
-                                    className="h-10 bg-white"
-                                />
-                            </div>
-                            
-                            <div className="col-span-2 space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cidade</Label>
-                                <Input 
-                                    name="city" 
-                                    value={addressFields.city} 
-                                    onChange={e => setAddressFields(p => ({ ...p, city: e.target.value }))} 
-                                    placeholder="Porto Alegre" 
-                                    required 
-                                    className="h-10 bg-white"
-                                />
-                            </div>
-                            
-                            <div className="col-span-2 space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Rua / Logradouro</Label>
-                                <Input 
-                                    name="street" 
-                                    value={addressFields.street} 
-                                    onChange={e => setAddressFields(p => ({ ...p, street: e.target.value }))} 
-                                    placeholder="Rua das Flores" 
-                                    required 
-                                    className="h-10 bg-white"
-                                />
-                            </div>
-                            
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Número</Label>
-                                <Input name="number" placeholder="123" required className="h-10 bg-white" />
-                            </div>
-                            
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Complemento</Label>
-                                <Input name="complement" placeholder="Apto 2B" className="h-10 bg-white" />
-                            </div>
-                        </div>
+                        <AddressFields
+                            values={address}
+                            onChange={(updated) => setAddress((prev) => ({ ...prev, ...updated }))}
+                        />
                     </div>
 
                     <DialogFooter className="bg-slate-50/55 -mx-6 -mb-6 p-5 border-t flex justify-end gap-3 rounded-b-lg">
-                        <Button 
-                            type="submit" 
-                            disabled={isPending} 
+                        <Button
+                            type="submit"
+                            disabled={isPending}
                             className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-10 min-w-[150px] cursor-pointer"
                         >
                             {isPending ? (
