@@ -2,18 +2,16 @@
 
 import { useState, useEffect, useTransition } from "react";
 import dynamic from "next/dynamic";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Stethoscope, Check, Plus, Trash2, Save, Loader2, Award, ClipboardCheck, MessageSquare, Sparkles } from "lucide-react";
+import { Stethoscope, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ToothStatus, ToothInfo } from "@/src/types/dashboard/pacientes";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-odontogram/style.css";
 import { saveOdontogramaPaciente } from "@/src/services/pacientes";
+import { ToothDiagnosisModal } from "./components/tooth-diagnosis-modal";
+import { CustomTeethList } from "./components/custom-teeth-list";
 
 const Odontogram = dynamic(
     () => import("react-odontogram").then((mod) => mod.Odontogram),
@@ -31,7 +29,7 @@ export const statusConfig = {
     OUTRO: { label: "Outro", color: "bg-indigo-500", border: "border-indigo-500", text: "text-indigo-700", bgLight: "bg-indigo-50/60", fill: "#6366f1", stroke: "#4338ca" },
 } satisfies Record<ToothStatus, { label: string; color: string; border: string; text: string; bgLight: string; fill: string; stroke: string }>;
 
-interface CustomTooth {
+export interface CustomTooth {
     id: string;
     description: string;
     status: ToothStatus;
@@ -96,6 +94,11 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
     const [selectedCustomToothId, setSelectedCustomToothId] = useState<string | null>(null);
     const [isSelectionOpen, setIsSelectionOpen] = useState(false);
 
+    // Estados temporários para gerenciar diagnóstico em edição antes de confirmar ou cancelar
+    const [tempStatus, setTempStatus] = useState<ToothStatus>("SAUDAVEL");
+    const [tempNotes, setTempNotes] = useState<string>("");
+    const [tempCustomDescription, setTempCustomDescription] = useState<string>("");
+
     useEffect(() => {
         let attempts = 0;
 
@@ -147,9 +150,9 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                         if (fdi.startsWith("2")) {
                             transformAttr = `translate(${x}, ${y}) scale(-1, 1) translate(${-x}, ${-y})`;
                         } else if (fdi.startsWith("3")) {
-                            transformAttr = `translate(${x}, ${y}) scale(-1, -1) translate(${-x}, ${-y})`;
-                        } else if (fdi.startsWith("4")) {
                             transformAttr = `translate(${x}, ${y}) scale(1, -1) translate(${-x}, ${-y})`;
+                        } else if (fdi.startsWith("4")) {
+                            transformAttr = `translate(${x}, ${y}) scale(-1, -1) translate(${-x}, ${-y})`;
                         }
                         if (transformAttr) textNode.setAttribute("transform", transformAttr);
 
@@ -171,10 +174,10 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         return () => clearInterval(interval);
     }, [teeth]);
 
-    const handleSave = () => {
+    const triggerSave = (updatedTeeth = teeth, updatedCustomTeeth = customTeeth) => {
         const payloadTeeth: any[] = [];
 
-        Object.values(teeth).forEach(t => {
+        Object.values(updatedTeeth).forEach(t => {
             if (t.status !== "SAUDAVEL" || (t.notes && t.notes.trim() !== "")) {
                 payloadTeeth.push({
                     toothKey: t.id.toString(),
@@ -186,7 +189,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
             }
         });
 
-        customTeeth.forEach(ct => {
+        updatedCustomTeeth.forEach(ct => {
             payloadTeeth.push({
                 toothKey: ct.id,
                 isCustom: true,
@@ -204,80 +207,87 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
 
         startTransition(async () => {
             const res = await saveOdontogramaPaciente(patientId, payload);
-            if (res.success) {
-                toast.success("Odontograma salvo com sucesso!");
-            } else {
-                toast.error(res.error || "Erro ao salvar odontograma.");
+            if (!res.success) {
+                toast.error(res.error || "Erro ao salvar alterações automaticamente.");
             }
         });
     };
 
     const handleToothStatusUpdate = (status: ToothStatus) => {
-        if (selectedTooth !== null) {
-            setTeeth(prev => ({
-                ...prev,
-                [selectedTooth]: {
-                    ...prev[selectedTooth],
-                    status
-                }
-            }));
-        } else if (selectedCustomToothId !== null) {
-            setCustomTeeth(prev => prev.map(ct => ct.id === selectedCustomToothId ? { ...ct, status } : ct));
-        }
+        setTempStatus(status);
     };
 
     const handleToothNoteUpdate = (notes: string) => {
-        if (selectedTooth !== null) {
-            setTeeth(prev => ({
-                ...prev,
-                [selectedTooth]: {
-                    ...prev[selectedTooth],
-                    notes
-                }
-            }));
-        } else if (selectedCustomToothId !== null) {
-            setCustomTeeth(prev => prev.map(ct => ct.id === selectedCustomToothId ? { ...ct, notes } : ct));
-        }
+        setTempNotes(notes);
     };
 
     const handleCustomDescriptionUpdate = (description: string) => {
-        if (selectedCustomToothId !== null) {
-            setCustomTeeth(prev => prev.map(ct => ct.id === selectedCustomToothId ? { ...ct, description } : ct));
-        }
+        setTempCustomDescription(description);
     };
 
     const addCustomTooth = () => {
         const newId = `Supranumerário #${customTeeth.length + 1}`;
-        const newTooth: CustomTooth = {
-            id: newId,
-            description: "Dente extra detectado",
-            status: "SAUDAVEL",
-            notes: ""
-        };
-        setCustomTeeth(prev => [...prev, newTooth]);
-        setSelectedTooth(null);
         setSelectedCustomToothId(newId);
+        setSelectedTooth(null);
+
+        // Inicializa estado temporário para novo dente
+        setTempStatus("SAUDAVEL");
+        setTempNotes("");
+        setTempCustomDescription("Dente extra detectado");
+
         setIsSelectionOpen(true);
     };
 
     const removeCustomTooth = (id: string) => {
-        setCustomTeeth(prev => prev.filter(ct => ct.id !== id));
+        const nextCustom = customTeeth.filter(ct => ct.id !== id);
+        setCustomTeeth(nextCustom);
         if (selectedCustomToothId === id) {
+            setIsSelectionOpen(false);
             setSelectedCustomToothId(null);
         }
+        triggerSave(teeth, nextCustom);
     };
 
-    const currentSelectedStatus = selectedTooth !== null
-        ? teeth[selectedTooth]?.status || "SAUDAVEL"
-        : selectedCustomToothId !== null
-            ? customTeeth.find(ct => ct.id === selectedCustomToothId)?.status || "SAUDAVEL"
-            : "SAUDAVEL";
+    // Consolida diagnóstico editado temporariamente nos estados globais e salva na nuvem
+    const handleConfirmDiagnosis = () => {
+        let updatedTeeth = teeth;
+        let updatedCustomTeeth = customTeeth;
 
-    const currentSelectedNotes = selectedTooth !== null
-        ? teeth[selectedTooth]?.notes || ""
-        : selectedCustomToothId !== null
-            ? customTeeth.find(ct => ct.id === selectedCustomToothId)?.notes || ""
-            : "";
+        if (selectedTooth !== null) {
+            updatedTeeth = {
+                ...teeth,
+                [selectedTooth]: {
+                    ...teeth[selectedTooth],
+                    status: tempStatus,
+                    notes: tempNotes
+                }
+            };
+            setTeeth(updatedTeeth);
+        } else if (selectedCustomToothId !== null) {
+            const exists = customTeeth.some(ct => ct.id === selectedCustomToothId);
+            if (exists) {
+                updatedCustomTeeth = customTeeth.map(ct =>
+                    ct.id === selectedCustomToothId
+                        ? { ...ct, status: tempStatus, notes: tempNotes, description: tempCustomDescription }
+                        : ct
+                );
+            } else {
+                updatedCustomTeeth = [
+                    ...customTeeth,
+                    {
+                        id: selectedCustomToothId,
+                        description: tempCustomDescription,
+                        status: tempStatus,
+                        notes: tempNotes
+                    }
+                ];
+            }
+            setCustomTeeth(updatedCustomTeeth);
+        }
+
+        setIsSelectionOpen(false);
+        triggerSave(updatedTeeth, updatedCustomTeeth);
+    };
 
     const getTeethConditions = () => {
         const conditions: any[] = [];
@@ -318,6 +328,12 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                     setTimeout(() => {
                         setSelectedTooth(toothNumber);
                         setSelectedCustomToothId(null);
+
+                        // Inicializa estados temporários com dados consolidados existentes
+                        const currentTooth = teeth[toothNumber];
+                        setTempStatus(currentTooth?.status || "SAUDAVEL");
+                        setTempNotes(currentTooth?.notes || "");
+
                         setIsSelectionOpen(true);
                     }, 0);
                 }
@@ -340,16 +356,27 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 flex-wrap w-full sm:w-auto">
+                <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
+                    {/* Indicador de Auto-Save em Tempo Real */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-[11px] font-bold text-slate-500 shadow-xs shrink-0 select-none">
+                        {isPending ? (
+                            <>
+                                <Loader2 className="h-3.5 w-3.5 text-blue-600 animate-spin" />
+                                <span className="text-slate-500">Sincronizando...</span>
+                            </>
+                        ) : (
+                            <>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                                </svg>
+                                <span className="text-emerald-700">Alterações salvas</span>
+                            </>
+                        )}
+                    </div>
+
                     <Button onClick={addCustomTooth} size="sm" variant="outline" className="flex-1 sm:flex-initial text-xs h-9 px-4 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-350 text-indigo-700 font-semibold gap-1.5 rounded-xl cursor-pointer">
                         <Plus className="h-3.5 w-3.5" /> Caso Especial
-                    </Button>
-                    <Button onClick={handleSave} disabled={isPending} className="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-semibold h-9 px-5 rounded-xl gap-2 transition-all cursor-pointer">
-                        {isPending ? (
-                            <><Loader2 className="h-4 w-4 animate-spin" /> Salvando...</>
-                        ) : (
-                            <><Save className="h-4 w-4" /> Salvar Alterações</>
-                        )}
                     </Button>
                 </div>
             </div>
@@ -364,7 +391,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
             </div>
 
             <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs flex flex-col items-center justify-center w-full">
-                <div className="w-full py-2 flex justify-center items-center [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:max-h-[380px] md:[&_svg]:max-h-[480px] lg:[&_svg]:max-h-[600px] [&_svg]:mx-auto">
+                <div className="w-full py-2 flex justify-center items-center [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:max-h-[380px] md:[&_svg]:max-h-[500px] lg:[&_svg]:max-h-[600px] [&_svg]:mx-auto">
                     <Odontogram
                         theme="light"
                         layout="circle"
@@ -382,178 +409,39 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                 </div>
             </div>
 
-            {customTeeth.length > 0 && (
-                <div className="bg-white border rounded-xl p-5 space-y-4 shadow-sm">
-                    <h4 className="text-sm font-bold text-slate-800">Dentes Supranumerários e Anomalias</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {customTeeth.map((ct) => {
-                            const conf = statusConfig[ct.status || "SAUDAVEL"];
-                            return (
-                                <div
-                                    key={ct.id}
-                                    onClick={() => {
-                                        setSelectedCustomToothId(ct.id);
-                                        setSelectedTooth(null);
-                                        setIsSelectionOpen(true);
-                                    }}
-                                    className={cn(
-                                        "border rounded-xl p-3 flex flex-col gap-1 cursor-pointer transition-all hover:shadow-xs",
-                                        selectedCustomToothId === ct.id ? "border-blue-600 bg-blue-50/10" : "border-slate-100 hover:border-slate-350 bg-white"
-                                    )}
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-bold text-slate-800">{ct.id}</span>
-                                        <div className="flex items-center gap-2">
-                                            <span className={cn("px-2 py-0.5 rounded text-[8px] font-bold uppercase", conf.bgLight, conf.text)}>
-                                                {conf.label}
-                                            </span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeCustomTooth(ct.id);
-                                                }}
-                                                className="p-1 text-slate-400 hover:text-rose-600 rounded transition-all"
-                                            >
-                                                <Trash2 className="h-3.5 w-3.5" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <p className="text-[11px] text-slate-500 font-medium">{ct.description}</p>
-                                    {ct.notes && (
-                                        <p className="text-[10px] text-slate-400 mt-1 italic border-t pt-1 border-slate-50 truncate">
-                                            {ct.notes}
-                                        </p>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+            <CustomTeethList
+                customTeeth={customTeeth}
+                selectedCustomToothId={selectedCustomToothId}
+                onSelectCustomTooth={(id) => {
+                    setSelectedCustomToothId(id);
+                    setSelectedTooth(null);
 
-            <Dialog open={isSelectionOpen} onOpenChange={setIsSelectionOpen}>
-                <DialogContent className="sm:max-w-lg border-none p-0 overflow-hidden shadow-2xl rounded-3xl bg-slate-50">
-                    <div className="bg-white rounded-3xl overflow-hidden border border-slate-100">
-                        <div className="bg-slate-900 text-white px-6 py-5">
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
-                                        <Stethoscope className="h-5 w-5 text-blue-450" />
-                                    </div>
-                                    <div>
-                                        <DialogTitle className="text-lg font-black tracking-tight">
-                                            {selectedTooth !== null ? `Dente #${selectedTooth}` : selectedCustomToothId}
-                                        </DialogTitle>
-                                        <DialogDescription className="text-xs text-slate-400 mt-0.5 font-medium">
-                                            {selectedTooth !== null
-                                                ? (selectedTooth <= 28 ? "Arcada Superior • Maxilar" : "Arcada Inferior • Mandíbula")
-                                                : "Caso Especial Supranumerário"}
-                                        </DialogDescription>
-                                    </div>
-                                </div>
-                                <Badge className={cn("font-black tracking-wider text-[10px] uppercase py-1 px-3 border-none rounded-full shadow-sm", statusConfig[currentSelectedStatus].bgLight, statusConfig[currentSelectedStatus].text)}>
-                                    {statusConfig[currentSelectedStatus].label}
-                                </Badge>
-                            </div>
-                        </div>
+                    // Inicializa estados temporários ao clicar na lista especial
+                    const ct = customTeeth.find(x => x.id === id);
+                    setTempStatus(ct?.status || "SAUDAVEL");
+                    setTempNotes(ct?.notes || "");
+                    setTempCustomDescription(ct?.description || "");
 
-                        <div className="p-6 space-y-5">
-                            {selectedCustomToothId !== null && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="customDescription" className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                                        <Award className="w-3.5 h-3.5 text-blue-600" />
-                                        Nome / Descrição da Anomalia
-                                    </Label>
-                                    <Input
-                                        id="customDescription"
-                                        value={customTeeth.find(ct => ct.id === selectedCustomToothId)?.description || ""}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleCustomDescriptionUpdate(e.target.value)}
-                                        placeholder="Ex: Mesiodens extra, Siso semi-incluso..."
-                                        className="h-10 text-sm bg-slate-50 border-slate-200 focus-visible:ring-1 focus-visible:ring-blue-600 font-semibold rounded-xl shadow-xs"
-                                    />
-                                </div>
-                            )}
+                    setIsSelectionOpen(true);
+                }}
+                onRemoveCustomTooth={removeCustomTooth}
+            />
 
-                            <div className="space-y-3">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                                    <ClipboardCheck className="w-3.5 h-3.5 text-blue-600" />
-                                    Diagnóstico Clínico
-                                </Label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {Object.entries(statusConfig).map(([key, value]) => (
-                                        <button
-                                            key={key}
-                                            type="button"
-                                            onClick={() => handleToothStatusUpdate(key as ToothStatus)}
-                                            className={cn(
-                                                "flex items-center gap-2.5 p-2.5 rounded-xl border text-xs sm:text-sm transition-all duration-205 font-bold cursor-pointer relative overflow-hidden shadow-xs",
-                                                currentSelectedStatus === key
-                                                    ? "bg-blue-600 border-blue-600 text-white"
-                                                    : "bg-white border-slate-100 hover:border-slate-300 text-slate-700 hover:bg-slate-50"
-                                            )}
-                                        >
-                                            <span className={cn(
-                                                "w-2.5 h-2.5 rounded-full shrink-0 border border-black/5",
-                                                currentSelectedStatus === key ? "bg-white" : value.color
-                                            )} />
-                                            <span className="truncate">{value.label}</span>
-                                            {currentSelectedStatus === key && (
-                                                <Check className="h-3.5 w-3.5 text-white ml-auto shrink-0" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="space-y-2.5">
-                                <Label htmlFor="toothNotes" className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                                    <MessageSquare className="w-3.5 h-3.5 text-blue-600" />
-                                    Anotações & Observações
-                                </Label>
-
-                                <textarea
-                                    id="toothNotes"
-                                    value={currentSelectedNotes}
-                                    onChange={(e) => handleToothNoteUpdate(e.target.value)}
-                                    placeholder="Escreva observações personalizadas aqui..."
-                                    className="w-full h-24 rounded-xl border border-slate-200 bg-white p-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 transition-all placeholder:text-slate-400 resize-none font-semibold text-slate-750 shadow-xs"
-                                />
-
-                                <div className="space-y-1.5">
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                        <Sparkles className="w-3 h-3 text-amber-500" />
-                                        Sugestões Rápidas (Toque para Inserir)
-                                    </div>
-                                    <div className="flex flex-wrap gap-1">
-                                        {quickNotes.map((note) => (
-                                            <button
-                                                key={note}
-                                                type="button"
-                                                onClick={() => {
-                                                    const separator = currentSelectedNotes ? ", " : "";
-                                                    handleToothNoteUpdate(currentSelectedNotes + separator + note);
-                                                }}
-                                                className="px-2.5 py-1 text-[10px] font-semibold text-slate-650 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors cursor-pointer"
-                                            >
-                                                + {note}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="pt-2">
-                                <Button
-                                    onClick={() => setIsSelectionOpen(false)}
-                                    className="w-full h-11 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md transition-all cursor-pointer text-sm"
-                                >
-                                    Confirmar Diagnóstico
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            <ToothDiagnosisModal
+                isOpen={isSelectionOpen}
+                onOpenChange={setIsSelectionOpen}
+                selectedTooth={selectedTooth}
+                selectedCustomToothId={selectedCustomToothId}
+                customTeeth={customTeeth}
+                currentSelectedStatus={tempStatus}
+                currentSelectedNotes={tempNotes}
+                customDescription={tempCustomDescription}
+                quickNotes={quickNotes}
+                onCustomDescriptionUpdate={handleCustomDescriptionUpdate}
+                onToothStatusUpdate={handleToothStatusUpdate}
+                onToothNoteUpdate={handleToothNoteUpdate}
+                onConfirm={handleConfirmDiagnosis}
+            />
         </div>
     );
 }
