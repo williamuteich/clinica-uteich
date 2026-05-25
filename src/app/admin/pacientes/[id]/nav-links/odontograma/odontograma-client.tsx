@@ -94,7 +94,6 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
     const [selectedCustomToothId, setSelectedCustomToothId] = useState<string | null>(null);
     const [isSelectionOpen, setIsSelectionOpen] = useState(false);
 
-    // Estados temporários para gerenciar diagnóstico em edição antes de confirmar ou cancelar
     const [tempStatus, setTempStatus] = useState<ToothStatus>("SAUDAVEL");
     const [tempNotes, setTempNotes] = useState<string>("");
     const [tempCustomDescription, setTempCustomDescription] = useState<string>("");
@@ -158,7 +157,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
 
                         textNode.textContent = fdi;
                         g.appendChild(textNode);
-                    } catch (_) {}
+                    } catch (_) { }
                 }
             });
 
@@ -230,7 +229,6 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         setSelectedCustomToothId(newId);
         setSelectedTooth(null);
 
-        // Inicializa estado temporário para novo dente
         setTempStatus("SAUDAVEL");
         setTempNotes("");
         setTempCustomDescription("Dente extra detectado");
@@ -248,7 +246,6 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         triggerSave(teeth, nextCustom);
     };
 
-    // Consolida diagnóstico editado temporariamente nos estados globais e salva na nuvem
     const handleConfirmDiagnosis = () => {
         let updatedTeeth = teeth;
         let updatedCustomTeeth = customTeeth;
@@ -329,7 +326,6 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                         setSelectedTooth(toothNumber);
                         setSelectedCustomToothId(null);
 
-                        // Inicializa estados temporários com dados consolidados existentes
                         const currentTooth = teeth[toothNumber];
                         setTempStatus(currentTooth?.status || "SAUDAVEL");
                         setTempNotes(currentTooth?.notes || "");
@@ -357,7 +353,6 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap w-full sm:w-auto">
-                    {/* Indicador de Auto-Save em Tempo Real */}
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-[11px] font-bold text-slate-500 shadow-xs shrink-0 select-none">
                         {isPending ? (
                             <>
@@ -416,7 +411,6 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                     setSelectedCustomToothId(id);
                     setSelectedTooth(null);
 
-                    // Inicializa estados temporários ao clicar na lista especial
                     const ct = customTeeth.find(x => x.id === id);
                     setTempStatus(ct?.status || "SAUDAVEL");
                     setTempNotes(ct?.notes || "");

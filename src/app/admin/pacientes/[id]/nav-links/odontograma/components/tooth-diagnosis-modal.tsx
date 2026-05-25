@@ -31,7 +31,6 @@ export function ToothDiagnosisModal({
     onOpenChange,
     selectedTooth,
     selectedCustomToothId,
-    customTeeth,
     currentSelectedStatus,
     currentSelectedNotes,
     customDescription,
