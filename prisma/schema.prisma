@@ -94,6 +94,7 @@ model Patient {
   anamneses    Anamnese[]
   odontogram   Odontogram?
   appointments Appointment[]
+  trabalhos    TrabalhoProtetico[]
 }
 
 model PatientHistory {
@@ -230,4 +231,33 @@ enum AppointmentStatus {
   CONFIRMADO
   CANCELADO
   REALIZADO
+}
+
+enum StatusTrabalho {
+  EM_ANDAMENTO
+  PRONTO
+  FINALIZADO
+}
+
+model TrabalhoProtetico {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  pacienteId       String?        @map("paciente_id") @db.ObjectId
+  paciente         Patient?       @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  nomePaciente     String         @map("nome_paciente")
+  cpfPaciente      String?        @map("cpf_paciente")
+  laboratorio      String         @map("laboratorio")
+  nomeTrabalho     String         @map("nome_trabalho")
+  descricao        String         @map("descricao")
+  status           StatusTrabalho @default(EM_ANDAMENTO)
+  dataEnvio        DateTime       @map("data_envio")
+  previsaoRetorno  DateTime?      @map("previsao_retorno")
+  dataRecebimento  DateTime?      @map("data_recebimento")
+  dentesEnvolvidos String?        @map("dentes_envolvidos")
+  valor            Float?         @map("valor")
+  observacoes      String?        @map("observacoes")
+  createdBy        String         @map("created_by") @db.ObjectId
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  @@map("trabalhos_proteticos")
 }
