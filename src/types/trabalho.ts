@@ -5,7 +5,7 @@ export type Trabalho = {
     pacienteId?: string | null;
     laboratorio: string;
     nomeTrabalho: string;
-    descricao: string;
+    descricao?: string | null;
     status: "EM_ANDAMENTO" | "PRONTO" | "FINALIZADO";
     dataEnvio: string;
     previsaoRetorno?: string | null;

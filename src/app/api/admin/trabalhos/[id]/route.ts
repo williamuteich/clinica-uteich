@@ -40,7 +40,7 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const data = validated.data;
+        const { pacienteId, ...rest } = validated.data;
 
         const original = await prisma.trabalhoProtetico.findUnique({
             where: { id },
@@ -54,19 +54,23 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
         const trabalho = await prisma.$transaction(async (tx) => {
             const updated = await tx.trabalhoProtetico.update({
                 where: { id },
-                data,
+                data: {
+                    ...rest,
+                    pacienteId: pacienteId || null,
+                    descricao: rest.descricao ?? "",
+                } as any,
             });
 
-            if (data.pacienteId && original.status !== data.status) {
+            if (pacienteId && original.status !== rest.status) {
                 let statusLabel = "";
-                if (data.status === "EM_ANDAMENTO") statusLabel = "Em Andamento";
-                else if (data.status === "PRONTO") statusLabel = "Pronto para Instalação";
-                else if (data.status === "FINALIZADO") statusLabel = "Finalizado / Instalado";
+                if (rest.status === "EM_ANDAMENTO") statusLabel = "Em Andamento";
+                else if (rest.status === "PRONTO") statusLabel = "Pronto para Instalação";
+                else if (rest.status === "FINALIZADO") statusLabel = "Finalizado / Instalado";
 
                 await tx.patientHistory.create({
                     data: {
-                        patientId: data.pacienteId,
-                        description: `Trabalho protético "${data.nomeTrabalho}" alterou status para: ${statusLabel}.`,
+                        patientId: pacienteId,
+                        description: `Trabalho protético "${rest.nomeTrabalho}" alterou status para: ${statusLabel}.`,
                     },
                 });
             }

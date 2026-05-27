@@ -67,21 +67,23 @@ async function _POST(request: Request) {
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const data = validated.data;
+        const { pacienteId, ...rest } = validated.data;
 
         const trabalho = await prisma.$transaction(async (tx) => {
             const created = await tx.trabalhoProtetico.create({
                 data: {
-                    ...data,
+                    ...rest,
+                    pacienteId: pacienteId || null,
+                    descricao: rest.descricao ?? "",
                     createdBy: session.user.id,
-                },
+                } as any,
             });
 
-            if (data.pacienteId) {
+            if (pacienteId) {
                 await tx.patientHistory.create({
                     data: {
-                        patientId: data.pacienteId,
-                        description: `Trabalho protético registrado: "${data.nomeTrabalho}" enviado para o laboratório "${data.laboratorio}".`,
+                        patientId: pacienteId,
+                        description: `Trabalho protético registrado: "${rest.nomeTrabalho}" enviado para o laboratório "${rest.laboratorio}".`,
                     },
                 });
             }

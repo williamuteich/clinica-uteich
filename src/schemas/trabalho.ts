@@ -6,7 +6,7 @@ export const trabalhoSchema = z.object({
   cpfPaciente: z.string().optional().nullable(),
   laboratorio: z.string().min(2, "Nome do laboratório é obrigatório"),
   nomeTrabalho: z.string().min(2, "Nome do trabalho é obrigatório"),
-  descricao: z.string().min(2, "Descrição do trabalho é obrigatória"),
+  descricao: z.string().optional().nullable(),
   status: z.enum(["EM_ANDAMENTO", "PRONTO", "FINALIZADO"]).default("EM_ANDAMENTO"),
   dataEnvio: z.string().transform((val) => new Date(val)),
   previsaoRetorno: z.string().optional().nullable().transform((val) => val ? new Date(val) : null),

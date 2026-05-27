@@ -146,7 +146,7 @@ export function TrabalhoFormDialog({
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Dados do Paciente</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-semibold text-slate-500">CPF do Paciente (busca automática)</Label>
+                                <Label className="text-xs font-semibold text-slate-500">CPF do Paciente <span className="text-slate-400 font-normal">(opcional)</span></Label>
                                 <div className="relative">
                                     <Input
                                         value={cpf}
@@ -199,12 +199,11 @@ export function TrabalhoFormDialog({
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Descrição *</Label>
+                            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Descrição <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                             <textarea
                                 name="descricao"
                                 defaultValue={trabalho?.descricao ?? ""}
                                 placeholder="Detalhes técnicos (ex: cor A2, ombro cerâmico)..."
-                                required
                                 className="flex min-h-[70px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             />
                         </div>
@@ -225,35 +224,37 @@ export function TrabalhoFormDialog({
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dentes Envolvidos</Label>
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dentes <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                                 <Input name="dentesEnvolvidos" defaultValue={trabalho?.dentesEnvolvidos ?? ""} placeholder="Ex: 11, 21" className="h-10 bg-white" />
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Valor Cobrado (R$)</Label>
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Valor R$ <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                                 <Input name="valor" type="number" step="0.01" min="0" defaultValue={trabalho?.valor ?? ""} placeholder="0,00" className="h-10 bg-white" />
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className={`grid grid-cols-1 gap-3 ${isEdit ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data de Envio *</Label>
                                 <Input name="dataEnvio" type="date" defaultValue={toDateInputValue(trabalho?.dataEnvio) || new Date().toISOString().slice(0, 10)} required className="h-10 bg-white" />
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Previsão Retorno</Label>
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Previsão Retorno <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                                 <Input name="previsaoRetorno" type="date" defaultValue={toDateInputValue(trabalho?.previsaoRetorno)} className="h-10 bg-white" />
                             </div>
 
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data Recebimento</Label>
-                                <Input name="dataRecebimento" type="date" defaultValue={toDateInputValue(trabalho?.dataRecebimento)} className="h-10 bg-white" />
-                            </div>
+                            {isEdit && (
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data Recebimento</Label>
+                                    <Input name="dataRecebimento" type="date" defaultValue={toDateInputValue(trabalho?.dataRecebimento)} className="h-10 bg-white" />
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Observações Internas</Label>
+                            <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Observações <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                             <textarea
                                 name="observacoes"
                                 defaultValue={trabalho?.observacoes ?? ""}
