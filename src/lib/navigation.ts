@@ -1,15 +1,9 @@
-import { LayoutDashboard, ShieldCheck, Key, CalendarDays, History, Users, ClipboardList } from "lucide-react";
+import { ShieldCheck, Key, CalendarDays, History, Users, ClipboardList } from "lucide-react";
 import { NavConfig } from "../types/dashboard/navigation";
 
 export type NavSection = "CLÍNICA" | "ADMINISTRAÇÃO" | "SISTEMA";
 
 export const ADMIN_NAVIGATION: NavConfig[] = [
-    {
-        title: "Dashboard",
-        href: "/admin",
-        icon: LayoutDashboard,
-        section: "CLÍNICA"
-    },
     {
         title: "Agenda",
         href: "/admin/agenda",
