@@ -36,7 +36,7 @@ const PROCEDURES = [
 
 const generateTimeSlots = () => {
   const slots = [];
-  let startMinutes = 8 * 60 + 30;
+  let startMinutes = 10 * 60;
   const endMinutes = 19 * 60 + 30;
 
   while (startMinutes <= endMinutes) {

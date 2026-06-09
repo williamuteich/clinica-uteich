@@ -76,11 +76,11 @@ export async function POST(request: Request) {
 
     const [hours, minutes] = time.split(":").map(Number);
     const timeMinutes = hours * 60 + minutes;
-    const minTime = 8 * 60 + 30;
+    const minTime = 10 * 60;
     const maxTime = 19 * 60 + 30;
 
     if (timeMinutes < minTime || timeMinutes > maxTime) {
-      return NextResponse.json({ error: "Horário de atendimento é das 08:30 às 19:30" }, { status: 400 });
+      return NextResponse.json({ error: "Horário de atendimento é das 10:00 às 19:30" }, { status: 400 });
     }
 
     const startDate = new Date(`${date}T00:00:00-03:00`);
