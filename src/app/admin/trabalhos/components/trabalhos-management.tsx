@@ -16,7 +16,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
 import { maskCPF } from "@/src/lib/masks";
 import Link from "next/link";
-import { Trabalho, TrabalhosResponse, DashboardStats } from "@/src/types/trabalho";
+import { Trabalho, TrabalhosResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
 import { TrabalhoFormDialog } from "./trabalho-form-dialog";
 
 const STATUS_CONFIG = {

@@ -1,7 +1,7 @@
 "use server";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { Trabalho, TrabalhosResponse, DashboardStats } from "@/src/types/trabalho";
+import { Trabalho, TrabalhosResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
 
 const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 

@@ -11,7 +11,7 @@ import { Loader2, Plus, ClipboardList } from "lucide-react";
 import { createTrabalho, updateTrabalho } from "@/src/services/trabalhos";
 import { toast } from "react-toastify";
 import { maskCPF } from "@/src/lib/masks";
-import { Trabalho, PatientMatch } from "@/src/types/trabalho";
+import { Trabalho, PatientMatch } from "@/src/types/dashboard/trabalho";
 
 function toDateInputValue(dateStr?: string | null) {
     if (!dateStr) return "";

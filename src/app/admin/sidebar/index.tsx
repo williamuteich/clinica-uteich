@@ -1,8 +1,11 @@
+import { getServerSession } from "next-auth";
 import { SidebarContent } from "../components/sidebar-content";
-import { requireAdminContext } from "@/src/lib/auth-helpers-server";
+import { auth } from "@/src/lib/auth-config";
 
 export async function Sidebar() {
-    const session = await requireAdminContext();
+    const session = await getServerSession(auth);
+    if (!session) return null;
+
     return (
         <aside className="w-64 bg-white hidden lg:flex flex-col h-full shrink-0 relative transition-transform">
             <SidebarContent session={session} />
