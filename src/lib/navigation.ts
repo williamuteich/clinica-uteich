@@ -19,7 +19,7 @@ export const ADMIN_NAVIGATION: NavConfig[] = [
         section: "CLÍNICA"
     },
     {
-        title: "Trabalhos Protéticos",
+        title: "Lab / Envios",
         href: "/admin/trabalhos",
         icon: ClipboardList,
         resource: "pacientes",

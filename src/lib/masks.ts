@@ -42,3 +42,16 @@ export function phoneToWhatsapp(phoneStr: string): string {
     }
     return clean;
 }
+
+/** Formata valor monetário: R$ 1.234,56 */
+export function maskCurrency(value: string | number): string {
+    const raw = String(value).replace(/\D/g, "");
+    if (!raw) return "";
+    const num = (parseInt(raw, 10) / 100).toFixed(2);
+    return num.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+/** Converte "1.234,56" de volta para float */
+export function rawCurrency(masked: string): number {
+    return parseFloat(masked.replace(/\./g, "").replace(",", ".")) || 0;
+}

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import CalendarGrid, { Appointment } from "./calendar-grid";
 import { CalendarDays, Loader2 } from "lucide-react";
+import { Appointment } from "@/src/types/dashboard/agendamento";
+import CalendarGrid from "./calendar-grid";
 
 export default function AgendaContainer() {
     const [viewDate, setViewDate] = useState(new Date());

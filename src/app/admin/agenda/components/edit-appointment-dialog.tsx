@@ -10,7 +10,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { ProcedureSelect, PROCEDURES } from "./procedure-select";
-import type { Appointment } from "./calendar-grid";
+import { Appointment } from "@/src/types/dashboard/agendamento";
 
 interface EditAppointmentDialogProps {
     open: boolean;

@@ -62,10 +62,7 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
             });
 
             if (pacienteId && original.status !== rest.status) {
-                let statusLabel = "";
-                if (rest.status === "EM_ANDAMENTO") statusLabel = "Em Andamento";
-                else if (rest.status === "PRONTO") statusLabel = "Pronto para Instalação";
-                else if (rest.status === "FINALIZADO") statusLabel = "Finalizado / Instalado";
+                let statusLabel = rest.status === "PENDENTE" ? "Pendente" : "Concluído";
 
                 await tx.patientHistory.create({
                     data: {

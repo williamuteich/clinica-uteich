@@ -7,10 +7,10 @@ import { Label } from "@/components/ui/label";
 import {
     Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
-import { Loader2, Plus, ClipboardList } from "lucide-react";
+import { Loader2, Plus, FlaskConical } from "lucide-react";
 import { createTrabalho, updateTrabalho } from "@/src/services/trabalhos";
 import { toast } from "react-toastify";
-import { maskCPF } from "@/src/lib/masks";
+import { maskCPF, maskCurrency, rawCurrency } from "@/src/lib/masks";
 import { Trabalho, PatientMatch } from "@/src/types/dashboard/trabalho";
 
 function toDateInputValue(dateStr?: string | null) {
@@ -36,6 +36,11 @@ export function TrabalhoFormDialog({
     const [searchingPatient, setSearchingPatient] = useState(false);
     const [patientSearched, setPatientSearched] = useState(false);
 
+    const initialValor = trabalho?.valor
+        ? maskCurrency(String(Math.round(trabalho.valor * 100)))
+        : "";
+    const [valorDisplay, setValorDisplay] = useState(initialValor);
+
     const isEdit = !!trabalho;
 
     const reset = () => {
@@ -43,6 +48,7 @@ export function TrabalhoFormDialog({
         setCpf(trabalho?.cpfPaciente ?? "");
         setPatientMatch(null);
         setPatientSearched(false);
+        setValorDisplay(initialValor);
     };
 
     const searchPatient = useCallback(async (cpfValue: string) => {
@@ -50,11 +56,12 @@ export function TrabalhoFormDialog({
         if (clean.length !== 11) return;
         setSearchingPatient(true);
         try {
-            const res = await fetch(`/api/admin/pacientes/busca-cpf?cpf=${clean}`);
+            const res = await fetch(`/api/admin/pacientes?cpf=${clean}&limit=1`);
             const data = await res.json();
             setPatientSearched(true);
-            if (data.found) {
-                setPatientMatch({ id: data.patient.id, name: data.patient.name, cpf: data.patient.cpf });
+            const patient = data.pacientes?.[0] ?? null;
+            if (patient) {
+                setPatientMatch({ id: patient.id, name: patient.name, cpf: patient.cpf });
             } else {
                 setPatientMatch(null);
             }
@@ -75,6 +82,10 @@ export function TrabalhoFormDialog({
         }
     };
 
+    const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setValorDisplay(maskCurrency(e.target.value));
+    };
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
@@ -87,12 +98,10 @@ export function TrabalhoFormDialog({
             laboratorio: fd.get("laboratorio") as string,
             nomeTrabalho: fd.get("nomeTrabalho") as string,
             descricao: fd.get("descricao") as string,
-            status: fd.get("status") as Trabalho["status"],
+            status: (isEdit ? fd.get("status") as Trabalho["status"] : "PENDENTE"),
             dataEnvio: fd.get("dataEnvio") as string,
-            previsaoRetorno: (fd.get("previsaoRetorno") as string) || null,
-            dataRecebimento: (fd.get("dataRecebimento") as string) || null,
             dentesEnvolvidos: (fd.get("dentesEnvolvidos") as string) || null,
-            valor: fd.get("valor") ? Number(fd.get("valor")) : null,
+            valor: valorDisplay ? rawCurrency(valorDisplay) : null,
             observacoes: (fd.get("observacoes") as string) || null,
         };
 
@@ -127,8 +136,8 @@ export function TrabalhoFormDialog({
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-slate-900 font-bold">
-                        <ClipboardList className="h-5 w-5 text-blue-600" />
-                        {isEdit ? "Editar Trabalho Protético" : "Registrar Novo Trabalho"}
+                        <FlaskConical className="h-5 w-5 text-blue-600" />
+                        {isEdit ? "Editar Trabalho" : "Novo Envio ao Laboratório"}
                     </DialogTitle>
                     <DialogDescription className="text-xs text-slate-400">
                         {isEdit ? "Edite as informações do trabalho." : "Preencha as informações do trabalho enviado ao laboratório."}
@@ -137,7 +146,7 @@ export function TrabalhoFormDialog({
 
                 <form key={formKey} onSubmit={handleSubmit} className="space-y-4 py-2">
                     {error && (
-                        <div className="p-3 text-xs font-semibold text-red-650 bg-red-50 border border-red-100 rounded-lg">
+                        <div className="p-3 text-xs font-semibold text-red-600 bg-red-50 border border-red-100 rounded-lg">
                             {error}
                         </div>
                     )}
@@ -146,14 +155,13 @@ export function TrabalhoFormDialog({
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Dados do Paciente</p>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-semibold text-slate-500">CPF do Paciente <span className="text-slate-400 font-normal">(opcional)</span></Label>
+                                <Label className="text-xs font-semibold text-slate-500">CPF <span className="text-slate-400 font-normal">(opcional)</span></Label>
                                 <div className="relative">
                                     <Input
+                                        placeholder="000.000.000-00"
+                                        className="h-10 bg-white w-full"
                                         value={cpf}
                                         onChange={handleCpfChange}
-                                        placeholder="000.000.000-00"
-                                        maxLength={14}
-                                        className="h-10 bg-white"
                                     />
                                     {searchingPatient && (
                                         <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-slate-400" />
@@ -178,7 +186,7 @@ export function TrabalhoFormDialog({
                                     defaultValue={patientMatch?.name ?? trabalho?.nomePaciente ?? ""}
                                     placeholder="Nome completo"
                                     required
-                                    className="h-10 bg-white"
+                                    className="h-10 bg-white w-full"
                                     readOnly={!!patientMatch}
                                 />
                             </div>
@@ -189,12 +197,12 @@ export function TrabalhoFormDialog({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Laboratório Destino *</Label>
-                                <Input name="laboratorio" defaultValue={trabalho?.laboratorio ?? ""} placeholder="Ex: Lab Uteich" required className="h-10 bg-white" />
+                                <Input name="laboratorio" defaultValue={trabalho?.laboratorio ?? ""} placeholder="Ex: Lab Uteich" required className="h-10 bg-white w-full" />
                             </div>
 
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome do Trabalho *</Label>
-                                <Input name="nomeTrabalho" defaultValue={trabalho?.nomeTrabalho ?? ""} placeholder="Ex: Prótese dente 11" required className="h-10 bg-white" />
+                                <Input name="nomeTrabalho" defaultValue={trabalho?.nomeTrabalho ?? ""} placeholder="Ex: Prótese dente 11" required className="h-10 bg-white w-full" />
                             </div>
                         </div>
 
@@ -208,49 +216,50 @@ export function TrabalhoFormDialog({
                             />
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {isEdit && (
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status *</Label>
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</Label>
                                 <select
                                     name="status"
-                                    defaultValue={trabalho?.status ?? "EM_ANDAMENTO"}
-                                    required
+                                    defaultValue={trabalho.status}
                                     className="w-full h-10 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="EM_ANDAMENTO">Em Andamento</option>
-                                    <option value="PRONTO">Pronto</option>
-                                    <option value="FINALIZADO">Finalizado</option>
+                                    <option value="PENDENTE">Pendente</option>
+                                    <option value="CONCLUIDO">Concluído</option>
                                 </select>
+                            </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data de Envio *</Label>
+                                <Input
+                                    name="dataEnvio"
+                                    type="date"
+                                    defaultValue={toDateInputValue(trabalho?.dataEnvio) || new Date().toISOString().slice(0, 10)}
+                                    required
+                                    className="h-10 bg-white w-full"
+                                />
                             </div>
 
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dentes <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
-                                <Input name="dentesEnvolvidos" defaultValue={trabalho?.dentesEnvolvidos ?? ""} placeholder="Ex: 11, 21" className="h-10 bg-white" />
+                                <Input name="dentesEnvolvidos" defaultValue={trabalho?.dentesEnvolvidos ?? ""} placeholder="Ex: 11, 21" className="h-10 bg-white w-full" />
                             </div>
 
                             <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Valor R$ <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
-                                <Input name="valor" type="number" step="0.01" min="0" defaultValue={trabalho?.valor ?? ""} placeholder="0,00" className="h-10 bg-white" />
-                            </div>
-                        </div>
-
-                        <div className={`grid grid-cols-1 gap-3 ${isEdit ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}>
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data de Envio *</Label>
-                                <Input name="dataEnvio" type="date" defaultValue={toDateInputValue(trabalho?.dataEnvio) || new Date().toISOString().slice(0, 10)} required className="h-10 bg-white" />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Previsão Retorno <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
-                                <Input name="previsaoRetorno" type="date" defaultValue={toDateInputValue(trabalho?.previsaoRetorno)} className="h-10 bg-white" />
-                            </div>
-
-                            {isEdit && (
-                                <div className="space-y-1.5">
-                                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data Recebimento</Label>
-                                    <Input name="dataRecebimento" type="date" defaultValue={toDateInputValue(trabalho?.dataRecebimento)} className="h-10 bg-white" />
+                                <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Valor <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-slate-400">R$</span>
+                                    <Input
+                                        className="h-10 bg-white w-full pl-8"
+                                        placeholder="0,00"
+                                        value={valorDisplay}
+                                        onChange={handleValorChange}
+                                        inputMode="numeric"
+                                    />
                                 </div>
-                            )}
+                            </div>
                         </div>
 
                         <div className="space-y-1.5">

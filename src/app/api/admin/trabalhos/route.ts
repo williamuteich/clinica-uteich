@@ -16,22 +16,15 @@ export async function GET(request: Request) {
     const limit = Number(searchParams.get("limit") || "20");
     const status = searchParams.get("status") || undefined;
     const query = searchParams.get("query") || "";
-    const atrasado = searchParams.get("atrasado") === "true";
 
     const where: any = {};
-    if (status) {
-        where.status = status;
-    }
+    if (status) where.status = status;
     if (query) {
         where.OR = [
             { nomePaciente: { contains: query, mode: "insensitive" } },
             { laboratorio: { contains: query, mode: "insensitive" } },
             { nomeTrabalho: { contains: query, mode: "insensitive" } },
         ];
-    }
-    if (atrasado) {
-        where.status = "EM_ANDAMENTO";
-        where.previsaoRetorno = { lt: new Date() };
     }
 
     const [trabalhos, total] = await Promise.all([

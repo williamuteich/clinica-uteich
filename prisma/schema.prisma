@@ -234,9 +234,8 @@ enum AppointmentStatus {
 }
 
 enum StatusTrabalho {
-  EM_ANDAMENTO
-  PRONTO
-  FINALIZADO
+  PENDENTE
+  CONCLUIDO
 }
 
 model TrabalhoProtetico {
@@ -248,10 +247,8 @@ model TrabalhoProtetico {
   laboratorio      String         @map("laboratorio")
   nomeTrabalho     String         @map("nome_trabalho")
   descricao        String         @map("descricao")
-  status           StatusTrabalho @default(EM_ANDAMENTO)
+  status           StatusTrabalho @default(PENDENTE)
   dataEnvio        DateTime       @map("data_envio")
-  previsaoRetorno  DateTime?      @map("previsao_retorno")
-  dataRecebimento  DateTime?      @map("data_recebimento")
   dentesEnvolvidos String?        @map("dentes_envolvidos")
   valor            Float?         @map("valor")
   observacoes      String?        @map("observacoes")

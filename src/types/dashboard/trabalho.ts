@@ -6,10 +6,8 @@ export type Trabalho = {
     laboratorio: string;
     nomeTrabalho: string;
     descricao?: string | null;
-    status: "EM_ANDAMENTO" | "PRONTO" | "FINALIZADO";
+    status: "PENDENTE" | "CONCLUIDO";
     dataEnvio: string;
-    previsaoRetorno?: string | null;
-    dataRecebimento?: string | null;
     dentesEnvolvidos?: string | null;
     valor?: number | null;
     observacoes?: string | null;
@@ -24,9 +22,8 @@ export type TrabalhosResponse = {
 };
 
 export type DashboardStats = {
-    ativos: number;
-    atrasados: number;
-    recebidosHoje: number;
+    pendentes: number;
+    concluidos: number;
 };
 
 export type PatientMatch = {

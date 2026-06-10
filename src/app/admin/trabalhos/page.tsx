@@ -20,7 +20,7 @@ async function TrabalhosContent() {
     return (
         <TrabalhosManagement
             initialData={initialData ?? { trabalhos: [], total: 0, page: 1, limit: 20, totalPages: 0 }}
-            stats={stats ?? { ativos: 0, atrasados: 0, recebidosHoje: 0 }}
+        stats={stats ?? { pendentes: 0, concluidos: 0 }}
         />
     );
 }
@@ -50,11 +50,11 @@ export default async function TrabalhosPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                     <ClipboardList className="h-8 w-8 text-blue-600" />
-                    Trabalhos Protéticos
+                    Lab / Envios
                 </h1>
                 <p className="text-muted-foreground mt-2">
-                    Controle de prazos, entregas e status de trabalhos protéticos enviados a laboratórios.
-                </p>
+                        Gerencie trabalhos enviados a laboratórios parceiros.
+                    </p>
             </div>
 
             <Suspense fallback={<TrabalhosSkeleton />}>
