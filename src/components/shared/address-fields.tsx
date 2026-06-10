@@ -6,22 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { maskCEP } from "@/src/lib/masks";
 import { fetchCep } from "@/src/lib/cep";
+import { AddressValues, AddressFieldsProps } from "@/src/types/dashboard/address";
 
-export interface AddressValues {
-    zipCode: string;
-    state: string;
-    city: string;
-    street: string;
-    number: string;
-    complement: string;
-}
-
-interface AddressFieldsProps {
-    values: AddressValues;
-    onChange: (updated: Partial<AddressValues>) => void;
-    required?: boolean;
-    className?: string;
-}
+export type { AddressValues };
 
 export function AddressFields({ values, onChange, required = true, className }: AddressFieldsProps) {
     const [cepLoading, setCepLoading] = useState(false);

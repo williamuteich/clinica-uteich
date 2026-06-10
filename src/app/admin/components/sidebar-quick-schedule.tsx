@@ -3,13 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { CalendarDays, Search, X, UserCheck, UserX, Loader2, Plus, ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface PatientFound {
-    id: string;
-    name: string;
-    cpf: string;
-    phone: string;
-}
+import { PatientFound } from "@/src/types/dashboard/components";
 
 function formatCPF(value: string) {
     const digits = value.replace(/\D/g, "").slice(0, 11);

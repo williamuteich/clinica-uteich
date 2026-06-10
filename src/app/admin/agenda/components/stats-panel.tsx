@@ -1,10 +1,5 @@
 import { Calendar, CheckCircle2, Clock, AlertCircle } from "lucide-react";
-
-interface StatsPanelProps {
-    total: number;
-    confirmed: number;
-    pending: number;
-}
+import { StatsPanelProps } from "@/src/types/dashboard/components";
 
 export default function StatsPanel({ total, confirmed, pending }: StatsPanelProps) {
     return (

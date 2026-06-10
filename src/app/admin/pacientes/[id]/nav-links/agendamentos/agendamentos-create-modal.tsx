@@ -7,13 +7,7 @@ import { Loader2 } from "lucide-react";
 import { createAgendamento } from "@/src/services/pacientes";
 import { Appointment, CreateAgendamentoInput } from "@/src/types/dashboard/pacientes";
 import { toast } from "react-toastify";
-
-interface AgendamentoCreateModalProps {
-    patientId: string;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-    onCreated: (appointment: Appointment) => void;
-}
+import { AgendamentoCreateModalProps } from "@/src/types/dashboard/components";
 
 export default function AgendamentoCreateModal({ patientId, open, onOpenChange, onCreated }: AgendamentoCreateModalProps) {
     const [isPending, startTransition] = useTransition();

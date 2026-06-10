@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Stethoscope, Plus, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ToothStatus, ToothInfo } from "@/src/types/dashboard/pacientes";
+import { CustomTooth } from "@/src/types/dashboard/odontograma";
 import { Button } from "@/components/ui/button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -28,13 +29,6 @@ export const statusConfig = {
     RETIDO: { label: "Retido", color: "bg-orange-500", border: "border-orange-500", text: "text-orange-700", bgLight: "bg-orange-50/60", fill: "#f97316", stroke: "#c2410c" },
     OUTRO: { label: "Outro", color: "bg-indigo-500", border: "border-indigo-500", text: "text-indigo-700", bgLight: "bg-indigo-50/60", fill: "#6366f1", stroke: "#4338ca" },
 } satisfies Record<ToothStatus, { label: string; color: string; border: string; text: string; bgLight: string; fill: string; stroke: string }>;
-
-export interface CustomTooth {
-    id: string;
-    description: string;
-    status: ToothStatus;
-    notes: string;
-}
 
 const upperTeethRight = [18, 17, 16, 15, 14, 13, 12, 11];
 const upperTeethLeft = [21, 22, 23, 24, 25, 26, 27, 28];

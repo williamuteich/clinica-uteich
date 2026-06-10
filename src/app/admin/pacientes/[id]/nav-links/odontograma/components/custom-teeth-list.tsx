@@ -2,8 +2,9 @@
 
 import { Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CustomTooth, statusConfig } from "../odontograma-client";
 import { ToothStatus } from "@/src/types/dashboard/pacientes";
+import { CustomTooth } from "@/src/types/dashboard/odontograma";
+import { statusConfig } from "../odontograma-client";
 
 interface CustomTeethListProps {
     customTeeth: CustomTooth[];

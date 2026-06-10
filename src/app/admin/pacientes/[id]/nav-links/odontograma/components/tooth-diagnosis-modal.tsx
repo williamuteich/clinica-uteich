@@ -8,23 +8,8 @@ import { cn } from "@/lib/utils";
 import { ToothStatus } from "@/src/types/dashboard/pacientes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { statusConfig, CustomTooth } from "../odontograma-client";
-
-interface ToothDiagnosisModalProps {
-    isOpen: boolean;
-    onOpenChange: (open: boolean) => void;
-    selectedTooth: number | null;
-    selectedCustomToothId: string | null;
-    customTeeth: CustomTooth[];
-    currentSelectedStatus: ToothStatus;
-    currentSelectedNotes: string;
-    customDescription: string;
-    quickNotes: string[];
-    onCustomDescriptionUpdate: (description: string) => void;
-    onToothStatusUpdate: (status: ToothStatus) => void;
-    onToothNoteUpdate: (notes: string) => void;
-    onConfirm: () => void;
-}
+import { statusConfig } from "../odontograma-client";
+import { ToothDiagnosisModalProps } from "@/src/types/dashboard/components";
 
 export function ToothDiagnosisModal({
     isOpen,

@@ -1,9 +1,4 @@
-interface TableSkeletonProps {
-    rowsCount?: number;
-    colsCount?: number;
-    hasHeaderButton?: boolean;
-    buttonWidthClass?: string;
-}
+import { TableSkeletonProps } from "@/src/types/dashboard/components";
 
 export function TableSkeleton({
     rowsCount = 5,

@@ -27,3 +27,10 @@ export interface IOdontogram {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+export interface CustomTooth {
+    id: string;
+    description: string;
+    status: ToothStatus;
+    notes: string;
+}

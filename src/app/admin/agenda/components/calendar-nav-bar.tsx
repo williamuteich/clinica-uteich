@@ -1,15 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-
-interface CalendarNavBarProps {
-    monthName: string;
-    isCurrentMonth: boolean;
-    onPrevMonth: () => void;
-    onNextMonth: () => void;
-    onGoToday: () => void;
-    onAddThisMonth: () => void;
-}
+import { CalendarNavBarProps } from "@/src/types/dashboard/components";
 
 export function CalendarNavBar({
     monthName,
