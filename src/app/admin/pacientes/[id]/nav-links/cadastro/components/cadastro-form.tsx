@@ -20,9 +20,9 @@ export default function CadastroForm({ paciente }: { paciente: Paciente }) {
 
     const [personalFields, setPersonalFields] = useState({
         name: paciente.name || "",
-        cpf: paciente.cpf || "",
+        cpf: maskCPF(paciente.cpf || ""),
         birthDate: paciente.birthDate ? new Date(paciente.birthDate).toISOString().split("T")[0] : "",
-        phone: paciente.phone || "",
+        phone: maskPhone(paciente.phone || ""),
         active: paciente.active ?? true,
     });
 

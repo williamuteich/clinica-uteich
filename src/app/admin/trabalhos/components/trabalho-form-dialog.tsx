@@ -174,7 +174,7 @@ export function TrabalhoFormDialog({
                                 )}
                                 {patientSearched && !patientMatch && (
                                     <p className="text-xs text-amber-600">
-                                        ⚠ Não cadastrado. Informe o nome abaixo.
+                                        ⚠ Não cadastrado.
                                     </p>
                                 )}
                             </div>

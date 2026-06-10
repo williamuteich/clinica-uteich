@@ -79,7 +79,7 @@ model Patient {
   name       String
   cpf        String   @unique
   birthDate  DateTime
-  phone      String
+  phone      String   @unique
   zipCode    String
   state      String
   city       String

@@ -26,7 +26,6 @@ const EMPTY_ADDRESS: AddressValues = {
 export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogProps) {
     const [open, setOpen] = useState(false);
     const [isPending, startTransition] = useTransition();
-    const [error, setError] = useState("");
 
     const [cpf, setCpf] = useState("");
     const [phone, setPhone] = useState("");
@@ -36,12 +35,10 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
         setCpf("");
         setPhone("");
         setAddress(EMPTY_ADDRESS);
-        setError("");
     };
 
     const handleAction = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setError("");
 
         const formData = new FormData(e.currentTarget);
 
@@ -68,7 +65,6 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
                 resetForm();
                 onCreateSuccess();
             } else {
-                setError(res.error || "Erro ao cadastrar paciente.");
                 toast.error(res.error || "Erro ao cadastrar paciente.");
             }
         });
@@ -93,11 +89,6 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
                 </DialogHeader>
 
                 <form onSubmit={handleAction} className="space-y-5 py-3">
-                    {error && (
-                        <div className="p-3 text-xs font-semibold text-red-650 bg-red-50 border border-red-100 rounded-lg">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 space-y-1.5">

@@ -11,7 +11,7 @@ const getId = async (ctx: Ctx) => (await ctx.params).id;
 
 const ENCRYPTED_FIELDS = [
     { name: "cpf", action: encryptDeterministic, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "phone", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
+    { name: "phone", action: encryptDeterministic, shouldProcess: (val: string) => !val.includes(":") },
     { name: "number", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
     { name: "complement", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
 ] as const;
@@ -76,6 +76,56 @@ async function _PUT(request: Request, ctx: Ctx) {
 
         const { birthDate, ...rest } = validated.data;
 
+        // Verificar se CPF já existe (excluindo o próprio paciente)
+        if (rest.cpf) {
+            const encryptedCpf = await encryptDeterministic(rest.cpf);
+            const existingCpf = await prisma.patient.findFirst({ where: { cpf: encryptedCpf, NOT: { id } } });
+            if (existingCpf) {
+                return NextResponse.json({ error: "CPF já cadastrado" }, { status: 400 });
+            }
+        }
+
+        // Verificar se telefone já existe (excluindo o próprio paciente)
+        if (rest.phone) {
+            const cleanPhone = rest.phone.replace(/\D/g, "");
+            const encryptedPhone = await encryptDeterministic(rest.phone);
+            let phoneExists = false;
+
+            const existingPhone = await prisma.patient.findFirst({
+                where: {
+                    phone: encryptedPhone,
+                    NOT: { id },
+                },
+            });
+
+            if (existingPhone) {
+                phoneExists = true;
+            } else {
+                const patients = await prisma.patient.findMany({
+                    where: {
+                        NOT: { id },
+                    },
+                    select: { id: true, phone: true },
+                });
+                for (const p of patients) {
+                    try {
+                        const decrypted = await decrypt(p.phone);
+                        const cleanDbPhone = decrypted.replace(/\D/g, "");
+                        if (cleanDbPhone === cleanPhone) {
+                            phoneExists = true;
+                            break;
+                        }
+                    } catch (e) {
+                        console.error(`Erro ao descriptografar telefone do paciente ${p.id}:`, e);
+                    }
+                }
+            }
+
+            if (phoneExists) {
+                return NextResponse.json({ error: "Telefone já cadastrado" }, { status: 400 });
+            }
+        }
+
         const encryptedBody = await encryptData(rest);
 
         const paciente = await prisma.patient.update({
@@ -90,7 +140,7 @@ async function _PUT(request: Request, ctx: Ctx) {
 
         return NextResponse.json(await decryptData(paciente));
     } catch (error: any) {
-        if (error.code === "P2002") return NextResponse.json({ error: "CPF já cadastrado" }, { status: 400 });
+        if (error.code === "P2002") return NextResponse.json({ error: "Erro ao atualizar paciente" }, { status: 400 });
         if (error.code === "P2025") return NextResponse.json({ error: "Paciente não encontrado" }, { status: 404 });
         console.error("Erro ao atualizar paciente:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
