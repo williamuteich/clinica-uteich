@@ -215,7 +215,7 @@ export default function CalendarGrid({
                                                 role="button"
                                                 tabIndex={0}
                                                 className={cn(
-                                                    "w-full text-left p-1 rounded-lg border text-[10px] font-bold transition-all truncate flex items-center gap-1 shadow-2xs hover:scale-[1.02]",
+                                                    "w-full text-left p-1 py-0.5 border text-[10px] font-bold transition-all truncate flex items-center gap-1 shadow-2xs hover:scale-[1.02]",
                                                     theme.bg
                                                 )}
                                             >
