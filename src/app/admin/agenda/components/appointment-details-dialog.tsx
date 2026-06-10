@@ -9,7 +9,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { phoneToWhatsapp } from "@/src/lib/masks";
-import type { Appointment } from "./calendar-grid";
+import { Appointment } from "@/src/types/dashboard/agendamento";
 
 const STATUS_THEMES = {
     Confirmado: {

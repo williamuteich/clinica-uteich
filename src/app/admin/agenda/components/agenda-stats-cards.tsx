@@ -1,16 +1,7 @@
 "use client";
 
+import { AgendaStatsCardsProps } from "@/src/types/dashboard/agendamento";
 import { Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
-
-interface AgendaStatsCardsProps {
-    monthName: string;
-    stats: {
-        total: number;
-        confirmados: number;
-        pendentes: number;
-        cancelados: number;
-    };
-}
 
 export function AgendaStatsCards({ monthName, stats }: AgendaStatsCardsProps) {
     return (
@@ -23,7 +14,7 @@ export function AgendaStatsCards({ monthName, stats }: AgendaStatsCardsProps) {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                         No Mês ({monthName})
                     </p>
-                    <p className="text-xl font-black text-slate-800 mt-0.5">{stats.total} Agendados</p>
+                    <p className="text-sm font-black text-slate-800 mt-0.5">{stats.total} Agendados</p>
                 </div>
             </div>
 
@@ -33,7 +24,7 @@ export function AgendaStatsCards({ monthName, stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confirmados</p>
-                    <p className="text-xl font-black text-emerald-700 mt-0.5">{stats.confirmados}</p>
+                    <p className="text-sm font-black text-emerald-700 mt-0.5">{stats.confirmados}</p>
                 </div>
             </div>
 
@@ -43,7 +34,7 @@ export function AgendaStatsCards({ monthName, stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aguardando Resposta</p>
-                    <p className="text-xl font-black text-amber-700 mt-0.5">{stats.pendentes}</p>
+                    <p className="text-sm font-black text-amber-700 mt-0.5">{stats.pendentes}</p>
                 </div>
             </div>
 
@@ -53,7 +44,7 @@ export function AgendaStatsCards({ monthName, stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cancelados</p>
-                    <p className="text-xl font-black text-rose-600 mt-0.5">{stats.cancelados}</p>
+                    <p className="text-sm font-black text-rose-600 mt-0.5">{stats.cancelados}</p>
                 </div>
             </div>
         </div>

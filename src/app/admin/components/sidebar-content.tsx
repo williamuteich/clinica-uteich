@@ -1,8 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { NavItem } from "./nav-item";
 import { Session } from "next-auth";
+import { Stethoscope } from "lucide-react";
+
+import { NavItem } from "./nav-item";
 import { hasPermission } from "@/src/lib/auth-helpers";
 import { ADMIN_NAVIGATION } from "@/src/lib/navigation";
 
@@ -22,26 +24,30 @@ export function SidebarContent({
     ] as const;
 
     return (
-        <div className="flex h-full flex-col border-r border-slate-200/80 bg-white">
-            <div className="flex h-20 items-center px-6 shrink-0">
-                <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-cyan-500 shadow-sm">
-                        <div className="h-3 w-3 rounded-full bg-white" />
+        <div className="flex h-full flex-col border-r border-slate-200 bg-white">
+            <div className="shrink-0 border-b border-slate-100 px-6 py-5">
+                <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 shadow-sm">
+                        <Stethoscope
+                            size={22}
+                            strokeWidth={2.2}
+                            className="text-white"
+                        />
                     </div>
 
-                    <div className="flex flex-col leading-tight">
-                        <span className="text-[14px] font-bold tracking-tight text-slate-800 uppercase">
+                    <div className="min-w-0">
+                        <h1 className="truncate text-sm font-bold tracking-tight text-slate-900">
                             Uteich Odontologia
-                        </span>
+                        </h1>
 
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                            Painel Clínico
-                        </span>
+                        <p className="mt-0.5 text-xs font-medium text-slate-500">
+                            Sistema de Gestão Clínica
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-3 py-4 custom-scrollbar">
+            <div className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
                 <div className="space-y-6">
                     {sections.map(section => {
                         const sectionItems = ADMIN_NAVIGATION.filter(
@@ -63,7 +69,10 @@ export function SidebarContent({
                         }
 
                         return (
-                            <section key={section} className="space-y-2">
+                            <section
+                                key={section}
+                                className="space-y-2"
+                            >
                                 <div className="px-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
                                     {section}
                                 </div>

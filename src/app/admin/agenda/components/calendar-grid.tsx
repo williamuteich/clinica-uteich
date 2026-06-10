@@ -9,31 +9,7 @@ import { CalendarNavBar } from "./calendar-nav-bar";
 import { AppointmentDetailsDialog } from "./appointment-details-dialog";
 import { AddAppointmentDialog } from "./add-appointment-dialog";
 import { EditAppointmentDialog } from "./edit-appointment-dialog";
-
-// ─── Tipos exportados ────────────────────────────────────────────────────────
-
-export interface Appointment {
-    id: string | number;
-    patientName: string;
-    date: string;
-    time: string;
-    procedure: string;
-    estimatedValue: number;
-    status: "Confirmado" | "Pendente" | "Cancelado";
-    isNew?: boolean;
-    isGuest?: boolean;
-    patientId?: string;
-    description?: string;
-}
-
-interface CalendarGridProps {
-    appointments: Appointment[];
-    viewDate: Date;
-    setViewDate: (date: Date) => void;
-    onStatusChange: (id: string | number, status: "Confirmado" | "Cancelado") => void;
-    onUpdate: (id: string | number, updatedFields: Partial<Appointment>) => void;
-    onAdd: (apt: Omit<Appointment, "id">) => void;
-}
+import { Appointment, CalendarGridProps } from "@/src/types/dashboard/agendamento";
 
 const STATUS_THEMES = {
     Confirmado: {

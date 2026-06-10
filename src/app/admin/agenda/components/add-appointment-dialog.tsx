@@ -11,22 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { maskCPF, rawCPF } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
-import type { Appointment } from "./calendar-grid";
-
-interface PatientFound {
-    id: string;
-    name: string;
-    cpf: string;
-    phone: string;
-}
-
-interface AddAppointmentDialogProps {
-    open: boolean;
-    onOpenChange: (v: boolean) => void;
-    selectedDateStr: string | null;
-    onDateChange: (date: string) => void;
-    onAdd: (apt: Omit<Appointment, "id">) => void;
-}
+import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
 
 export function AddAppointmentDialog({
     open,
