@@ -140,7 +140,6 @@ export function AdminManagement({
                                 <DialogDescription>Configure o acesso do administrador.</DialogDescription>
                             </DialogHeader>
                             <div className="grid gap-4 py-4">
-                                {error && <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg">{error}</div>}
                                 <div className="space-y-2">
                                     <Label>Nome Completo</Label>
                                     <Input name="name" defaultValue={editingAdmin?.name || ""} placeholder="Ex: William Uteich" required />
