@@ -138,8 +138,6 @@ export function RoleManagement({ initialRoles }: { initialRoles: Role[] }) {
                                 </div>
                             </div>
 
-                            {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
-
                             <DialogFooter>
                                 <Button type="submit" disabled={isPending} className="w-full bg-indigo-600">
                                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Salvar Cargo"}

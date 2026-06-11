@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { TableSkeleton } from "../components/table-skeleton";
 
 async function UsuariosContent() {
-    await requirePermission("administradores", "visualizar");
+    await requirePermission("usuarios", "visualizar");
     const data = await getUsuariosInit();
     return (
         <AdminManagement
