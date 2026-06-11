@@ -18,7 +18,6 @@ import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { getPacientes, deletePaciente } from "@/src/services/pacientes";
 import { useDebounce } from "@/src/hook/use-debounce";
 
-// Componente memoizado para cada linha da tabela
 const PacienteRow = memo(({
     paciente,
     isPending,
