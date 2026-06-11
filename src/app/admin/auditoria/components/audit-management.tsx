@@ -21,7 +21,7 @@ import {
     ChevronRight,
     Loader2,
 } from "lucide-react";
-import { AuditLog, AuditLogsResponse, AuditFilters } from "@/src/types/dashboard/audit";
+import { AuditLogsResponse, AuditFilters } from "@/src/types/dashboard/audit";
 import { getAuditLogs } from "@/src/services/audit";
 
 export function AuditManagement({

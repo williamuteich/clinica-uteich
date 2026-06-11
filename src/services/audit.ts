@@ -21,7 +21,7 @@ export async function getAuditLogs(
     const query = params.toString();
     const res = await fetch(
         `${API_URL}/api/admin/auditoria${query ? `?${query}` : ""}`,
-        { headers: { Cookie: cookie } }
+        { cache: 'no-store', headers: { Cookie: cookie } }
     );
 
     if (res.status === 403 || res.status === 401) return null;
