@@ -10,8 +10,8 @@ import AgendamentosTab from "./agendamentos/agendamentos-tab";
 import CadastroTab from "./cadastro/cadastro-tab";
 import AnamneseTab from "./anamnese/anamnese-tab";
 import { Suspense } from "react";
+import { getAgendamentos } from "@/src/services/agendamento";
 
-import { getAgendamentos } from "@/src/services/pacientes";
 
 export default async function ProntuarioContainer({
     paciente,
@@ -21,7 +21,6 @@ export default async function ProntuarioContainer({
     initialAnamnese,
     initialOdontogram,
 }: ProntuarioContainerProps) {
-    // Fetch recent appointments for this patient to show last scheduled
     let lastAppointment: any = null;
     try {
         const resp = await getAgendamentos({ patientId, page: 1, limit: 100 });

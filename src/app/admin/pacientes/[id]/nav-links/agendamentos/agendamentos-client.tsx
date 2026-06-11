@@ -7,10 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Plus, Clock, Loader2, ChevronRight, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Appointment, UpdateAgendamentoInput } from "@/src/types/dashboard/pacientes";
-import { updateAgendamento } from "@/src/services/pacientes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AgendamentoCreateModal from "./agendamentos-create-modal";
+import { updateAgendamento } from "@/src/services/agendamento";
 
 const statusLabel: Record<Appointment["status"], string> = {
     PENDENTE: "Pendente",

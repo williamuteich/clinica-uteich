@@ -17,9 +17,9 @@ import {
 import { CalendarDays, ClipboardList, Clock, Pencil, Activity, Plus, Trash2 } from "lucide-react";
 import { EvolucaoItemProps, HistoricoPatient } from "@/src/types/dashboard/pacientes";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
-import { createHistoricoPaciente, updateHistoricoPaciente, deleteHistoricoPaciente } from "@/src/services/pacientes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { createHistoricoPaciente, deleteHistoricoPaciente, updateHistoricoPaciente } from "@/src/services/historico";
 
 function EvolucaoItem({ evolucao, onUpdate, onDelete }: EvolucaoItemProps) {
     const [editOpen, setEditOpen] = useState(false);

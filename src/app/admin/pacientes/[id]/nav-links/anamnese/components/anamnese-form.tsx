@@ -17,9 +17,9 @@ import {
     Save,
     Loader2
 } from "lucide-react";
-import { saveAnamnesePaciente } from "@/src/services/pacientes";
 import { IAnamneseDisease, IAnamneseAllergy, IContinuousMedication } from "@/src/types/dashboard/anamnese";
 import { IAnamnese } from "@/src/types/dashboard/anamnese";
+import { saveAnamnesePaciente } from "@/src/services/anamnese";
 
 type AnamneseFormProps = {
     patientId: string;

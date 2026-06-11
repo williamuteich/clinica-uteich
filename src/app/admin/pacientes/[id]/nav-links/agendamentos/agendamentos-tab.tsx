@@ -1,4 +1,4 @@
-import { getAgendamentos } from "@/src/services/pacientes";
+import { getAgendamentos } from "@/src/services/agendamento";
 import AgendamentosClient from "./agendamentos-client";
 
 export default async function AgendamentosTab({ patientId }: { patientId: string }) {

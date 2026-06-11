@@ -4,10 +4,10 @@ import { useState, useTransition } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { createAgendamento } from "@/src/services/pacientes";
 import { Appointment, CreateAgendamentoInput } from "@/src/types/dashboard/pacientes";
 import { toast } from "react-toastify";
 import { AgendamentoCreateModalProps } from "@/src/types/dashboard/components";
+import { createAgendamento } from "@/src/services/agendamento";
 
 export default function AgendamentoCreateModal({ patientId, open, onOpenChange, onCreated }: AgendamentoCreateModalProps) {
     const [isPending, startTransition] = useTransition();

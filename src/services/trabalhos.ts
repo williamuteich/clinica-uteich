@@ -24,15 +24,6 @@ export async function getTrabalhos(filters: { page?: number; limit?: number; sta
     return res.json();
 }
 
-export async function getTrabalho(id: string): Promise<Trabalho | null> {
-    const cookie = (await headers()).get("cookie") || "";
-    const res = await fetch(`${API_URL}/api/admin/trabalhos/${id}`, {
-        headers: { Cookie: cookie },
-    });
-    if (!res.ok) return null;
-    return res.json();
-}
-
 export async function getTrabalhoDashboard(): Promise<DashboardStats> {
     const cookie = (await headers()).get("cookie") || "";
     const res = await fetch(`${API_URL}/api/admin/trabalhos/dashboard`, {

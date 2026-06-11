@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-odontogram/style.css";
-import { saveOdontogramaPaciente } from "@/src/services/pacientes";
 import { ToothDiagnosisModal } from "./components/tooth-diagnosis-modal";
 import { CustomTeethList } from "./components/custom-teeth-list";
+import { saveOdontogramaPaciente } from "@/src/services/odontograma";
 
 const Odontogram = dynamic(
     () => import("react-odontogram").then((mod) => mod.Odontogram),
