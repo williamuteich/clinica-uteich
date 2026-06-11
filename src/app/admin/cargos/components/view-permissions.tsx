@@ -76,17 +76,15 @@ export function ViewPermissions({
 
     return (
         <Dialog>
-            <DialogTrigger
-                render={
-                    <button className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer">
-                        <div className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 transition-colors group-hover:bg-indigo-100">
-                            <Fingerprint className="h-3.5 w-3.5" />
-                        </div>
+            <DialogTrigger asChild>
+                <button className="group inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-all hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 transition-colors group-hover:bg-indigo-100">
+                        <Fingerprint className="h-3.5 w-3.5" />
+                    </div>
 
-                        <span>Permissões</span>
-                    </button>
-                }
-            />
+                    <span>Permissões</span>
+                </button>
+            </DialogTrigger>
 
             <DialogContent className="w-[95vw] max-w-3xl sm:max-w-3xl rounded-3xl border border-slate-200 bg-white p-0 shadow-2xl">
                 <DialogHeader className="border-b border-slate-100 px-5 py-4">

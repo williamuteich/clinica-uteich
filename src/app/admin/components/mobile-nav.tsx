@@ -18,13 +18,11 @@ export function MobileNav() {
 
     return (
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger
-                render={
-                    <Button variant="ghost" size="icon" className="lg:hidden mr-2">
-                        <Menu className="w-6 h-6" />
-                    </Button>
-                }
-            />
+            <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden mr-2">
+                    <Menu className="w-6 h-6" />
+                </Button>
+            </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 border-none">
                 {open && (
                     session ? (

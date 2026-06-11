@@ -1,8 +1,18 @@
 "use server";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { HistoricoPatient } from "../types/dashboard/pacientes";
 
 const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+export async function getHistoricoPaciente(id: string): Promise<HistoricoPatient[] | null> {
+    const cookie = (await headers()).get("cookie") || "";
+    const res = await fetch(`${API_URL}/api/admin/pacientes/${id}/historico`, {
+        headers: { Cookie: cookie },
+    });
+    if (!res.ok) return null;
+    return res.json();
+}
 
 export async function createHistoricoPaciente(patientId: string, description: string): Promise<{ success: boolean; data?: any; error?: string }> {
     const cookie = (await headers()).get("cookie") || "";

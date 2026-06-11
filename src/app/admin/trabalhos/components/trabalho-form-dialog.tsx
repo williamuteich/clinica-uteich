@@ -125,13 +125,13 @@ export function TrabalhoFormDialog({
 
     return (
         <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); setOpen(v); }}>
-            <DialogTrigger render={
-                trigger ?? (
+            <DialogTrigger asChild>
+                {trigger ?? (
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 h-10 cursor-pointer font-semibold text-xs rounded-md">
                         <Plus className="mr-2 h-4 w-4" /> Novo Trabalho
                     </Button>
-                )
-            } />
+                )}
+            </DialogTrigger>
 
             <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>

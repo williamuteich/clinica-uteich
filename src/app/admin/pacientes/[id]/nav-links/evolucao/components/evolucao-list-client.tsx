@@ -86,7 +86,7 @@ function EvolucaoItem({ evolucao, onUpdate, onDelete }: EvolucaoItemProps) {
 
                 <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all duration-300 shrink-0">
                     <Dialog open={editOpen} onOpenChange={setEditOpen}>
-                        <DialogTrigger render={
+                        <DialogTrigger asChild>
                             <button
                                 type="button"
                                 className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
@@ -94,7 +94,7 @@ function EvolucaoItem({ evolucao, onUpdate, onDelete }: EvolucaoItemProps) {
                             >
                                 <Pencil className="h-3.5 w-3.5" />
                             </button>
-                        } />
+                        </DialogTrigger>
                         <DialogContent className="sm:max-w-lg">
                             <form onSubmit={handleEditSubmit}>
                                 <DialogHeader>
@@ -125,7 +125,7 @@ function EvolucaoItem({ evolucao, onUpdate, onDelete }: EvolucaoItemProps) {
                                 </div>
 
                                 <DialogFooter className="bg-slate-50/55 -mx-6 -mb-6 p-5 border-t flex justify-end gap-3 rounded-b-lg">
-                                    <DialogClose render={
+                                    <DialogClose asChild>
                                         <Button
                                             type="button"
                                             variant="outline"
@@ -133,7 +133,7 @@ function EvolucaoItem({ evolucao, onUpdate, onDelete }: EvolucaoItemProps) {
                                         >
                                             Cancelar
                                         </Button>
-                                    } />
+                                    </DialogClose>
                                     <Button
                                         type="submit"
                                         disabled={isPending}
@@ -243,11 +243,11 @@ export default function EvolucaoListClient({ initialItems, patientId }: Evolucao
                 </div>
 
                 <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-                    <DialogTrigger render={
+                    <DialogTrigger asChild>
                         <Button className="bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 rounded-md shrink-0 flex items-center gap-2 shadow-xs text-xs font-semibold cursor-pointer">
                             <Plus className="h-4 w-4" /> Nova Evolução
                         </Button>
-                    } />
+                    </DialogTrigger>
                     <DialogContent className="sm:max-w-lg">
                         <form onSubmit={handleCreateSubmit}>
                             <DialogHeader>
@@ -277,7 +277,7 @@ export default function EvolucaoListClient({ initialItems, patientId }: Evolucao
                             </div>
 
                             <DialogFooter className="bg-slate-50/55 -mx-6 -mb-6 p-5 border-t flex justify-end gap-3 rounded-b-lg">
-                                <DialogClose render={
+                                <DialogClose asChild>
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -285,7 +285,7 @@ export default function EvolucaoListClient({ initialItems, patientId }: Evolucao
                                     >
                                         Cancelar
                                     </Button>
-                                } />
+                                </DialogClose>
                                 <Button
                                     type="submit"
                                     disabled={isPending}

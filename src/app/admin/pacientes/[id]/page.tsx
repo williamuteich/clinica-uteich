@@ -6,8 +6,9 @@ import ProntuarioContainer from "./nav-links/prontuario-container";
 import { Suspense } from "react";
 import { ProntuarioSkeleton } from "./components/prontuario-skeleton";
 import { getAnamnesePaciente } from "@/src/services/anamnese";
-import { getHistoricoPaciente, getPaciente } from "@/src/services/pacientes";
 import { getOdontogramaPaciente } from "@/src/services/odontograma";
+import { getPaciente } from "@/src/services/pacientes";
+import { getHistoricoPaciente } from "@/src/services/historico";
 
 async function ProntuarioContent({
     params,

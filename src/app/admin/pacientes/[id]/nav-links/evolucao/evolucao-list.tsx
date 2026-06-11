@@ -1,6 +1,6 @@
-import { getHistoricoPaciente } from "@/src/services/pacientes";
 import { EvolucaoListProps } from "@/src/types/dashboard/pacientes";
 import EvolucaoListClient from "./components/evolucao-list-client";
+import { getHistoricoPaciente } from "@/src/services/historico";
 
 export default async function EvolucaoList({ initialItems, patientId }: EvolucaoListProps) {
     const items = initialItems ?? (await getHistoricoPaciente(patientId)) ?? [];

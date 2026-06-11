@@ -92,7 +92,11 @@ export function RoleManagement({ initialRoles }: { initialRoles: Role[] }) {
                 </div>
 
                 <Dialog open={open} onOpenChange={(val) => { if (!val) { setEditingRole(null); setSelectedPermissions([]); setError(""); } setOpen(val); }}>
-                    <DialogTrigger render={<Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 h-10 cursor-pointer font-semibold text-xs rounded-md"><Plus className="mr-2 h-4 w-4" /> Novo Cargo</Button>} />
+                    <DialogTrigger asChild>
+                        <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 h-10 cursor-pointer font-semibold text-xs rounded-md">
+                            <Plus className="mr-2 h-4 w-4" /> Novo Cargo
+                        </Button>
+                    </DialogTrigger>
                     <DialogContent className="sm:max-w-[500px] border-none shadow-2xl overflow-y-auto max-h-[90vh]">
                         <form key={editingRole?.id || "new-role"} action={handleAction} className="space-y-6 py-4">
                             <DialogHeader>

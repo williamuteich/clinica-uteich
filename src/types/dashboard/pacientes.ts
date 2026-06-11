@@ -155,16 +155,13 @@ export interface HistoricoPatientResponse {
   limit: number;
 }
 
-
-
 export interface CreatePacienteDialogProps {
   onCreateSuccess: () => void;
 }
 
 export interface PacienteHistoricoDialogProps {
-  paciente: Paciente | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  pacienteId: string;
+  pacienteName: string;
 }
 
 export interface DeleteDialogGenericProps {

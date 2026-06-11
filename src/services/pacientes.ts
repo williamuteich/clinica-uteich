@@ -1,5 +1,5 @@
 "use server";
-import { HistoricoPatient, Paciente, PacienteFilters, PacientesResponse } from "@/src/types/dashboard/pacientes";
+import { Paciente, PacienteFilters, PacientesResponse } from "@/src/types/dashboard/pacientes";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
@@ -72,12 +72,4 @@ export async function deletePaciente(id: string): Promise<{ success: boolean; er
     return { success: true };
 }
 
-export async function getHistoricoPaciente(id: string): Promise<HistoricoPatient[] | null> {
-    const cookie = (await headers()).get("cookie") || "";
-    const res = await fetch(`${API_URL}/api/admin/pacientes/${id}/historico`, {
-        headers: { Cookie: cookie },
-    });
-    if (!res.ok) return null;
-    return res.json();
-}
 

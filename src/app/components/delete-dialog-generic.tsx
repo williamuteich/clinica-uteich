@@ -36,13 +36,13 @@ export function DeleteDialogGeneric({
 
     return (
         <AlertDialog>
-            <AlertDialogTrigger render={
-                triggerButton || (
+            <AlertDialogTrigger asChild>
+                {triggerButton || (
                     <Button variant="ghost" size="icon-sm" disabled={isPending} title="Excluir">
                         <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
-                )
-            } />
+                )}
+            </AlertDialogTrigger>
             <AlertDialogContent className="border-red-100">
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-slate-900 font-bold flex gap-3"><AlertTriangle className="h-6 w-6 text-red-600" />{title}</AlertDialogTitle>
@@ -50,7 +50,7 @@ export function DeleteDialogGeneric({
                         {description}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="bg-slate-50/50 -mx-6 -mb-6 p-4 border-t flex justify-end gap-0 rounded-b-lg">
+                <AlertDialogFooter>
                     <AlertDialogCancel className="h-9 text-xs font-semibold cursor-pointer">Cancelar</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleDelete}
