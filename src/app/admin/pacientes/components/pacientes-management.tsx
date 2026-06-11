@@ -18,22 +18,7 @@ import { CreatePacienteDialog } from "./create-paciente-dialog";
 import { PacienteHistoricoDialog } from "./paciente-historico-dialog";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
 import { deletePaciente } from "@/src/services/pacientes";
-
-const maskCPF = (value: string) => {
-    return value
-        .replace(/\D/g, "")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})/, "$1-$2")
-        .replace(/(-\d{2})\d+?$/, "$1");
-};
-
-const maskPhone = (value: string) => {
-    return value
-        .replace(/\D/g, "")
-        .replace(/(\d{2})(\d)/, "($1) $2")
-        .replace(/(\d{4,5})(\d{4})$/, "$1-$2");
-};
+import { maskCPF, maskPhone } from "@/src/lib/masks";
 
 export function PacientesManagement({ initialData }: { initialData: PacientesResponse }) {
     const [data, setData] = useState<PacientesResponse>(initialData);
@@ -75,15 +60,6 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
         });
     };
 
-    const calcIdade = (birthDate: string) => {
-        const hoje = new Date();
-        const nasc = new Date(birthDate);
-        let idade = hoje.getFullYear() - nasc.getFullYear();
-        const m = hoje.getMonth() - nasc.getMonth();
-        if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
-        return idade;
-    };
-
     return (
         <div className="space-y-4">
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
@@ -116,9 +92,7 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                         <TableRow>
                             <TableHead>Paciente</TableHead>
                             <TableHead>CPF</TableHead>
-                            <TableHead>Idade</TableHead>
                             <TableHead>Telefone</TableHead>
-                            <TableHead>Cidade/UF</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
@@ -137,9 +111,7 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                                         <div className="font-medium text-slate-800">{paciente.name}</div>
                                     </TableCell>
                                     <TableCell className="text-sm text-slate-500 font-mono">{maskCPF(paciente.cpf)}</TableCell>
-                                    <TableCell className="text-sm">{calcIdade(paciente.birthDate)} anos</TableCell>
                                     <TableCell className="text-sm">{maskPhone(paciente.phone)}</TableCell>
-                                    <TableCell className="text-sm">{paciente.city}/{paciente.state}</TableCell>
                                     <TableCell>
                                         <Badge variant={paciente.active ? "default" : "secondary"}
                                             className={paciente.active ? "bg-emerald-500/10 text-emerald-600 border-emerald-200/50" : ""}>

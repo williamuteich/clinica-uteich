@@ -9,11 +9,11 @@ export interface Paciente {
   cpf: string;
   birthDate: string;
   phone: string;
-  zipCode: string;
-  state: string;
-  city: string;
-  street: string;
-  number: string;
+  zipCode?: string | null;
+  state?: string | null;
+  city?: string | null;
+  street?: string | null;
+  number?: string | null;
   complement?: string | null;
   active: boolean;
   createdAt: string;

@@ -80,11 +80,11 @@ model Patient {
   cpf        String   @unique
   birthDate  DateTime
   phone      String   @unique
-  zipCode    String
-  state      String
-  city       String
-  street     String
-  number     String
+  zipCode    String?
+  state      String?
+  city       String?
+  street     String?
+  number     String?
   complement String?
   active     Boolean  @default(true)
   createdAt  DateTime @default(now())
@@ -209,9 +209,9 @@ enum ToothStatus {
 model Appointment {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  patientId  String?  @db.ObjectId
-  patient    Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  guestName  String?
+  patientId String?  @db.ObjectId
+  patient   Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  guestName String?
 
   scheduledAt    DateTime
   serviceType    String

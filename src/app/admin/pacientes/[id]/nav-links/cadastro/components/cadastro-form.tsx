@@ -12,7 +12,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { toast, ToastContainer } from "react-toastify";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
-import { AddressFields, type AddressValues } from "@/src/components/shared/address-fields";
+import { AddressFields, type AddressValues } from "@/src/app/admin/pacientes/[id]/nav-links/ficha-cadastral/address-fields";
 
 export default function CadastroForm({ paciente }: { paciente: Paciente }) {
     const router = useRouter();

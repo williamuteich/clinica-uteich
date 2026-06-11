@@ -12,16 +12,6 @@ import { createPaciente } from "@/src/services/pacientes";
 import { toast } from "react-toastify";
 import { CreatePacienteDialogProps } from "@/src/types/dashboard/pacientes";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
-import { AddressFields, type AddressValues } from "@/src/components/shared/address-fields";
-
-const EMPTY_ADDRESS: AddressValues = {
-    zipCode: "",
-    state: "",
-    city: "",
-    street: "",
-    number: "",
-    complement: "",
-};
 
 export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogProps) {
     const [open, setOpen] = useState(false);
@@ -29,12 +19,10 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
 
     const [cpf, setCpf] = useState("");
     const [phone, setPhone] = useState("");
-    const [address, setAddress] = useState<AddressValues>(EMPTY_ADDRESS);
 
     const resetForm = () => {
         setCpf("");
         setPhone("");
-        setAddress(EMPTY_ADDRESS);
     };
 
     const handleAction = (e: React.FormEvent<HTMLFormElement>) => {
@@ -48,12 +36,6 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
                 cpf,
                 birthDate: formData.get("birthDate") as string,
                 phone,
-                zipCode: address.zipCode,
-                state: address.state,
-                city: address.city,
-                street: address.street,
-                number: address.number,
-                complement: address.complement || undefined,
                 active: true,
             };
 
@@ -132,16 +114,6 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
                                 maxLength={15}
                             />
                         </div>
-                    </div>
-
-                    <div className="border-t pt-4">
-                        <p className="text-xs font-bold text-slate-800 flex items-center gap-1 mb-4">
-                            Endereço Residencial
-                        </p>
-                        <AddressFields
-                            values={address}
-                            onChange={(updated) => setAddress((prev) => ({ ...prev, ...updated }))}
-                        />
                     </div>
 
                     <DialogFooter className="bg-slate-50/55 -mx-6 -mb-6 p-5 border-t flex justify-end gap-3 rounded-b-lg">
