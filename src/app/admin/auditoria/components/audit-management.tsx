@@ -22,6 +22,7 @@ import {
     Loader2,
 } from "lucide-react";
 import { AuditLogsResponse, AuditFilters } from "@/src/types/dashboard/audit";
+import { useDebounce } from "@/src/hook/use-debounce";
 import { getAuditLogs } from "@/src/services/audit";
 
 export function AuditManagement({
@@ -37,15 +38,13 @@ export function AuditManagement({
     const [isPending, startTransition] = useTransition();
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            if (searchTerm !== (filters.userName || "")) {
-                fetchLogs({ ...filters, userName: searchTerm || undefined, page: 1 });
-            }
-        }, 500);
+    const debouncedSearchTerm = useDebounce(searchTerm, 700);
 
-        return () => clearTimeout(handler);
-    }, [searchTerm]);
+    useEffect(() => {
+        if (debouncedSearchTerm !== (filters.userName || "")) {
+            fetchLogs({ ...filters, userName: debouncedSearchTerm || undefined, page: 1 });
+        }
+    }, [debouncedSearchTerm]);
 
     const fetchLogs = (newFilters: AuditFilters) => {
         startTransition(async () => {

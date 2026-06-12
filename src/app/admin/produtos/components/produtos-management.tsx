@@ -36,8 +36,8 @@ export function ProdutosManagement({ initialProducts, initialMovements }: Produt
     const [prodSearch, setProdSearch] = useState("");
     const [movSearch, setMovSearch] = useState("");
 
-    const debouncedProdSearch = useDebounce(prodSearch, 350);
-    const debouncedMovSearch = useDebounce(movSearch, 350);
+    const debouncedProdSearch = useDebounce(prodSearch, 700);
+    const debouncedMovSearch = useDebounce(movSearch, 700);
 
     const [isPending, startTransition] = useTransition();
     const [gerenciarOpen, setGerenciarOpen] = useState(false);
@@ -173,74 +173,75 @@ export function ProdutosManagement({ initialProducts, initialMovements }: Produt
                                 />
                             </div>
 
-                            <Table>
-                                <TableHeader>
-                                    <TableRow className="border-slate-100">
-                                        <TableHead className="text-slate-500 font-semibold text-xs">Produto</TableHead>
-                                        <TableHead className="text-slate-500 font-semibold text-xs text-center">Em estoque</TableHead>
-                                        <TableHead className="text-slate-500 font-semibold text-xs text-center">Quantidade mínima</TableHead>
-                                        <TableHead className="text-slate-500 font-semibold text-xs">Validade</TableHead>
-                                        <TableHead className="text-right"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {products.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={5} className="text-center text-slate-400 py-10 text-sm">
-                                                Nenhum produto cadastrado.
-                                            </TableCell>
+                            <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
+                                <Table>
+                                    <TableHeader className="bg-slate-900 border-none">
+                                        <TableRow className="hover:bg-transparent border-none">
+                                            <TableHead className="font-bold text-slate-100 py-3.5 pl-4">Produto</TableHead>
+                                            <TableHead className="font-bold text-slate-100 py-3.5 pl-4 text-center">Em estoque</TableHead>
+                                            <TableHead className="font-bold text-slate-100 py-3.5 pl-4 text-center">Quantidade mínima</TableHead>
+                                            <TableHead className="font-bold text-slate-100 py-3.5 pl-4">Validade</TableHead>
+                                            <TableHead className="text-right text-white">Ações</TableHead>
                                         </TableRow>
-                                    ) : products.map((p: Product) => {
-                                        const isLow = p.quantity <= p.minimumQuantity;
-                                        return (
-                                            <TableRow key={p.id} className="hover:bg-slate-50/50">
-                                                <TableCell className="py-3.5">
-                                                    <p className={`font-semibold text-sm ${isLow ? "text-red-600" : "text-slate-800"}`}>{p.name}</p>
-                                                    {p.notes && <p className="text-xs text-slate-400 mt-0.5">{p.notes}</p>}
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <span className={`font-bold text-sm ${isLow ? "text-red-600" : "text-slate-700"}`}>{p.quantity}</span>
-                                                </TableCell>
-                                                <TableCell className="text-center text-sm text-slate-600 font-medium">{p.minimumQuantity}</TableCell>
-                                                <TableCell className="text-sm text-slate-600 font-medium">{formatExpiration(p.expirationDate)}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <div className="flex items-center justify-end gap-1">
-                                                        <GerenciarEstoqueModal
-                                                            initialTab="alterar"
-                                                            singleProduct={p}
-                                                            onSuccess={() => { toast.success("Estoque atualizado!"); refresh(); }}
-                                                            trigger={
-                                                                <Button variant="outline" size="sm" className="h-8 text-xs font-semibold cursor-pointer">
-                                                                    Dar baixa
-                                                                </Button>
-                                                            }
-                                                        />
-                                                        <GerenciarEstoqueModal
-                                                            initialTab="cadastrar"
-                                                            editProduct={p}
-                                                            onSuccess={() => { toast.success("Produto atualizado!"); refresh(); }}
-                                                            trigger={
-                                                                <Button variant="ghost" size="icon-sm" className="cursor-pointer" title="Editar">
-                                                                    <Pencil className="h-4 w-4 text-blue-500" />
-                                                                </Button>
-                                                            }
-                                                        />
-                                                        <DeleteDialogGeneric
-                                                            id={p.id}
-                                                            onDelete={handleDelete}
-                                                            onSuccess={refresh}
-                                                            title="Excluir produto?"
-                                                            description={`O produto "${p.name}" será removido permanentemente.`}
-                                                            successMessage="Produto removido!"
-                                                        />
-                                                    </div>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {products.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="text-center text-slate-400 py-10 text-sm">
+                                                    Nenhum produto cadastrado.
                                                 </TableCell>
                                             </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-
+                                        ) : products.map((p: Product) => {
+                                            const isLow = p.quantity <= p.minimumQuantity;
+                                            return (
+                                                <TableRow key={p.id} className="hover:bg-slate-50/50">
+                                                    <TableCell className="py-3.5">
+                                                        <p className={`font-semibold text-sm ${isLow ? "text-red-600" : "text-slate-800"}`}>{p.name}</p>
+                                                        {p.notes && <p className="text-xs text-slate-400 mt-0.5">{p.notes}</p>}
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
+                                                        <span className={`font-bold text-sm ${isLow ? "text-red-600" : "text-slate-700"}`}>{p.quantity}</span>
+                                                    </TableCell>
+                                                    <TableCell className="text-center text-sm text-slate-600 font-medium">{p.minimumQuantity}</TableCell>
+                                                    <TableCell className="text-sm text-slate-600 font-medium">{formatExpiration(p.expirationDate)}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex items-center justify-end gap-1">
+                                                            <GerenciarEstoqueModal
+                                                                initialTab="alterar"
+                                                                singleProduct={p}
+                                                                onSuccess={() => { toast.success("Estoque atualizado!"); refresh(); }}
+                                                                trigger={
+                                                                    <Button variant="outline" size="sm" className="h-8 text-xs font-semibold cursor-pointer">
+                                                                        Dar baixa
+                                                                    </Button>
+                                                                }
+                                                            />
+                                                            <GerenciarEstoqueModal
+                                                                initialTab="cadastrar"
+                                                                editProduct={p}
+                                                                onSuccess={() => { toast.success("Produto atualizado!"); refresh(); }}
+                                                                trigger={
+                                                                    <Button variant="ghost" size="icon-sm" className="cursor-pointer" title="Editar">
+                                                                        <Pencil className="h-4 w-4 text-blue-500" />
+                                                                    </Button>
+                                                                }
+                                                            />
+                                                            <DeleteDialogGeneric
+                                                                id={p.id}
+                                                                onDelete={handleDelete}
+                                                                onSuccess={refresh}
+                                                                title="Excluir produto?"
+                                                                description={`O produto "${p.name}" será removido permanentemente.`}
+                                                                successMessage="Produto removido!"
+                                                            />
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </div>
                             {Math.ceil(prodTotal / LIMIT) > 1 && (
                                 <div className="flex items-center justify-between pt-2">
                                     <p className="text-xs text-slate-400">

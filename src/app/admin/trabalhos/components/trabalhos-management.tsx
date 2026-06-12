@@ -19,6 +19,8 @@ import Link from "next/link";
 import { ProtheticWork, ProtheticWorksResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
 import { TrabalhoFormDialog } from "./trabalho-form-dialog";
 
+import { useDebounce } from "@/src/hook/use-debounce";
+
 const STATUS_CONFIG = {
     PENDING: {
         label: "Pendente",
@@ -52,16 +54,15 @@ export function TrabalhosManagement({
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("");
 
+    const debouncedSearchTerm = useDebounce(searchTerm, 700);
+
     useEffect(() => {
-        const handler = setTimeout(() => {
-            fetchWorks({
-                page: 1,
-                query: searchTerm || undefined,
-                status: statusFilter || undefined,
-            });
-        }, 350);
-        return () => clearTimeout(handler);
-    }, [searchTerm, statusFilter]);
+        fetchWorks({
+            page: 1,
+            query: debouncedSearchTerm || undefined,
+            status: statusFilter || undefined,
+        });
+    }, [debouncedSearchTerm, statusFilter]);
 
     const fetchWorks = (newFilters: any) => {
         startTransition(async () => {

@@ -41,6 +41,7 @@ import { Admin, Role, AdminsResponse, AdminFilters } from "@/src/types/dashboard
 import { createAdmin, updateAdmin, deleteAdmin, getAdmins } from "@/src/services/administrator";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
 import { toast, ToastContainer } from "react-toastify";
+import { useDebounce } from "@/src/hook/use-debounce";
 
 export function AdminManagement({
     initialData,
@@ -61,19 +62,17 @@ export function AdminManagement({
     const [editingAdmin, setEditingAdmin] = useState<Admin | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
 
+    const debouncedSearchTerm = useDebounce(searchTerm, 700);
+
     useEffect(() => {
         setData(initialData);
     }, [initialData]);
 
     useEffect(() => {
-        const handler = setTimeout(() => {
-            if (searchTerm !== (filters.name || "")) {
-                fetchAdmins({ ...filters, name: searchTerm || undefined, page: 1 });
-            }
-        }, 500);
-
-        return () => clearTimeout(handler);
-    }, [searchTerm]);
+        if (debouncedSearchTerm !== (filters.name || "")) {
+            fetchAdmins({ ...filters, name: debouncedSearchTerm || undefined, page: 1 });
+        }
+    }, [debouncedSearchTerm]);
 
     const fetchAdmins = (newFilters: AdminFilters) => {
         startTransition(async () => {
