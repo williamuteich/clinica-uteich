@@ -359,8 +359,8 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                         ))}
                     </div>
 
-                    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs flex flex-col items-center justify-center w-full">
-                        <div className="w-full py-4 flex justify-center items-center [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:max-h-[180px] md:[&_svg]:max-h-[420px] lg:[&_svg]:max-h-[500px] [&_svg]:mx-auto">
+                    <div className="bg-white border border-slate-200 rounded-2xl p-3 sm:p-6 shadow-xs flex flex-col items-center justify-center w-full">
+                        <div className="w-full py-2 sm:py-4 flex justify-center items-center [&_svg]:max-w-full [&_svg]:h-auto [&_svg]:max-h-[300px] md:[&_svg]:max-h-[420px] lg:[&_svg]:max-h-[500px] [&_svg]:mx-auto">
                             <Odontogram
                                 theme="light"
                                 layout="circle"
