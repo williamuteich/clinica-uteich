@@ -30,7 +30,7 @@ export default function PrivateLayout({ children }: { children: ReactNode }) {
                         <Header />
                     </Suspense>
 
-                    <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+                    <main className="flex-1 overflow-y-auto p-4 lg:p-6">
                         <div className="mx-auto w-full">
                             {children}
                         </div>

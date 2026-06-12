@@ -24,6 +24,7 @@ export default function CadastroForm({ paciente }: { paciente: Paciente }) {
         birthDate: paciente.birthDate ? new Date(paciente.birthDate).toISOString().split("T")[0] : "",
         phone: maskPhone(paciente.phone || ""),
         active: paciente.active ?? true,
+        observations: paciente.observations || "",
     });
 
     const [address, setAddress] = useState<AddressValues>({
@@ -131,7 +132,7 @@ export default function CadastroForm({ paciente }: { paciente: Paciente }) {
                             />
                         </div>
 
-                        <div className="flex items-center gap-2 pt-4">
+                        <div className="flex items-center gap-2 pt-2">
                             <input
                                 type="checkbox"
                                 name="active"
@@ -143,6 +144,18 @@ export default function CadastroForm({ paciente }: { paciente: Paciente }) {
                             <Label htmlFor="active" className="text-sm font-medium text-slate-700 cursor-pointer select-none">
                                 Paciente com cadastro ativo
                             </Label>
+                        </div>
+
+                        <div className="space-y-1.5 pt-2">
+                            <Label htmlFor="observations" className="text-sm font-medium">Observações</Label>
+                            <textarea
+                                id="observations"
+                                name="observations"
+                                value={personalFields.observations}
+                                onChange={(e) => setPersonalFields((p) => ({ ...p, observations: e.target.value }))}
+                                placeholder="Nenhuma observação ou observações clínicas do paciente..."
+                                className="flex min-h-[100px] w-full rounded-md border border-input bg-white px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus:border-blue-500 focus:ring-blue-100 outline-none resize-none font-semibold text-slate-700 transition-all"
+                            />
                         </div>
                     </div>
                 </div>

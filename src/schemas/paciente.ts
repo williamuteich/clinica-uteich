@@ -16,6 +16,7 @@ export const pacienteSchema = z.object({
   number: z.string().min(1, "Número é obrigatório").optional(),
   complement: z.string().optional(),
   active: z.boolean().default(true).optional(),
+  observations: z.string().optional().nullable(),
 });
 
 export type PacienteInput = z.infer<typeof pacienteSchema>;

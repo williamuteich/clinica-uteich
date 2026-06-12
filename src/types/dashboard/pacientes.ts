@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import { FormEvent, ReactNode } from "react";
 import { IAnamnese } from "./anamnese";
 import { IOdontogram } from "@/src/schemas/odontograma";
 import type { ToothStatus as OdontogramToothStatus } from "./odontograma";
@@ -15,6 +15,7 @@ export interface Paciente {
   street?: string | null;
   number?: string | null;
   complement?: string | null;
+  observations?: string | null;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -173,4 +174,17 @@ export interface DeleteDialogGenericProps {
   successMessage?: string;
   errorMessage?: string;
   triggerButton?: React.ReactElement;
+}
+
+export interface PatientLayoutProps {
+  children: ReactNode;
+  params: Promise<{ id: string }>;
+}
+
+export interface PatientPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export interface PatientNavTabsProps {
+  patientId: string;
 }

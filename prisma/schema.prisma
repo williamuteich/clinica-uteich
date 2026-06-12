@@ -75,26 +75,28 @@ model LogAdmin {
 }
 
 model Patient {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
-  cpf        String   @unique
-  birthDate  DateTime
-  phone      String   @unique
-  zipCode    String?
-  state      String?
-  city       String?
-  street     String?
-  number     String?
-  complement String?
-  active     Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  cpf          String   @unique
+  birthDate    DateTime
+  phone        String   @unique
+  zipCode      String?
+  state        String?
+  city         String?
+  street       String?
+  number       String?
+  complement   String?
+  observations String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   history      PatientHistory[]
   anamneses    Anamnese[]
   odontogram   Odontogram?
   appointments Appointment[]
   trabalhos    TrabalhoProtetico[]
+  tasks        PatientTask[]
 }
 
 model PatientHistory {
@@ -104,6 +106,18 @@ model PatientHistory {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model PatientTask {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  patientId   String    @db.ObjectId
+  patient     Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Anamnese {

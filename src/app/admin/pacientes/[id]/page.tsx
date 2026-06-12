@@ -1,75 +1,256 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { requirePermission } from "@/src/lib/auth-helpers-server";
-import ProntuarioContainer from "./nav-links/prontuario-container";
-import { Suspense } from "react";
-import { ProntuarioSkeleton } from "./components/prontuario-skeleton";
-import { getAnamnesePaciente } from "@/src/services/anamnese";
-import { getOdontogramaPaciente } from "@/src/services/odontograma";
 import { getPaciente } from "@/src/services/pacientes";
+import { getOdontogramaPaciente } from "@/src/services/odontograma";
 import { getHistoricoPaciente } from "@/src/services/historico";
+import { getAgendamentos } from "@/src/services/agendamento";
+import OdontogramaTab from "./nav-links/odontograma/odontograma-tab";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
+import {
+    Plus,
+    Calendar,
+    User,
+    MessageCircle,
+    FileText,
+} from "lucide-react";
 
-async function ProntuarioContent({
-    params,
-    searchParams
-}: {
-    params: Promise<{ id: string }>;
-    searchParams: Promise<{ tab?: string }>;
-}) {
-    await requirePermission("pacientes", "visualizar");
+import { PatientPageProps } from "@/src/types/dashboard/pacientes";
+import { TasksModal } from "./components/tasks-modal";
+import { maskCPF, maskPhone } from "@/src/lib/masks";
 
+
+export default async function PatientOverviewPage({ params }: PatientPageProps) {
     const { id } = await params;
-    const { tab = "odontograma" } = await searchParams;
-    const activeTab = ["odontograma", "evolucao", "anamnese", "agendamentos", "cadastro"].includes(tab)
-        ? tab
-        : "odontograma";
 
-    const [paciente, historicoPaciente, anamnese, odontogram] = await Promise.all([
+    const [paciente, odontogram, historico, agendamentosRes] = await Promise.all([
         getPaciente(id),
-        activeTab === "evolucao" ? getHistoricoPaciente(id) : Promise.resolve(null),
-        activeTab === "anamnese" ? getAnamnesePaciente(id) : Promise.resolve(null),
-        activeTab === "odontograma" ? getOdontogramaPaciente(id) : Promise.resolve(null),
+        getOdontogramaPaciente(id),
+        getHistoricoPaciente(id),
+        getAgendamentos({ patientId: id, page: 1, limit: 5 }),
     ]);
 
-    if (!paciente) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4 text-center">
-                <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center text-rose-600 font-bold text-xl">!</div>
-                <h2 className="text-xl font-bold text-slate-900">Paciente não encontrado</h2>
-                <p className="text-muted-foreground max-w-xs">O paciente que você está tentando visualizar não existe ou foi removido.</p>
-                <Link
-                    href="/admin/pacientes"
-                    className={cn(buttonVariants({ variant: "default" }), "bg-blue-600 hover:bg-blue-700 text-white")}
-                >
-                    Voltar para Pacientes
-                </Link>
+    if (!paciente) return null;
+
+    const appointments = agendamentosRes?.agendamentos ?? [];
+    const latestEvolutions = historico?.slice(0, 3) ?? [];
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full animate-in fade-in duration-500">
+            <div className="lg:col-span-1 space-y-6">
+                <TasksModal patientId={id} patientName={paciente.name} />
+
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
+                    <h3 className="text-base font-black text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
+                        <User className="h-4.5 w-4.5 text-slate-500" />
+                        Informações do Paciente
+                    </h3>
+
+                    <div className="space-y-4">
+                        <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Nome Completo
+                            </span>
+                            <span className="text-sm font-bold text-slate-700 mt-1 block">
+                                {paciente.name}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                    CPF
+                                </span>
+                                <span className="text-xs font-bold text-slate-700 mt-1 block font-mono bg-slate-50 px-2 py-1 rounded-md border border-slate-100 w-fit">
+                                    {paciente.cpf ? maskCPF(paciente.cpf) : "Não informado"}
+                                </span>
+                            </div>
+
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                    Código
+                                </span>
+                                <span className="text-xs font-bold text-slate-650 mt-1 block font-mono bg-slate-50 px-2 py-1 rounded-md border border-slate-100 w-fit">
+                                    #{paciente.id.slice(-6).toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+
+                        {paciente.birthDate && (
+                            <div>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                    Data de Nascimento
+                                </span>
+                                <span className="text-xs font-semibold text-slate-700 mt-1 block">
+                                    {new Date(paciente.birthDate).toLocaleDateString("pt-BR")}
+                                </span>
+                            </div>
+                        )}
+
+                        <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Celular / WhatsApp
+                            </span>
+                            {paciente.phone ? (
+                                <a
+                                    href={`https://wa.me/${paciente.phone.replace(/\D/g, "")}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-100 hover:border-emerald-250 text-xs font-bold transition-all mt-1 cursor-pointer"
+                                >
+                                    <MessageCircle className="h-4 w-4 shrink-0 text-emerald-600" />
+                                    {maskPhone(paciente.phone)}
+                                </a>
+                            ) : (
+                                <span className="text-xs font-semibold text-slate-400 mt-1 block">Não informado</span>
+                            )}
+                        </div>
+
+                        <div>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                Observações
+                            </span>
+                            <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-3 mt-1">
+                                <p className="text-xs text-slate-650 font-semibold leading-relaxed">
+                                    {paciente.observations || <span className="text-slate-400 italic font-normal">Nenhuma observação cadastrada.</span>}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                        <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
+                            <FileText className="h-4.5 w-4.5 text-slate-500" />
+                            Últimas Evoluções
+                        </h3>
+                        <Link
+                            href={`/admin/pacientes/${id}/evolucao`}
+                            className={cn(
+                                buttonVariants({ variant: "outline", size: "sm" }),
+                                "rounded-xl border-slate-200 text-xs font-bold text-slate-700"
+                            )}
+                        >
+                            <Plus className="mr-1 h-3.5 w-3.5 text-slate-500" /> Adicionar
+                        </Link>
+                    </div>
+
+                    {latestEvolutions.length > 0 ? (
+                        <div className="space-y-3">
+                            {latestEvolutions.map((item) => (
+                                <div key={item.id} className="bg-slate-50/60 hover:bg-slate-50 border border-slate-100 rounded-xl p-3.5 transition-all">
+                                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-750 bg-blue-50 px-2 py-0.5 rounded-md w-fit">
+                                        <span>
+                                            {new Date(item.createdAt).toLocaleDateString("pt-BR")}
+                                        </span>
+                                        <span>•</span>
+                                        <span>
+                                            {new Date(item.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-700 font-medium mt-2 leading-relaxed whitespace-pre-wrap">
+                                        {item.description}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-6 text-center">
+                            <p className="text-xs text-slate-400 font-semibold">
+                                Nenhuma evolução cadastrada para este paciente.
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
-        );
-    }
 
-    return (
-        <ProntuarioContainer
-            paciente={paciente}
-            patientId={id}
-            activeTab={activeTab}
-            initialHistory={activeTab === "evolucao" ? historicoPaciente || [] : undefined}
-            initialAnamnese={activeTab === "anamnese" ? anamnese : undefined}
-            initialOdontogram={activeTab === "odontograma" ? odontogram : undefined}
-        />
-    );
-}
+            <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                        <h3 className="text-base font-black text-slate-900">
+                            Odontograma Interativo
+                        </h3>
+                    </div>
+                    <OdontogramaTab
+                        patientId={id}
+                        initialOdontogram={odontogram}
+                    />
+                </div>
 
-export default async function ProntuarioPage({
-    params,
-    searchParams
-}: {
-    params: Promise<{ id: string }>;
-    searchParams: Promise<{ tab?: string }>;
-}) {
-    return (
-        <Suspense fallback={<ProntuarioSkeleton />}>
-            <ProntuarioContent params={params} searchParams={searchParams} />
-        </Suspense>
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                        <h3 className="text-base font-black text-slate-900">
+                            Histórico de consultas
+                        </h3>
+                        <Link
+                            href={`/admin/pacientes/${id}/agendamentos`}
+                            className={cn(
+                                buttonVariants({ variant: "outline", size: "sm" }),
+                                "rounded-xl border-slate-200 text-xs font-bold text-slate-700"
+                            )}
+                        >
+                            <Plus className="mr-1 h-3.5 w-3.5 text-slate-500" /> Adicionar
+                        </Link>
+                    </div>
+
+                    {appointments.length > 0 ? (
+                        <div className="space-y-3">
+                            {appointments.map((appt) => (
+                                <div
+                                    key={appt.id}
+                                    className={cn(
+                                        "p-3.5 rounded-xl border flex items-center justify-between transition-all",
+                                        appt.status === "CONFIRMADO" && "bg-emerald-50/30 border-emerald-100 hover:bg-emerald-50/50",
+                                        appt.status === "PENDENTE" && "bg-amber-50/30 border-amber-100 hover:bg-amber-50/50",
+                                        appt.status === "CANCELADO" && "bg-rose-50/30 border-rose-100 hover:bg-rose-50/50",
+                                        appt.status === "REALIZADO" && "bg-slate-50/60 border-slate-100 hover:bg-slate-50"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={cn(
+                                            "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs",
+                                            appt.status === "CONFIRMADO" && "bg-emerald-100 text-emerald-700",
+                                            appt.status === "PENDENTE" && "bg-amber-100 text-amber-700",
+                                            appt.status === "CANCELADO" && "bg-rose-100 text-rose-700",
+                                            appt.status === "REALIZADO" && "bg-blue-100 text-blue-750"
+                                        )}>
+                                            <Calendar className="h-4.5 w-4.5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-black text-slate-800">
+                                                {appt.serviceType}
+                                            </p>
+                                            <p className="text-[10px] font-semibold text-slate-500 mt-0.5">
+                                                {new Date(appt.scheduledAt).toLocaleDateString("pt-BR")} às {new Date(appt.scheduledAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span className={cn(
+                                        "text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border shadow-2xs",
+                                        appt.status === "CONFIRMADO" && "bg-emerald-100 text-emerald-800 border-emerald-200",
+                                        appt.status === "PENDENTE" && "bg-amber-100 text-amber-800 border-amber-200",
+                                        appt.status === "CANCELADO" && "bg-rose-100 text-rose-800 border-rose-200",
+                                        appt.status === "REALIZADO" && "bg-slate-100 text-slate-850 border-slate-200"
+                                    )}>
+                                        {appt.status}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-12 flex flex-col items-center justify-center text-center gap-4">
+                            <div className="w-20 h-20 bg-blue-50/50 rounded-full flex items-center justify-center text-blue-500">
+                                <Calendar className="h-10 w-10 text-blue-400" />
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-sm font-black text-slate-700">
+                                    Este paciente ainda não tem consultas agendadas
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 }
