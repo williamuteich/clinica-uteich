@@ -272,3 +272,34 @@ model ProtheticWork {
 
   @@map("trabalhos_proteticos")
 }
+
+model Product {
+  id              String    @id @default(auto()) @map("_id") @db.ObjectId
+  name            String    @map("nome")
+  quantity        Int       @default(0) @map("quantidade")
+  minimumQuantity Int       @default(0) @map("quantidade_minima")
+  expirationDate  DateTime? @map("data_validade")
+  notes           String?   @map("observacoes")
+  createdBy       String    @map("created_by") @db.ObjectId
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  movements StockMovement[]
+
+  @@map("produtos")
+}
+
+model StockMovement {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId   String   @map("produto_id") @db.ObjectId
+  productName String   @map("nome_produto")
+  quantity    Int?     @map("quantidade")
+  type        String   @map("tipo")
+  notes       String?  @map("observacoes")
+  performedBy String   @map("realizado_por")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("movimentacoes_estoque")
+}
