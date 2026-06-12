@@ -119,7 +119,7 @@ async function _DELETE(request: Request, { params }: { params: Promise<{ id: str
             }
         });
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json(original);
     } catch (error) {
         console.error("Erro ao excluir trabalho protético:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -128,5 +128,5 @@ async function _DELETE(request: Request, { params }: { params: Promise<{ id: str
 
 export const DELETE = withAudit(_DELETE, {
     resource: "pacientes",
-    getResourceName: (data: any) => `Trabalho Removido: ${data.id}`,
+    getResourceName: (data: any) => data?.workName ? `Trabalho removido: ${data.workName}` : "Trabalho removido",
 });
