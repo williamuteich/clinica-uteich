@@ -7,12 +7,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Pencil, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Search, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { PacientesResponse, PacienteFilters } from "@/src/types/dashboard/pacientes";
 import Link from "next/link";
 import { ToastContainer } from "react-toastify";
 import { CreatePacienteDialog } from "./create-paciente-dialog";
-import { PacienteHistoricoDialog } from "./paciente-historico-dialog";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { getPacientes, deletePaciente } from "@/src/services/pacientes";
@@ -22,7 +21,6 @@ const PacienteRow = memo(({
     paciente,
     isPending,
     onDeleteSuccess,
-    filters
 }: {
     paciente: any;
     isPending: boolean;
@@ -44,10 +42,9 @@ const PacienteRow = memo(({
             </TableCell>
             <TableCell className="text-right">
                 <div className="flex justify-end gap-1">
-                    <PacienteHistoricoDialog pacienteId={paciente.id} pacienteName={paciente.name} />
                     <Link href={`/admin/pacientes/${paciente.id}`} title="Acessar Prontuário">
                         <Button variant="ghost" size="icon-sm" type="button">
-                            <Pencil className="h-4 w-4 text-blue-500" />
+                            <FileText className="h-4 w-4 text-slate-500" />
                         </Button>
                     </Link>
                     <DeleteDialogGeneric
