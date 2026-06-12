@@ -72,3 +72,8 @@ export interface ToothDiagnosisModalProps {
     onToothNoteUpdate: (notes: string) => void;
     onConfirm: () => void;
 }
+
+export interface PatientAppointmentsSectionProps {
+    patientId: string;
+    initialAppointments: Appointment[];
+}

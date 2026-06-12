@@ -7,7 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { Loader2, Search, ChevronLeft, ChevronRight, FileText, User } from "lucide-react";
 import { PacientesResponse, PacienteFilters } from "@/src/types/dashboard/pacientes";
 import Link from "next/link";
 import { ToastContainer } from "react-toastify";
@@ -29,10 +29,17 @@ const PacienteRow = memo(({
 }) => {
     return (
         <TableRow className={`hover:bg-muted/30 transition-opacity ${isPending ? "opacity-50" : ""}`}>
-            <TableCell className="font-medium text-slate-800">{paciente.name}</TableCell>
-            <TableCell className="text-sm text-slate-500 font-mono">{maskCPF(paciente.cpf)}</TableCell>
-            <TableCell className="text-sm">{maskPhone(paciente.phone)}</TableCell>
-            <TableCell>
+            <TableCell className="font-semibold text-slate-800 py-4 pl-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-2xs">
+                        <User className="h-4 w-4" />
+                    </div>
+                    <span className="font-bold text-slate-700">{paciente.name}</span>
+                </div>
+            </TableCell>
+            <TableCell className="text-sm text-slate-500 font-mono py-4">{maskCPF(paciente.cpf)}</TableCell>
+            <TableCell className="text-sm py-4">{maskPhone(paciente.phone)}</TableCell>
+            <TableCell className="py-4">
                 <Badge
                     variant={paciente.active ? "default" : "secondary"}
                     className={paciente.active ? "bg-emerald-500/10 text-emerald-600 border-emerald-200/50" : ""}
@@ -40,7 +47,7 @@ const PacienteRow = memo(({
                     {paciente.active ? "Ativo" : "Inativo"}
                 </Badge>
             </TableCell>
-            <TableCell className="text-right">
+            <TableCell className="text-right py-4 pr-4">
                 <div className="flex justify-end gap-1">
                     <Link href={`/admin/pacientes/${paciente.id}`} title="Acessar Prontuário">
                         <Button variant="ghost" size="icon-sm" type="button">
@@ -120,15 +127,15 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                 <CreatePacienteDialog onCreateSuccess={() => fetchPacientes(filters)} />
             </div>
 
-            <div className="rounded-xl border bg-card/50 overflow-hidden shadow-sm">
+            <div className="border rounded-xl bg-white shadow-xs overflow-hidden">
                 <Table>
-                    <TableHeader className="bg-muted/50">
-                        <TableRow>
-                            <TableHead>Paciente</TableHead>
-                            <TableHead>CPF</TableHead>
-                            <TableHead>Telefone</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="text-right">Ações</TableHead>
+                    <TableHeader className="bg-slate-900 border-none">
+                        <TableRow className="hover:bg-transparent border-none">
+                            <TableHead className="font-bold text-slate-100 py-3.5 rounded-tl-xl pl-4">Paciente</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">CPF</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Telefone</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Status</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5 text-right pr-4 rounded-tr-xl">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -153,14 +160,14 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                 </Table>
 
                 {data.totalPages > 1 && (
-                    <div className="p-4 border-t bg-muted/20 flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
+                    <div className="p-4 border-t bg-slate-50/50 flex items-center justify-between">
+                        <div className="text-sm text-slate-500 font-medium">
                             Mostrando{" "}
-                            <span className="font-medium">{(data.page - 1) * data.limit + 1}</span>–
-                            <span className="font-medium">
+                            <span className="font-bold text-slate-700">{(data.page - 1) * data.limit + 1}</span>–
+                            <span className="font-bold text-slate-700">
                                 {Math.min(data.page * data.limit, data.total)}
                             </span>{" "}
-                            de <span className="font-medium">{data.total}</span> pacientes
+                            de <span className="font-bold text-slate-700">{data.total}</span> pacientes
                         </div>
                         <div className="flex items-center gap-2">
                             <Button
@@ -171,7 +178,7 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                             >
                                 <ChevronLeft className="h-4 w-4" /> Anterior
                             </Button>
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-bold text-slate-700">
                                 {data.page} / {data.totalPages}
                             </span>
                             <Button

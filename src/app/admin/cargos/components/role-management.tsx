@@ -148,23 +148,23 @@ export function RoleManagement({ initialRoles }: { initialRoles: Role[] }) {
                 </Dialog>
             </div>
 
-            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden">
+            <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
                 <Table>
-                    <TableHeader className="bg-muted/50">
-                        <TableRow>
-                            <TableHead>Cargo</TableHead>
-                            <TableHead>Descrição</TableHead>
-                            <TableHead>Permissões</TableHead>
-                            <TableHead className="text-right">Ações</TableHead>
+                    <TableHeader className="bg-slate-900 border-none">
+                        <TableRow className="hover:bg-transparent border-none">
+                            <TableHead className="font-bold text-slate-100 py-3.5 rounded-tl-xl pl-4">Cargo</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Descrição</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Permissões</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5 text-right pr-4 rounded-tr-xl">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {roles.map((role) => (
                             <TableRow key={role.id} className={`hover:bg-muted/30 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
-                                <TableCell className="font-bold text-slate-800">{role.name}</TableCell>
-                                <TableCell className="text-sm text-slate-500">{role.description || "-"}</TableCell>
-                                <TableCell><ViewPermissions permissions={role.permissions} roleName={role.name} /></TableCell>
-                                <TableCell className="text-right">
+                                <TableCell className="font-bold text-slate-850 py-4 pl-4">{role.name}</TableCell>
+                                <TableCell className="text-sm text-slate-500 py-4">{role.description || "-"}</TableCell>
+                                <TableCell className="py-4"><ViewPermissions permissions={role.permissions} roleName={role.name} /></TableCell>
+                                <TableCell className="text-right py-4 pr-4">
                                     <div className="flex justify-end gap-2">
                                         {role.name !== "Admin" ? (
                                             <>

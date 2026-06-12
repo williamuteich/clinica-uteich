@@ -109,16 +109,16 @@ export function AuditManagement({
 
 
 
-            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden shadow-sm">
+            <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
                 <Table>
-                    <TableHeader className="bg-muted/50">
-                        <TableRow>
-                            <TableHead className="w-[180px]">Usuário</TableHead>
-                            <TableHead className="w-[120px]">Ação</TableHead>
-                            <TableHead>Recurso</TableHead>
-                            <TableHead>Alvo (Nome)</TableHead>
-                            <TableHead className="hidden md:table-cell">Caminho</TableHead>
-                            <TableHead className="text-right">Horário</TableHead>
+                    <TableHeader className="bg-slate-900 border-none">
+                        <TableRow className="hover:bg-transparent border-none">
+                            <TableHead className="w-[180px] font-bold text-slate-100 py-3.5 rounded-tl-xl pl-4">Usuário</TableHead>
+                            <TableHead className="w-[120px] font-bold text-slate-100 py-3.5">Ação</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Recurso</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Alvo (Nome)</TableHead>
+                            <TableHead className="hidden md:table-cell font-bold text-slate-100 py-3.5">Caminho</TableHead>
+                            <TableHead className="text-right font-bold text-slate-100 py-3.5 pr-4 rounded-tr-xl">Horário</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -131,34 +131,34 @@ export function AuditManagement({
                         ) : (
                             data.logs.map((log) => (
                                 <TableRow key={log.id} className="hover:bg-muted/30 transition-colors">
-                                    <TableCell>
+                                    <TableCell className="py-4 pl-4">
                                         <div className="flex flex-col">
-                                            <span className="font-medium text-slate-800 flex items-center gap-1.5">
-                                                <User className="h-3 w-3 text-slate-400" /> {log.administrator.name || "Sem nome"}
+                                            <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                                                <User className="h-3.5 w-3.5 text-slate-400" /> {log.administrator.name || "Sem nome"}
                                             </span>
-                                            <span className="text-[10px] text-muted-foreground">{log.administrator.role?.name || "Master"}</span>
+                                            <span className="text-[10px] text-muted-foreground font-semibold">{log.administrator.role?.name || "Master"}</span>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{getActionBadge(log.action)}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-4">{getActionBadge(log.action)}</TableCell>
+                                    <TableCell className="py-4">
                                         <div className="flex items-center gap-1.5 font-medium text-slate-700 capitalize">
-                                            <FileText className="h-3 w-3 text-slate-400" /> {log.resource === "usuarios" ? "Usuários" : log.resource === "cargos" ? "Cargos" : log.resource}
+                                            <FileText className="h-3.5 w-3.5 text-slate-400" /> {log.resource === "usuarios" ? "Usuários" : log.resource === "cargos" ? "Cargos" : log.resource}
                                         </div>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="py-4">
                                         <span className="font-semibold text-slate-900">
                                             {log.resourceName || log.resourceId || "-"}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="hidden md:table-cell">
+                                    <TableCell className="hidden md:table-cell py-4">
                                         <span className="text-xs text-muted-foreground font-mono">{log.url}</span>
                                     </TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="text-right py-4 pr-4">
                                         <div className="flex flex-col items-end">
-                                            <span className="text-sm font-medium text-slate-700">
+                                            <span className="text-sm font-semibold text-slate-700">
                                                 {new Date(log.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                                             </span>
-                                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                                            <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-semibold mt-0.5">
                                                 <CalendarIcon className="h-2.5 w-2.5" /> {new Date(log.createdAt).toLocaleDateString("pt-BR")}
                                             </span>
                                         </div>

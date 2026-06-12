@@ -26,10 +26,6 @@ export function PatientNavTabs({ patientId }: PatientNavTabsProps) {
             href: `/admin/pacientes/${patientId}/evolucao`,
         },
         {
-            name: "Agendamentos",
-            href: `/admin/pacientes/${patientId}/agendamentos`,
-        },
-        {
             name: "Ficha Cadastral",
             href: `/admin/pacientes/${patientId}/cadastro`,
         },

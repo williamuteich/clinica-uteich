@@ -34,7 +34,8 @@ import {
     AlertTriangle,
     Search,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    User
 } from "lucide-react";
 import { Admin, Role, AdminsResponse, AdminFilters } from "@/src/types/dashboard/admins";
 import { createAdmin, updateAdmin, deleteAdmin, getAdmins } from "@/src/services/administrator";
@@ -174,16 +175,16 @@ export function AdminManagement({
                 </Dialog>
             </div>
 
-            <div className="rounded-xl border bg-card/50 backdrop-blur-sm overflow-hidden shadow-sm">
+            <div className="rounded-xl border bg-white overflow-hidden shadow-sm">
                 <Table>
-                    <TableHeader className="bg-muted/50">
-                        <TableRow>
-                            <TableHead>Nome</TableHead>
-                            <TableHead>E-mail</TableHead>
-                            <TableHead>Cargo</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead className="flex items-center gap-1"><Clock className="h-3 w-3" /> Último Login</TableHead>
-                            <TableHead className="text-right">Ações</TableHead>
+                    <TableHeader className="bg-slate-900 border-none">
+                        <TableRow className="hover:bg-transparent border-none">
+                            <TableHead className="font-bold text-slate-100 py-3.5 rounded-tl-xl pl-4">Nome</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">E-mail</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Cargo</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Status</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5 flex items-center gap-1"><Clock className="h-3.5 w-3.5 text-slate-200" /> Último Login</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5 text-right pr-4 rounded-tr-xl">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -196,9 +197,25 @@ export function AdminManagement({
                         ) : (
                             data.admins.map((admin) => (
                                 <TableRow key={admin.id} className={`hover:bg-muted/30 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
-                                    <TableCell className="font-medium text-slate-800">{admin.name || "Sem nome"}</TableCell>
-                                    <TableCell><div className="flex items-center gap-2 text-slate-600 italic"><Mail className="h-3 w-3" /> {admin.email}</div></TableCell>
-                                    <TableCell>
+                                    <TableCell className="font-semibold text-slate-800 py-4 pl-4">
+                                        <div className="flex items-center gap-3">
+                                            {admin.image ? (
+                                                <img
+                                                    src={admin.image}
+                                                    alt={admin.name || ""}
+                                                    className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-200/80 shadow-2xs"
+                                                    referrerPolicy="no-referrer"
+                                                />
+                                            ) : (
+                                                <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-2xs">
+                                                    <User className="h-4 w-4" />
+                                                </div>
+                                            )}
+                                            <span className="font-bold text-slate-700">{admin.name || "Sem nome"}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="py-4"><div className="flex items-center gap-2 text-slate-600 italic"><Mail className="h-3.5 w-3.5" /> {admin.email}</div></TableCell>
+                                    <TableCell className="py-4">
                                         {admin.role ? (
                                             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit text-[11px] font-bold tracking-tight shadow-sm ${admin.role.name === "Admin" ? "text-amber-700 bg-amber-50 border border-amber-200" : "text-blue-700 bg-blue-50 border border-blue-100"}`}>
                                                 <ShieldCheck className="h-3 w-3" /> {admin.role.name}
@@ -209,9 +226,9 @@ export function AdminManagement({
                                             </div>
                                         )}
                                     </TableCell>
-                                    <TableCell><Badge variant={admin.active ? "default" : "secondary"} className={admin.active ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200/50" : ""}>{admin.active ? "Ativo" : "Inativo"}</Badge></TableCell>
-                                    <TableCell className="text-xs text-muted-foreground">{admin.lastLogin ? new Date(admin.lastLogin).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Nunca logou"}</TableCell>
-                                    <TableCell className="text-right">
+                                    <TableCell className="py-4"><Badge variant={admin.active ? "default" : "secondary"} className={admin.active ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200/50" : ""}>{admin.active ? "Ativo" : "Inativo"}</Badge></TableCell>
+                                    <TableCell className="text-xs text-slate-500 py-4 font-medium">{admin.lastLogin ? new Date(admin.lastLogin).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Nunca logou"}</TableCell>
+                                    <TableCell className="text-right py-4 pr-4">
                                         <div className="flex justify-end gap-2">
                                             {admin.email !== "williamuteich14@gmail.com" ? (
                                                 <>

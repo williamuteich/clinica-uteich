@@ -120,13 +120,13 @@ export default function CalendarGrid({
             />
 
             <div className="bg-white border border-slate-200 rounded-2xl shadow-md overflow-hidden">
-                <div className="grid grid-cols-7 border-b bg-slate-50/80">
+                <div className="grid grid-cols-7 bg-slate-900 border-b border-slate-950">
                     {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((day, idx) => (
                         <div
                             key={day}
                             className={cn(
-                                "py-3 text-center text-[10px] font-black uppercase tracking-wider border-r border-slate-200/80 last:border-r-0",
-                                idx === 0 || idx === 6 ? "text-slate-400" : "text-slate-500"
+                                "py-3 text-center text-[10px] font-black uppercase tracking-wider border-r border-slate-800 last:border-r-0",
+                                idx === 0 || idx === 6 ? "text-slate-350" : "text-slate-100"
                             )}
                         >
                             {day}

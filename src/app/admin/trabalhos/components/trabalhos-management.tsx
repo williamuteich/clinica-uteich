@@ -168,13 +168,13 @@ export function TrabalhosManagement({
 
             <div className="rounded-xl border bg-white overflow-hidden shadow-xs">
                 <Table>
-                    <TableHeader className="bg-slate-50">
-                        <TableRow>
-                            <TableHead className="font-bold text-slate-700">Trabalho / Lab</TableHead>
-                            <TableHead className="font-bold text-slate-700">Paciente</TableHead>
-                            <TableHead className="font-bold text-slate-700">Data Envio</TableHead>
-                            <TableHead className="font-bold text-slate-700">Status</TableHead>
-                            <TableHead className="text-right font-bold text-slate-700">Ações</TableHead>
+                    <TableHeader className="bg-slate-900 border-none">
+                        <TableRow className="hover:bg-transparent border-none">
+                            <TableHead className="font-bold text-slate-100 py-3.5 rounded-tl-xl pl-4">Trabalho / Lab</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Paciente</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Data Envio</TableHead>
+                            <TableHead className="font-bold text-slate-100 py-3.5">Status</TableHead>
+                            <TableHead className="text-right font-bold text-slate-100 py-3.5 pr-4 rounded-tr-xl">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -189,14 +189,14 @@ export function TrabalhosManagement({
                                 const statusCfg = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.PENDENTE;
                                 return (
                                     <TableRow key={t.id} className="hover:bg-slate-50/50 transition-colors">
-                                        <TableCell>
+                                        <TableCell className="py-4 pl-4">
                                             <div className="font-bold text-slate-800">{t.nomeTrabalho}</div>
                                             <div className="text-xs text-slate-400 font-medium">Destino: <span className="font-semibold text-slate-600">{t.laboratorio}</span></div>
                                             {t.dentesEnvolvidos && (
                                                 <div className="text-[10px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded w-fit mt-1">Dentes: {t.dentesEnvolvidos}</div>
                                             )}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="py-4">
                                             {t.pacienteId ? (
                                                 <Link href={`/admin/pacientes/${t.pacienteId}`} className="font-semibold text-blue-600 hover:underline">
                                                     {t.nomePaciente}
@@ -206,14 +206,14 @@ export function TrabalhosManagement({
                                             )}
                                             {t.cpfPaciente && <div className="text-[10px] text-slate-400 font-mono mt-0.5">{maskCPF(t.cpfPaciente)}</div>}
                                         </TableCell>
-                                        <TableCell className="text-slate-500 font-medium text-sm">{formatDate(t.dataEnvio)}</TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-slate-500 font-medium text-sm py-4">{formatDate(t.dataEnvio)}</TableCell>
+                                        <TableCell className="py-4">
                                             <Badge className={`flex items-center gap-1 w-fit rounded-lg ${statusCfg.className}`}>
                                                 {statusCfg.icon}
                                                 {statusCfg.label}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right py-4 pr-4">
                                             <div className="flex justify-end gap-1.5">
                                                 {t.status === "PENDENTE" && (
                                                     <Button

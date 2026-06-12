@@ -130,8 +130,14 @@ export default function AnamneseForm({ patientId, initialAnamnese }: AnamneseFor
         });
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+        if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT") {
+            e.preventDefault();
+        }
+    };
+
     return (
-        <form onSubmit={handleSave} className="space-y-6 w-full animate-in fade-in duration-300">
+        <form onSubmit={handleSave} onKeyDown={handleKeyDown} className="space-y-6 w-full animate-in fade-in duration-300">
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-3">

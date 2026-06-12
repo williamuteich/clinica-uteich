@@ -17,6 +17,7 @@ import {
 import { PatientPageProps } from "@/src/types/dashboard/pacientes";
 import { TasksModal } from "./components/tasks-modal";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
+import { PatientAppointmentsSection } from "./components/patient-appointments-section";
 
 
 export default async function PatientOverviewPage({ params }: PatientPageProps) {
@@ -26,7 +27,7 @@ export default async function PatientOverviewPage({ params }: PatientPageProps) 
         getPaciente(id),
         getOdontogramaPaciente(id),
         getHistoricoPaciente(id),
-        getAgendamentos({ patientId: id, page: 1, limit: 5 }),
+        getAgendamentos({ patientId: id, page: 1, limit: 100 }),
     ]);
 
     if (!paciente) return null;
@@ -118,6 +119,8 @@ export default async function PatientOverviewPage({ params }: PatientPageProps) 
                     </div>
                 </div>
 
+                <PatientAppointmentsSection patientId={id} initialAppointments={appointments} />
+
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
                         <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
@@ -175,80 +178,6 @@ export default async function PatientOverviewPage({ params }: PatientPageProps) 
                         patientId={id}
                         initialOdontogram={odontogram}
                     />
-                </div>
-
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-                    <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
-                        <h3 className="text-base font-black text-slate-900">
-                            Histórico de consultas
-                        </h3>
-                        <Link
-                            href={`/admin/pacientes/${id}/agendamentos`}
-                            className={cn(
-                                buttonVariants({ variant: "outline", size: "sm" }),
-                                "rounded-xl border-slate-200 text-xs font-bold text-slate-700"
-                            )}
-                        >
-                            <Plus className="mr-1 h-3.5 w-3.5 text-slate-500" /> Adicionar
-                        </Link>
-                    </div>
-
-                    {appointments.length > 0 ? (
-                        <div className="space-y-3">
-                            {appointments.map((appt) => (
-                                <div
-                                    key={appt.id}
-                                    className={cn(
-                                        "p-3.5 rounded-xl border flex items-center justify-between transition-all",
-                                        appt.status === "CONFIRMADO" && "bg-emerald-50/30 border-emerald-100 hover:bg-emerald-50/50",
-                                        appt.status === "PENDENTE" && "bg-amber-50/30 border-amber-100 hover:bg-amber-50/50",
-                                        appt.status === "CANCELADO" && "bg-rose-50/30 border-rose-100 hover:bg-rose-50/50",
-                                        appt.status === "REALIZADO" && "bg-slate-50/60 border-slate-100 hover:bg-slate-50"
-                                    )}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className={cn(
-                                            "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-xs",
-                                            appt.status === "CONFIRMADO" && "bg-emerald-100 text-emerald-700",
-                                            appt.status === "PENDENTE" && "bg-amber-100 text-amber-700",
-                                            appt.status === "CANCELADO" && "bg-rose-100 text-rose-700",
-                                            appt.status === "REALIZADO" && "bg-blue-100 text-blue-750"
-                                        )}>
-                                            <Calendar className="h-4.5 w-4.5" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-black text-slate-800">
-                                                {appt.serviceType}
-                                            </p>
-                                            <p className="text-[10px] font-semibold text-slate-500 mt-0.5">
-                                                {new Date(appt.scheduledAt).toLocaleDateString("pt-BR")} às {new Date(appt.scheduledAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span className={cn(
-                                        "text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-md border shadow-2xs",
-                                        appt.status === "CONFIRMADO" && "bg-emerald-100 text-emerald-800 border-emerald-200",
-                                        appt.status === "PENDENTE" && "bg-amber-100 text-amber-800 border-amber-200",
-                                        appt.status === "CANCELADO" && "bg-rose-100 text-rose-800 border-rose-200",
-                                        appt.status === "REALIZADO" && "bg-slate-100 text-slate-850 border-slate-200"
-                                    )}>
-                                        {appt.status}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="py-12 flex flex-col items-center justify-center text-center gap-4">
-                            <div className="w-20 h-20 bg-blue-50/50 rounded-full flex items-center justify-center text-blue-500">
-                                <Calendar className="h-10 w-10 text-blue-400" />
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-black text-slate-700">
-                                    Este paciente ainda não tem consultas agendadas
-                                </p>
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
