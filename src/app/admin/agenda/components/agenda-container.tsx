@@ -55,9 +55,9 @@ export default function AgendaContainer() {
             if (data.agendamentos) {
                 const mapped: Appointment[] = data.agendamentos.map((apt: any) => {
                     let mappedStatus: "Confirmado" | "Pendente" | "Cancelado" = "Pendente";
-                    if (apt.status === "CONFIRMADO" || apt.status === "REALIZADO") {
+                    if (apt.status === "CONFIRMED" || apt.status === "COMPLETED") {
                         mappedStatus = "Confirmado";
-                    } else if (apt.status === "CANCELADO") {
+                    } else if (apt.status === "CANCELLED") {
                         mappedStatus = "Cancelado";
                     }
 
@@ -93,7 +93,7 @@ export default function AgendaContainer() {
                 prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
             );
 
-            const backendStatus = newStatus === "Confirmado" ? "CONFIRMADO" : "CANCELADO";
+            const backendStatus = newStatus === "Confirmado" ? "CONFIRMED" : "CANCELLED";
             const res = await fetch(`/api/admin/agenda/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -120,8 +120,8 @@ export default function AgendaContainer() {
                 ...(typeof updatedFields.estimatedValue === "number" ? { estimatedValue: updatedFields.estimatedValue } : {}),
 
                 ...(updatedFields.status ? {
-                    status: updatedFields.status === "Confirmado" ? "CONFIRMADO" :
-                        updatedFields.status === "Cancelado" ? "CANCELADO" : "PENDENTE"
+                    status: updatedFields.status === "Confirmado" ? "CONFIRMED" :
+                        updatedFields.status === "Cancelado" ? "CANCELLED" : "PENDING"
                 } : {}),
             };
 
@@ -149,7 +149,7 @@ export default function AgendaContainer() {
                 scheduledAt: scheduledAt.toISOString(),
                 serviceType: apt.procedure,
                 estimatedValue: apt.estimatedValue,
-                status: "PENDENTE",
+                status: "PENDING",
             };
 
             const res = await fetch("/api/admin/agenda", {

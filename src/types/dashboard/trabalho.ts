@@ -1,20 +1,20 @@
-export type Trabalho = {
+export type ProtheticWork = {
     id: string;
-    nomePaciente: string;
-    cpfPaciente?: string | null;
-    pacienteId?: string | null;
-    laboratorio: string;
-    nomeTrabalho: string;
-    descricao?: string | null;
-    status: "PENDENTE" | "CONCLUIDO";
-    dataEnvio: string;
-    dentesEnvolvidos?: string | null;
-    valor?: number | null;
-    observacoes?: string | null;
+    patientName: string;
+    patientCpf?: string | null;
+    patientId?: string | null;
+    laboratory: string;
+    workName: string;
+    description?: string | null;
+    status: "PENDING" | "DONE";
+    sentAt: string;
+    teethInvolved?: string | null;
+    value?: number | null;
+    notes?: string | null;
 };
 
-export type TrabalhosResponse = {
-    trabalhos: Trabalho[];
+export type ProtheticWorksResponse = {
+    protheticWorks: ProtheticWork[];
     total: number;
     page: number;
     totalPages: number;
@@ -22,8 +22,8 @@ export type TrabalhosResponse = {
 };
 
 export type DashboardStats = {
-    pendentes: number;
-    concluidos: number;
+    pending: number;
+    done: number;
 };
 
 export type PatientMatch = {

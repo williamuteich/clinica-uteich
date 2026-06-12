@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
-import { trabalhoSchema } from "@/src/schemas/trabalho";
+import { protheticWorkSchema } from "@/src/schemas/trabalho";
 import { withAudit } from "@/src/lib/audit";
 
 export async function GET(request: Request) {
@@ -21,24 +21,24 @@ export async function GET(request: Request) {
     if (status) where.status = status;
     if (query) {
         where.OR = [
-            { nomePaciente: { contains: query, mode: "insensitive" } },
-            { laboratorio: { contains: query, mode: "insensitive" } },
-            { nomeTrabalho: { contains: query, mode: "insensitive" } },
+            { patientName: { contains: query, mode: "insensitive" } },
+            { laboratory: { contains: query, mode: "insensitive" } },
+            { workName: { contains: query, mode: "insensitive" } },
         ];
     }
 
-    const [trabalhos, total] = await Promise.all([
-        prisma.trabalhoProtetico.findMany({
+    const [protheticWorks, total] = await Promise.all([
+        prisma.protheticWork.findMany({
             where,
             orderBy: { createdAt: "desc" },
             skip: (page - 1) * limit,
             take: limit,
         }),
-        prisma.trabalhoProtetico.count({ where }),
+        prisma.protheticWork.count({ where }),
     ]);
 
     return NextResponse.json({
-        trabalhos,
+        protheticWorks,
         total,
         page,
         totalPages: Math.ceil(total / limit),
@@ -55,28 +55,28 @@ async function _POST(request: Request) {
 
     try {
         const body = await request.json();
-        const validated = trabalhoSchema.safeParse(body);
+        const validated = protheticWorkSchema.safeParse(body);
         if (!validated.success) {
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const { pacienteId, ...rest } = validated.data;
+        const { patientId, ...rest } = validated.data;
 
-        const trabalho = await prisma.$transaction(async (tx) => {
-            const created = await tx.trabalhoProtetico.create({
+        const protheticWork = await prisma.$transaction(async (tx) => {
+            const created = await tx.protheticWork.create({
                 data: {
                     ...rest,
-                    pacienteId: pacienteId || null,
-                    descricao: rest.descricao ?? "",
+                    patientId: patientId || null,
+                    description: rest.description ?? "",
                     createdBy: session.user.id,
                 } as any,
             });
 
-            if (pacienteId) {
+            if (patientId) {
                 await tx.patientHistory.create({
                     data: {
-                        patientId: pacienteId,
-                        description: `Trabalho protético registrado: "${rest.nomeTrabalho}" enviado para o laboratório "${rest.laboratorio}".`,
+                        patientId: patientId,
+                        description: `Trabalho protético registrado: "${rest.workName}" enviado para o laboratório "${rest.laboratory}".`,
                     },
                 });
             }
@@ -84,7 +84,7 @@ async function _POST(request: Request) {
             return created;
         });
 
-        return NextResponse.json(trabalho, { status: 201 });
+        return NextResponse.json(protheticWork, { status: 201 });
     } catch (error) {
         console.error("Erro ao criar trabalho protético:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -93,5 +93,5 @@ async function _POST(request: Request) {
 
 export const POST = withAudit(_POST, {
     resource: "pacientes",
-    getResourceName: (data: any) => `${data.nomeTrabalho} (${data.nomePaciente})`,
+    getResourceName: (data: any) => `${data.workName} (${data.patientName})`,
 });

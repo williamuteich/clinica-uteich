@@ -113,7 +113,7 @@ export function SidebarQuickSchedule() {
                 scheduledAt: new Date(`${date}T${time}:00`).toISOString(),
                 serviceType: finalProcedure,
                 estimatedValue: 0,
-                status: "PENDENTE",
+                status: "PENDING",
             };
 
             await fetch("/api/admin/agenda", {

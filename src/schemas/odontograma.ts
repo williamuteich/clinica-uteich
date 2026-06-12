@@ -1,21 +1,21 @@
 import { z } from "zod";
 
+export const toothStatusEnum = z.enum([
+    "HEALTHY",
+    "CAVITY",
+    "ENDODONTICS",
+    "PROSTHESIS",
+    "IMPLANT",
+    "EXTRACTED",
+    "RETAINED",
+    "OTHER",
+]);
+
 const baseEntitySchema = z.object({
     id: z.string().optional(),
     createdAt: z.date().optional(),
     updatedAt: z.date().optional(),
 });
-
-export const toothStatusEnum = z.enum([
-    "SAUDAVEL",
-    "CARIE",
-    "ENDODONTIA",
-    "PROTESE",
-    "IMPLANTE",
-    "EXTRAIDO",
-    "RETIDO",
-    "OUTRO"
-]);
 
 export const toothSchema = baseEntitySchema.extend({
     odontogramId: z.string().optional(),

@@ -1,31 +1,29 @@
 import { ClipboardList } from "lucide-react";
 import { requirePermission } from "@/src/lib/auth-helpers-server";
-import { getProtheticWorks, getProtheticWorkDashboard } from "@/src/services/trabalhos";
 import { Suspense } from "react";
-import { TrabalhosManagement } from "./components/trabalhos-management";
 
 export const metadata = {
-    title: "Trabalhos Protéticos | Uteich Odontologia",
-    description: "Controle de trabalhos enviados a laboratórios parceiros.",
+    title: "Produtos | Uteich Odontologia",
+    description: "Controle de produtos.",
 };
 
-async function TrabalhosContent() {
-    await requirePermission("pacientes", "visualizar");
+async function ProdutosContent() {
+    await requirePermission("produtos", "visualizar");
 
-    const [initialData, stats] = await Promise.all([
-        getProtheticWorks({ page: 1, limit: 20 }),
-        getProtheticWorkDashboard(),
-    ]);
+    //const [initialData, stats] = await Promise.all([
+    //    getTrabalhos({ page: 1, limit: 20 }),
+    //   getTrabalhoDashboard(),
+    //]);
 
-    return (
-        <TrabalhosManagement
-            initialData={initialData ?? { protheticWorks: [], total: 0, page: 1, limit: 20, totalPages: 0 }}
-            stats={stats ?? { pending: 0, done: 0 }}
-        />
-    );
+    //return (
+    //    <TrabalhosManagement
+    //        initialData={initialData ?? { trabalhos: [], total: 0, page: 1, limit: 20, totalPages: 0 }}
+    //    stats={stats ?? { pendentes: 0, concluidos: 0 }}
+    //    />
+    //);
 }
 
-function TrabalhosSkeleton() {
+function ProdutosSkeleton() {
     return (
         <div className="space-y-6 animate-pulse">
             <div className="grid grid-cols-3 gap-4">
@@ -53,12 +51,12 @@ export default async function TrabalhosPage() {
                     Lab / Envios
                 </h1>
                 <p className="text-muted-foreground mt-2">
-                        Gerencie trabalhos enviados a laboratórios parceiros.
-                    </p>
+                    Gerencie trabalhos enviados a laboratórios parceiros.
+                </p>
             </div>
 
-            <Suspense fallback={<TrabalhosSkeleton />}>
-                <TrabalhosContent />
+            <Suspense fallback={<ProdutosSkeleton />}>
+                <ProdutosSkeleton />
             </Suspense>
         </div>
     );

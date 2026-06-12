@@ -13,10 +13,10 @@ import AgendamentoCreateModal from "./agendamentos-create-modal";
 import { updateAgendamento } from "@/src/services/agendamento";
 
 const statusLabel: Record<Appointment["status"], string> = {
-    PENDENTE: "Pendente",
-    CONFIRMADO: "Confirmado",
-    CANCELADO: "Cancelado",
-    REALIZADO: "Realizado",
+    PENDING: "Pendente",
+    CONFIRMED: "Confirmado",
+    CANCELLED: "Cancelado",
+    COMPLETED: "Realizado",
 };
 
 export default function AgendamentosClient({ patientId, initialAppointments }: { patientId: string; initialAppointments: Appointment[] }) {
@@ -29,7 +29,7 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
     const [editScheduledAt, setEditScheduledAt] = useState("");
     const [editServiceType, setEditServiceType] = useState("");
     const [editEstimatedValue, setEditEstimatedValue] = useState("");
-    const [editStatus, setEditStatus] = useState<Appointment["status"]>("PENDENTE");
+    const [editStatus, setEditStatus] = useState<Appointment["status"]>("PENDING");
 
     const sortedAppointments = useMemo(
         () => [...appointments].sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()),
@@ -38,8 +38,8 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
 
     const summary = useMemo(() => {
         const total = sortedAppointments.length;
-        const confirmed = sortedAppointments.filter((item) => item.status === "CONFIRMADO").length;
-        const pending = sortedAppointments.filter((item) => item.status === "PENDENTE").length;
+        const confirmed = sortedAppointments.filter((item) => item.status === "CONFIRMED").length;
+        const pending = sortedAppointments.filter((item) => item.status === "PENDING").length;
         const totalValue = sortedAppointments.reduce((sum, item) => sum + (Number(item.estimatedValue) || 0), 0);
 
         return { total, confirmed, pending, totalValue };
@@ -167,10 +167,10 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
                                         <Badge
                                             className={cn(
                                                 "font-bold rounded-full px-2.5 py-1 text-[10px] uppercase tracking-wider",
-                                                appt.status === "CONFIRMADO" && "bg-emerald-50 text-emerald-700 border-emerald-100",
-                                                appt.status === "PENDENTE" && "bg-blue-50 text-blue-700 border-blue-100",
-                                                appt.status === "CANCELADO" && "bg-rose-50 text-rose-700 border-rose-100",
-                                                appt.status === "REALIZADO" && "bg-slate-100 text-slate-700 border-slate-200"
+                                                appt.status === "CONFIRMED" && "bg-emerald-50 text-emerald-700 border-emerald-100",
+                                                appt.status === "PENDING" && "bg-blue-50 text-blue-700 border-blue-100",
+                                                appt.status === "CANCELLED" && "bg-rose-50 text-rose-700 border-rose-100",
+                                                appt.status === "COMPLETED" && "bg-slate-100 text-slate-700 border-slate-200"
                                             )}
                                         >
                                             {statusLabel[appt.status]}
@@ -243,10 +243,10 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
                                         onChange={(e) => setEditStatus(e.target.value as Appointment["status"])}
                                         className="w-full h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                     >
-                                        <option value="PENDENTE">Pendente</option>
-                                        <option value="CONFIRMADO">Confirmado</option>
-                                        <option value="CANCELADO">Cancelado</option>
-                                        <option value="REALIZADO">Realizado</option>
+                                        <option value="PENDING">Pendente</option>
+                                        <option value="CONFIRMED">Confirmado</option>
+                                        <option value="CANCELLED">Cancelado</option>
+                                        <option value="COMPLETED">Realizado</option>
                                     </select>
                                     <div className="md:col-span-2 flex justify-end gap-2">
                                         <Button variant="outline" onClick={() => setEditingId(null)} disabled={isPending} className="rounded-xl border-slate-200">

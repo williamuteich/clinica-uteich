@@ -26,7 +26,7 @@ export function CustomTeethList({
             <h4 className="text-sm font-bold text-slate-800">Dentes Supranumerários e Anomalias</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {customTeeth.map((ct) => {
-                    const conf = statusConfig[(ct.status || "SAUDAVEL") as ToothStatus];
+                    const conf = statusConfig[(ct.status || "HEALTHY") as ToothStatus];
                     return (
                         <div
                             key={ct.id}

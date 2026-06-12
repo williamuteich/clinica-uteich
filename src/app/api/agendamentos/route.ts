@@ -25,7 +25,7 @@ export async function GET(request: Request) {
           lte: endDate,
         },
         status: {
-          not: "CANCELADO",
+          not: "CANCELLED",
         },
       },
       select: {
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
           lte: endDate,
         },
         status: {
-          not: "CANCELADO",
+          not: "CANCELLED",
         },
       },
     });
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
         serviceType: encryptedServiceType,
         estimatedValue: 0,
         description,
-        status: "PENDENTE",
+        status: "PENDING",
       },
     });
 

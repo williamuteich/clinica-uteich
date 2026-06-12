@@ -63,7 +63,7 @@ export interface Appointment {
   scheduledAt: string;
   serviceType: string;
   estimatedValue: number;
-  status: "PENDENTE" | "CONFIRMADO" | "CANCELADO" | "REALIZADO";
+  status: "PENDING" | "CONFIRMED" | "CANCELLED" | "COMPLETED";
   description?: string | null;
   createdAt: string;
   updatedAt: string;

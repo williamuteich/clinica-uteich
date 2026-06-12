@@ -8,10 +8,10 @@ import {
     Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger
 } from "@/components/ui/dialog";
 import { Loader2, Plus, FlaskConical } from "lucide-react";
-import { createTrabalho, updateTrabalho } from "@/src/services/trabalhos";
+import { createProtheticWork, updateProtheticWork } from "@/src/services/trabalhos";
 import { toast } from "react-toastify";
 import { maskCPF, maskCurrency, rawCurrency } from "@/src/lib/masks";
-import { Trabalho, PatientMatch } from "@/src/types/dashboard/trabalho";
+import { ProtheticWork, PatientMatch } from "@/src/types/dashboard/trabalho";
 
 function toDateInputValue(dateStr?: string | null) {
     if (!dateStr) return "";
@@ -23,7 +23,7 @@ export function TrabalhoFormDialog({
     onSuccess,
     trigger,
 }: {
-    trabalho?: Trabalho;
+    trabalho?: ProtheticWork;
     onSuccess: () => void;
     trigger?: ReactElement;
 }) {
@@ -31,13 +31,13 @@ export function TrabalhoFormDialog({
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState("");
 
-    const [cpf, setCpf] = useState(trabalho?.cpfPaciente ?? "");
+    const [cpf, setCpf] = useState(trabalho?.patientCpf ?? "");
     const [patientMatch, setPatientMatch] = useState<PatientMatch | null>(null);
     const [searchingPatient, setSearchingPatient] = useState(false);
     const [patientSearched, setPatientSearched] = useState(false);
 
-    const initialValor = trabalho?.valor
-        ? maskCurrency(String(Math.round(trabalho.valor * 100)))
+    const initialValor = trabalho?.value
+        ? maskCurrency(String(Math.round(trabalho.value * 100)))
         : "";
     const [valorDisplay, setValorDisplay] = useState(initialValor);
 
@@ -45,7 +45,7 @@ export function TrabalhoFormDialog({
 
     const reset = () => {
         setError("");
-        setCpf(trabalho?.cpfPaciente ?? "");
+        setCpf(trabalho?.patientCpf ?? "");
         setPatientMatch(null);
         setPatientSearched(false);
         setValorDisplay(initialValor);
@@ -92,23 +92,23 @@ export function TrabalhoFormDialog({
         const fd = new FormData(e.currentTarget);
 
         const payload = {
-            pacienteId: patientMatch?.id ?? trabalho?.pacienteId ?? null,
-            nomePaciente: patientMatch?.name ?? (fd.get("nomePaciente") as string),
-            cpfPaciente: cpf || null,
-            laboratorio: fd.get("laboratorio") as string,
-            nomeTrabalho: fd.get("nomeTrabalho") as string,
-            descricao: fd.get("descricao") as string,
-            status: (isEdit ? fd.get("status") as Trabalho["status"] : "PENDENTE"),
-            dataEnvio: fd.get("dataEnvio") as string,
-            dentesEnvolvidos: (fd.get("dentesEnvolvidos") as string) || null,
-            valor: valorDisplay ? rawCurrency(valorDisplay) : null,
-            observacoes: (fd.get("observacoes") as string) || null,
+            patientId: patientMatch?.id ?? trabalho?.patientId ?? null,
+            patientName: patientMatch?.name ?? (fd.get("patientName") as string),
+            patientCpf: cpf || null,
+            laboratory: fd.get("laboratory") as string,
+            workName: fd.get("workName") as string,
+            description: fd.get("description") as string,
+            status: (isEdit ? fd.get("status") as ProtheticWork["status"] : "PENDING"),
+            sentAt: fd.get("sentAt") as string,
+            teethInvolved: (fd.get("teethInvolved") as string) || null,
+            value: valorDisplay ? rawCurrency(valorDisplay) : null,
+            notes: (fd.get("notes") as string) || null,
         };
 
         startTransition(async () => {
             const res = isEdit
-                ? await updateTrabalho(trabalho.id, payload)
-                : await createTrabalho(payload);
+                ? await updateProtheticWork(trabalho.id, payload)
+                : await createProtheticWork(payload);
 
             if (res.success) {
                 toast.success(isEdit ? "Trabalho atualizado!" : "Trabalho registrado!");
@@ -182,8 +182,8 @@ export function TrabalhoFormDialog({
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-semibold text-slate-500">Nome do Paciente *</Label>
                                 <Input
-                                    name="nomePaciente"
-                                    defaultValue={patientMatch?.name ?? trabalho?.nomePaciente ?? ""}
+                                    name="patientName"
+                                    defaultValue={patientMatch?.name ?? trabalho?.patientName ?? ""}
                                     placeholder="Nome completo"
                                     required
                                     className="h-10 bg-white w-full"
@@ -197,20 +197,20 @@ export function TrabalhoFormDialog({
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Laboratório Destino *</Label>
-                                <Input name="laboratorio" defaultValue={trabalho?.laboratorio ?? ""} placeholder="Ex: Lab Uteich" required className="h-10 bg-white w-full" />
+                                <Input name="laboratory" defaultValue={trabalho?.laboratory ?? ""} placeholder="Ex: Lab Uteich" required className="h-10 bg-white w-full" />
                             </div>
 
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nome do Trabalho *</Label>
-                                <Input name="nomeTrabalho" defaultValue={trabalho?.nomeTrabalho ?? ""} placeholder="Ex: Prótese dente 11" required className="h-10 bg-white w-full" />
+                                <Input name="workName" defaultValue={trabalho?.workName ?? ""} placeholder="Ex: Prótese dente 11" required className="h-10 bg-white w-full" />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Descrição <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                             <textarea
-                                name="descricao"
-                                defaultValue={trabalho?.descricao ?? ""}
+                                name="description"
+                                defaultValue={trabalho?.description ?? ""}
                                 placeholder="Detalhes técnicos (ex: cor A2, ombro cerâmico)..."
                                 className="flex min-h-[70px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             />
@@ -224,8 +224,8 @@ export function TrabalhoFormDialog({
                                     defaultValue={trabalho.status}
                                     className="w-full h-10 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="PENDENTE">Pendente</option>
-                                    <option value="CONCLUIDO">Concluído</option>
+                                    <option value="PENDING">Pendente</option>
+                                    <option value="DONE">Concluído</option>
                                 </select>
                             </div>
                         )}
@@ -234,9 +234,9 @@ export function TrabalhoFormDialog({
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Data de Envio *</Label>
                                 <Input
-                                    name="dataEnvio"
+                                    name="sentAt"
                                     type="date"
-                                    defaultValue={toDateInputValue(trabalho?.dataEnvio) || new Date().toISOString().slice(0, 10)}
+                                    defaultValue={toDateInputValue(trabalho?.sentAt) || new Date().toISOString().slice(0, 10)}
                                     required
                                     className="h-10 bg-white w-full"
                                 />
@@ -244,7 +244,7 @@ export function TrabalhoFormDialog({
 
                             <div className="space-y-1.5">
                                 <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Dentes <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
-                                <Input name="dentesEnvolvidos" defaultValue={trabalho?.dentesEnvolvidos ?? ""} placeholder="Ex: 11, 21" className="h-10 bg-white w-full" />
+                                <Input name="teethInvolved" defaultValue={trabalho?.teethInvolved ?? ""} placeholder="Ex: 11, 21" className="h-10 bg-white w-full" />
                             </div>
 
                             <div className="space-y-1.5">
@@ -265,8 +265,8 @@ export function TrabalhoFormDialog({
                         <div className="space-y-1.5">
                             <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Observações <span className="text-slate-400 font-normal normal-case">(opcional)</span></Label>
                             <textarea
-                                name="observacoes"
-                                defaultValue={trabalho?.observacoes ?? ""}
+                                name="notes"
+                                defaultValue={trabalho?.notes ?? ""}
                                 placeholder="Ex: paciente tem pressa, cuidado ao encaixar..."
                                 className="flex min-h-[60px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                             />

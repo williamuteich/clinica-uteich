@@ -9,10 +9,10 @@ export async function GET() {
         return NextResponse.json({ error: "Sem permissão" }, { status: 403 });
     }
 
-    const [pendentes, concluidos] = await Promise.all([
-        prisma.trabalhoProtetico.count({ where: { status: "PENDENTE" } }),
-        prisma.trabalhoProtetico.count({ where: { status: "CONCLUIDO" } }),
+    const [pending, done] = await Promise.all([
+        prisma.protheticWork.count({ where: { status: "PENDING" } }),
+        prisma.protheticWork.count({ where: { status: "DONE" } }),
     ]);
 
-    return NextResponse.json({ pendentes, concluidos });
+    return NextResponse.json({ pending, done });
 }

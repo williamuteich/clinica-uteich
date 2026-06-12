@@ -163,7 +163,7 @@ async function _POST(request: Request) {
         scheduledAt: encryptedBody.scheduledAt,
         serviceType: encryptedBody.serviceType,
         estimatedValue: encryptedBody.estimatedValue,
-        status: encryptedBody.status || "PENDENTE",
+        status: encryptedBody.status || "PENDING",
       },
       include: {
         patient: {

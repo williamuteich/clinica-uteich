@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const appointmentStatusSchema = z.enum([
-  "PENDENTE",
-  "CONFIRMADO",
-  "CANCELADO",
-  "REALIZADO",
+  "PENDING",
+  "CONFIRMED",
+  "CANCELLED",
+  "COMPLETED",
 ]);
 
 export const createAppointmentSchema = z
@@ -16,7 +16,7 @@ export const createAppointmentSchema = z
     estimatedValue: z.coerce
       .number({ message: "Valor estimado inválido" })
       .min(0, "Valor estimado não pode ser negativo"),
-    status: appointmentStatusSchema.default("PENDENTE").optional(),
+    status: appointmentStatusSchema.default("PENDING").optional(),
   })
   .refine(
     (data) => {

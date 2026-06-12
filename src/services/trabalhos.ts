@@ -1,11 +1,11 @@
 "use server";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { Trabalho, TrabalhosResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
+import { ProtheticWork, ProtheticWorksResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
 
 const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-export async function getTrabalhos(filters: { page?: number; limit?: number; status?: string; query?: string } = { page: 1, limit: 20 }): Promise<TrabalhosResponse | null> {
+export async function getProtheticWorks(filters: { page?: number; limit?: number; status?: string; query?: string } = { page: 1, limit: 20 }): Promise<ProtheticWorksResponse | null> {
     const cookie = (await headers()).get("cookie") || "";
     const params = new URLSearchParams();
     if (filters.page) params.set("page", String(filters.page));
@@ -24,16 +24,16 @@ export async function getTrabalhos(filters: { page?: number; limit?: number; sta
     return res.json();
 }
 
-export async function getTrabalhoDashboard(): Promise<DashboardStats> {
+export async function getProtheticWorkDashboard(): Promise<DashboardStats> {
     const cookie = (await headers()).get("cookie") || "";
     const res = await fetch(`${API_URL}/api/admin/trabalhos/dashboard`, {
         headers: { Cookie: cookie },
     });
-    if (!res.ok) return { pendentes: 0, concluidos: 0 };
+    if (!res.ok) return { pending: 0, done: 0 };
     return res.json();
 }
 
-export async function createTrabalho(data: Omit<Trabalho, "id">): Promise<{ success: boolean; error?: string }> {
+export async function createProtheticWork(data: Omit<ProtheticWork, "id">): Promise<{ success: boolean; error?: string }> {
     const cookie = (await headers()).get("cookie") || "";
     const res = await fetch(`${API_URL}/api/admin/trabalhos`, {
         method: "POST",
@@ -43,11 +43,11 @@ export async function createTrabalho(data: Omit<Trabalho, "id">): Promise<{ succ
     const result = await res.json();
     if (!res.ok) return { success: false, error: result.error || "Erro ao criar trabalho" };
     revalidatePath("/admin/trabalhos");
-    if (data.pacienteId) revalidatePath(`/admin/pacientes/${data.pacienteId}`);
+    if (data.patientId) revalidatePath(`/admin/pacientes/${data.patientId}`);
     return { success: true };
 }
 
-export async function updateTrabalho(id: string, data: Omit<Trabalho, "id">): Promise<{ success: boolean; error?: string }> {
+export async function updateProtheticWork(id: string, data: Omit<ProtheticWork, "id">): Promise<{ success: boolean; error?: string }> {
     const cookie = (await headers()).get("cookie") || "";
     const res = await fetch(`${API_URL}/api/admin/trabalhos/${id}`, {
         method: "PUT",
@@ -58,11 +58,11 @@ export async function updateTrabalho(id: string, data: Omit<Trabalho, "id">): Pr
     if (!res.ok) return { success: false, error: result.error || "Erro ao atualizar trabalho" };
     revalidatePath("/admin/trabalhos");
     revalidatePath(`/admin/trabalhos/${id}`);
-    if (data.pacienteId) revalidatePath(`/admin/pacientes/${data.pacienteId}`);
+    if (data.patientId) revalidatePath(`/admin/pacientes/${data.patientId}`);
     return { success: true };
 }
 
-export async function deleteTrabalho(id: string, pacienteId?: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteProtheticWork(id: string, patientId?: string): Promise<{ success: boolean; error?: string }> {
     const cookie = (await headers()).get("cookie") || "";
     const res = await fetch(`${API_URL}/api/admin/trabalhos/${id}`, {
         method: "DELETE",
@@ -71,6 +71,6 @@ export async function deleteTrabalho(id: string, pacienteId?: string): Promise<{
     const result = await res.json();
     if (!res.ok) return { success: false, error: result.error || "Erro ao excluir trabalho" };
     revalidatePath("/admin/trabalhos");
-    if (pacienteId) revalidatePath(`/admin/pacientes/${pacienteId}`);
+    if (patientId) revalidatePath(`/admin/pacientes/${patientId}`);
     return { success: true };
 }

@@ -14,13 +14,13 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
     const [scheduledAt, setScheduledAt] = useState("");
     const [serviceType, setServiceType] = useState("");
     const [estimatedValue, setEstimatedValue] = useState("");
-    const [status, setStatus] = useState<CreateAgendamentoInput["status"]>("PENDENTE");
+    const [status, setStatus] = useState<CreateAgendamentoInput["status"]>("PENDING");
 
     const resetForm = () => {
         setScheduledAt("");
         setServiceType("");
         setEstimatedValue("");
-        setStatus("PENDENTE");
+        setStatus("PENDING");
     };
 
     const handleSubmit = () => {
@@ -101,10 +101,10 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
                                 onChange={(e) => setStatus(e.target.value as CreateAgendamentoInput["status"])}
                                 className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
-                                <option value="PENDENTE">Pendente</option>
-                                <option value="CONFIRMADO">Confirmado</option>
-                                <option value="CANCELADO">Cancelado</option>
-                                <option value="REALIZADO">Realizado</option>
+                                <option value="PENDING">Pendente</option>
+                                <option value="CONFIRMED">Confirmado</option>
+                                <option value="CANCELLED">Cancelado</option>
+                                <option value="COMPLETED">Realizado</option>
                             </select>
                         </div>
                     </div>

@@ -19,14 +19,14 @@ const Odontogram = dynamic(
 );
 
 export const statusConfig = {
-    SAUDAVEL: { label: "Saudável", color: "bg-emerald-500", border: "border-emerald-500", text: "text-emerald-700", bgLight: "bg-emerald-50/60", fill: "#ffffff", stroke: "#94a3b8" },
-    CARIE: { label: "Cárie", color: "bg-rose-500", border: "border-rose-500", text: "text-rose-700", bgLight: "bg-rose-50/60", fill: "#ef4444", stroke: "#b91c1c" },
-    ENDODONTIA: { label: "Endodontia", color: "bg-blue-500", border: "border-blue-500", text: "text-blue-700", bgLight: "bg-blue-50/60", fill: "#3b82f6", stroke: "#1d4ed8" },
-    PROTESE: { label: "Prótese", color: "bg-violet-500", border: "border-violet-500", text: "text-violet-700", bgLight: "bg-violet-50/60", fill: "#a855f7", stroke: "#7e22ce" },
-    IMPLANTE: { label: "Implante", color: "bg-amber-500", border: "border-amber-500", text: "text-amber-700", bgLight: "bg-amber-50/60", fill: "#f59e0b", stroke: "#b45309" },
-    EXTRAIDO: { label: "Extraído", color: "bg-slate-400", border: "border-slate-400", text: "text-slate-700", bgLight: "bg-slate-100", fill: "#cbd5e1", stroke: "#475569" },
-    RETIDO: { label: "Retido", color: "bg-orange-500", border: "border-orange-500", text: "text-orange-700", bgLight: "bg-orange-50/60", fill: "#f97316", stroke: "#c2410c" },
-    OUTRO: { label: "Outro", color: "bg-indigo-500", border: "border-indigo-500", text: "text-indigo-700", bgLight: "bg-indigo-50/60", fill: "#6366f1", stroke: "#4338ca" },
+    HEALTHY:     { label: "Saudável",   color: "bg-emerald-500", border: "border-emerald-500", text: "text-emerald-700", bgLight: "bg-emerald-50/60",  fill: "#ffffff", stroke: "#94a3b8" },
+    CAVITY:      { label: "Cárie",      color: "bg-rose-500",    border: "border-rose-500",    text: "text-rose-700",    bgLight: "bg-rose-50/60",     fill: "#ef4444", stroke: "#b91c1c" },
+    ENDODONTICS: { label: "Endodontia", color: "bg-blue-500",    border: "border-blue-500",    text: "text-blue-700",    bgLight: "bg-blue-50/60",     fill: "#3b82f6", stroke: "#1d4ed8" },
+    PROSTHESIS:  { label: "Prótese",    color: "bg-violet-500",  border: "border-violet-500",  text: "text-violet-700",  bgLight: "bg-violet-50/60",   fill: "#a855f7", stroke: "#7e22ce" },
+    IMPLANT:     { label: "Implante",   color: "bg-amber-500",   border: "border-amber-500",   text: "text-amber-700",   bgLight: "bg-amber-50/60",    fill: "#f59e0b", stroke: "#b45309" },
+    EXTRACTED:   { label: "Extraído",   color: "bg-slate-400",   border: "border-slate-400",   text: "text-slate-700",   bgLight: "bg-slate-100",      fill: "#cbd5e1", stroke: "#475569" },
+    RETAINED:    { label: "Retido",     color: "bg-orange-500",  border: "border-orange-500",  text: "text-orange-700",  bgLight: "bg-orange-50/60",   fill: "#f97316", stroke: "#c2410c" },
+    OTHER:       { label: "Outro",      color: "bg-indigo-500",  border: "border-indigo-500",  text: "text-indigo-700",  bgLight: "bg-indigo-50/60",   fill: "#6366f1", stroke: "#4338ca" },
 } satisfies Record<ToothStatus, { label: string; color: string; border: string; text: string; bgLight: string; fill: string; stroke: string }>;
 
 const upperTeethRight = [18, 17, 16, 15, 14, 13, 12, 11];
@@ -52,7 +52,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         const initial: Record<number, ToothInfo> = {};
         const allTeeth = [...upperTeethRight, ...upperTeethLeft, ...lowerTeethLeft, ...lowerTeethRight];
         allTeeth.forEach(t => {
-            initial[t] = { id: t, status: "SAUDAVEL", notes: "" };
+            initial[t] = { id: t, status: "HEALTHY", notes: "" };
         });
 
         if (initialOdontogram && initialOdontogram.teeth) {
@@ -86,7 +86,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
     const [selectedTooth, setSelectedTooth] = useState<number | null>(null);
     const [selectedCustomToothId, setSelectedCustomToothId] = useState<string | null>(null);
 
-    const [tempStatus, setTempStatus] = useState<ToothStatus>("SAUDAVEL");
+    const [tempStatus, setTempStatus] = useState<ToothStatus>("HEALTHY");
     const [tempNotes, setTempNotes] = useState<string>("");
     const [tempCustomDescription, setTempCustomDescription] = useState<string>("");
 
@@ -169,7 +169,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         const payloadTeeth: any[] = [];
 
         Object.values(updatedTeeth).forEach(t => {
-            if (t.status !== "SAUDAVEL" || (t.notes && t.notes.trim() !== "")) {
+            if (t.status !== "HEALTHY" || (t.notes && t.notes.trim() !== "")) {
                 payloadTeeth.push({
                     toothKey: t.id.toString(),
                     isCustom: false,
@@ -216,7 +216,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         setSelectedCustomToothId(newId);
         setSelectedTooth(null);
 
-        setTempStatus("SAUDAVEL");
+        setTempStatus("HEALTHY");
         setTempNotes("");
         setTempCustomDescription("Dente extra detectado");
     };
@@ -280,7 +280,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
         });
 
         Object.values(teeth).forEach(t => {
-            if (t.status !== "SAUDAVEL") {
+            if (t.status !== "HEALTHY") {
                 grouped[t.status].push(`teeth-${t.id}`);
             }
         });
@@ -312,7 +312,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                         setSelectedCustomToothId(null);
 
                         const currentTooth = teeth[toothNumber];
-                        setTempStatus(currentTooth?.status || "SAUDAVEL");
+                        setTempStatus(currentTooth?.status || "HEALTHY");
                         setTempNotes(currentTooth?.notes || "");
                     }, 0);
                 }
@@ -386,7 +386,7 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
                             setSelectedTooth(null);
 
                             const ct = customTeeth.find(x => x.id === id);
-                            setTempStatus(ct?.status || "SAUDAVEL");
+                            setTempStatus(ct?.status || "HEALTHY");
                             setTempNotes(ct?.notes || "");
                             setTempCustomDescription(ct?.description || "");
                         }}

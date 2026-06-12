@@ -1,12 +1,12 @@
 export type ToothStatus =
-    | "SAUDAVEL"
-    | "CARIE"
-    | "ENDODONTIA"
-    | "PROTESE"
-    | "IMPLANTE"
-    | "EXTRAIDO"
-    | "RETIDO"
-    | "OUTRO";
+    | "HEALTHY"
+    | "CAVITY"
+    | "ENDODONTICS"
+    | "PROSTHESIS"
+    | "IMPLANT"
+    | "EXTRACTED"
+    | "RETAINED"
+    | "OTHER";
 
 export interface ITooth {
     id?: string;

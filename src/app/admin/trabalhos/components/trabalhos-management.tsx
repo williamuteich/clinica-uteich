@@ -11,21 +11,21 @@ import {
     Loader2, Search, Pencil,
     CheckCircle2, Clock, ChevronLeft, ChevronRight
 } from "lucide-react";
-import { getTrabalhos, updateTrabalho, deleteTrabalho } from "@/src/services/trabalhos";
+import { getProtheticWorks, updateProtheticWork, deleteProtheticWork } from "@/src/services/trabalhos";
 import { toast, ToastContainer } from "react-toastify";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
 import { maskCPF } from "@/src/lib/masks";
 import Link from "next/link";
-import { Trabalho, TrabalhosResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
+import { ProtheticWork, ProtheticWorksResponse, DashboardStats } from "@/src/types/dashboard/trabalho";
 import { TrabalhoFormDialog } from "./trabalho-form-dialog";
 
 const STATUS_CONFIG = {
-    PENDENTE: {
+    PENDING: {
         label: "Pendente",
         className: "bg-amber-500/10 text-amber-600 border-amber-200/50",
         icon: <Clock className="h-3 w-3" />,
     },
-    CONCLUIDO: {
+    DONE: {
         label: "Concluído",
         className: "bg-emerald-500/10 text-emerald-600 border-emerald-200/50",
         icon: <CheckCircle2 className="h-3 w-3" />,
@@ -41,10 +41,10 @@ export function TrabalhosManagement({
     initialData,
     stats,
 }: {
-    initialData: TrabalhosResponse;
+    initialData: ProtheticWorksResponse;
     stats: DashboardStats;
 }) {
-    const [data, setData] = useState<TrabalhosResponse>(initialData);
+    const [data, setData] = useState<ProtheticWorksResponse>(initialData);
     const [statsData, setStatsData] = useState<DashboardStats>(stats);
     const [filters, setFilters] = useState<any>({ page: 1, limit: 20 });
     const [isPending, startTransition] = useTransition();
@@ -54,7 +54,7 @@ export function TrabalhosManagement({
 
     useEffect(() => {
         const handler = setTimeout(() => {
-            fetchTrabalhos({
+            fetchWorks({
                 page: 1,
                 query: searchTerm || undefined,
                 status: statusFilter || undefined,
@@ -63,9 +63,9 @@ export function TrabalhosManagement({
         return () => clearTimeout(handler);
     }, [searchTerm, statusFilter]);
 
-    const fetchTrabalhos = (newFilters: any) => {
+    const fetchWorks = (newFilters: any) => {
         startTransition(async () => {
-            const result = await getTrabalhos(newFilters);
+            const result = await getProtheticWorks(newFilters);
             if (result) {
                 setData(result);
                 setFilters(newFilters);
@@ -78,24 +78,24 @@ export function TrabalhosManagement({
         });
     };
 
-    const refresh = () => fetchTrabalhos(filters);
+    const refresh = () => fetchWorks(filters);
 
-    const handleQuickStatus = (trabalho: Trabalho, targetStatus: "CONCLUIDO") => {
+    const handleQuickStatus = (work: ProtheticWork, targetStatus: "DONE") => {
         startTransition(async () => {
             const payload = {
-                pacienteId: trabalho.pacienteId,
-                nomePaciente: trabalho.nomePaciente,
-                cpfPaciente: trabalho.cpfPaciente,
-                laboratorio: trabalho.laboratorio,
-                nomeTrabalho: trabalho.nomeTrabalho,
-                descricao: trabalho.descricao,
+                patientId: work.patientId,
+                patientName: work.patientName,
+                patientCpf: work.patientCpf,
+                laboratory: work.laboratory,
+                workName: work.workName,
+                description: work.description,
                 status: targetStatus,
-                dataEnvio: new Date(trabalho.dataEnvio).toISOString().slice(0, 10),
-                dentesEnvolvidos: trabalho.dentesEnvolvidos,
-                valor: trabalho.valor,
-                observacoes: trabalho.observacoes,
+                sentAt: new Date(work.sentAt).toISOString().slice(0, 10),
+                teethInvolved: work.teethInvolved,
+                value: work.value,
+                notes: work.notes,
             };
-            const res = await updateTrabalho(trabalho.id, payload);
+            const res = await updateProtheticWork(work.id, payload);
             if (res.success) {
                 toast.success("Trabalho concluído!");
                 refresh();
@@ -106,8 +106,8 @@ export function TrabalhosManagement({
     };
 
     const deleteWithId = async (id: string) => {
-        const item = data.trabalhos.find(t => t.id === id);
-        return deleteTrabalho(id, item?.pacienteId ?? undefined);
+        const item = data.protheticWorks.find(t => t.id === id);
+        return deleteProtheticWork(id, item?.patientId ?? undefined);
     };
 
     return (
@@ -121,7 +121,7 @@ export function TrabalhosManagement({
                         <Clock className="h-5 w-5 text-amber-500" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-slate-800">{statsData.pendentes}</p>
+                        <p className="text-2xl font-bold text-slate-800">{statsData.pending}</p>
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Pendentes</p>
                     </div>
                 </div>
@@ -131,7 +131,7 @@ export function TrabalhosManagement({
                         <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                        <p className="text-2xl font-bold text-slate-800">{statsData.concluidos}</p>
+                        <p className="text-2xl font-bold text-slate-800">{statsData.done}</p>
                         <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Concluídos</p>
                     </div>
                 </div>
@@ -156,8 +156,8 @@ export function TrabalhosManagement({
                         className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                     >
                         <option value="">Todos os status</option>
-                        <option value="PENDENTE">Pendente</option>
-                        <option value="CONCLUIDO">Concluído</option>
+                        <option value="PENDING">Pendente</option>
+                        <option value="DONE">Concluído</option>
                     </select>
 
                     {isPending && <Loader2 className="h-4 w-4 animate-spin text-blue-500 ml-2" />}
@@ -178,35 +178,35 @@ export function TrabalhosManagement({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {data.trabalhos.length === 0 ? (
+                        {data.protheticWorks.length === 0 ? (
                             <TableRow>
                                 <TableCell colSpan={5} className="h-32 text-center text-slate-400">
                                     Nenhum trabalho registrado ou encontrado.
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            data.trabalhos.map((t) => {
-                                const statusCfg = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.PENDENTE;
+                            data.protheticWorks.map((t) => {
+                                const statusCfg = STATUS_CONFIG[t.status] ?? STATUS_CONFIG.PENDING;
                                 return (
                                     <TableRow key={t.id} className="hover:bg-slate-50/50 transition-colors">
                                         <TableCell className="py-4 pl-4">
-                                            <div className="font-bold text-slate-800">{t.nomeTrabalho}</div>
-                                            <div className="text-xs text-slate-400 font-medium">Destino: <span className="font-semibold text-slate-600">{t.laboratorio}</span></div>
-                                            {t.dentesEnvolvidos && (
-                                                <div className="text-[10px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded w-fit mt-1">Dentes: {t.dentesEnvolvidos}</div>
+                                            <div className="font-bold text-slate-800">{t.workName}</div>
+                                            <div className="text-xs text-slate-400 font-medium">Destino: <span className="font-semibold text-slate-600">{t.laboratory}</span></div>
+                                            {t.teethInvolved && (
+                                                <div className="text-[10px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded w-fit mt-1">Dentes: {t.teethInvolved}</div>
                                             )}
                                         </TableCell>
                                         <TableCell className="py-4">
-                                            {t.pacienteId ? (
-                                                <Link href={`/admin/pacientes/${t.pacienteId}`} className="font-semibold text-blue-600 hover:underline">
-                                                    {t.nomePaciente}
+                                            {t.patientId ? (
+                                                <Link href={`/admin/pacientes/${t.patientId}`} className="font-semibold text-blue-600 hover:underline">
+                                                    {t.patientName}
                                                 </Link>
                                             ) : (
-                                                <span className="font-medium text-slate-700">{t.nomePaciente}</span>
+                                                <span className="font-medium text-slate-700">{t.patientName}</span>
                                             )}
-                                            {t.cpfPaciente && <div className="text-[10px] text-slate-400 font-mono mt-0.5">{maskCPF(t.cpfPaciente)}</div>}
+                                            {t.patientCpf && <div className="text-[10px] text-slate-400 font-mono mt-0.5">{maskCPF(t.patientCpf)}</div>}
                                         </TableCell>
-                                        <TableCell className="text-slate-500 font-medium text-sm py-4">{formatDate(t.dataEnvio)}</TableCell>
+                                        <TableCell className="text-slate-500 font-medium text-sm py-4">{formatDate(t.sentAt)}</TableCell>
                                         <TableCell className="py-4">
                                             <Badge className={`flex items-center gap-1 w-fit rounded-lg ${statusCfg.className}`}>
                                                 {statusCfg.icon}
@@ -215,11 +215,11 @@ export function TrabalhosManagement({
                                         </TableCell>
                                         <TableCell className="text-right py-4 pr-4">
                                             <div className="flex justify-end gap-1.5">
-                                                {t.status === "PENDENTE" && (
+                                                {t.status === "PENDING" && (
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => handleQuickStatus(t, "CONCLUIDO")}
+                                                        onClick={() => handleQuickStatus(t, "DONE")}
                                                         className="h-8 text-xs font-bold border-emerald-200 text-emerald-600 hover:bg-emerald-50 cursor-pointer"
                                                         title="Marcar como Concluído"
                                                     >
@@ -240,7 +240,7 @@ export function TrabalhosManagement({
                                                     onDelete={deleteWithId}
                                                     onSuccess={refresh}
                                                     title="Excluir Registro?"
-                                                    description={`O registro do trabalho "${t.nomeTrabalho}" de ${t.nomePaciente} será excluído permanentemente.`}
+                                                    description={`O registro do trabalho "${t.workName}" de ${t.patientName} será excluído permanentemente.`}
                                                     successMessage="Trabalho removido!"
                                                     errorMessage="Erro ao remover trabalho."
                                                 />
@@ -264,7 +264,7 @@ export function TrabalhosManagement({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => fetchTrabalhos({ ...filters, page: data.page - 1 })}
+                                onClick={() => fetchWorks({ ...filters, page: data.page - 1 })}
                                 disabled={data.page === 1 || isPending}
                             >
                                 <ChevronLeft className="h-4 w-4" /> Anterior
@@ -273,7 +273,7 @@ export function TrabalhosManagement({
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => fetchTrabalhos({ ...filters, page: data.page + 1 })}
+                                onClick={() => fetchWorks({ ...filters, page: data.page + 1 })}
                                 disabled={data.page === data.totalPages || isPending}
                             >
                                 Próximo <ChevronRight className="h-4 w-4" />

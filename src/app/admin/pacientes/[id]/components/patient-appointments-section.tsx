@@ -13,25 +13,25 @@ import { updateAgendamento } from "@/src/services/agendamento";
 import { PatientAppointmentsSectionProps } from "@/src/types/dashboard/components";
 
 const statusThemes: Record<Appointment["status"], { bg: string; text: string; border: string; dot: string }> = {
-    PENDENTE: {
+    PENDING: {
         bg: "bg-amber-50/50",
         text: "text-amber-700",
         border: "border-amber-100",
         dot: "bg-amber-500",
     },
-    CONFIRMADO: {
+    CONFIRMED: {
         bg: "bg-emerald-50/50",
         text: "text-emerald-700",
         border: "border-emerald-100",
         dot: "bg-emerald-500",
     },
-    CANCELADO: {
+    CANCELLED: {
         bg: "bg-rose-50/50",
         text: "text-rose-700",
         border: "border-rose-100",
         dot: "bg-rose-500",
     },
-    REALIZADO: {
+    COMPLETED: {
         bg: "bg-slate-50/60",
         text: "text-slate-700",
         border: "border-slate-200",
@@ -40,10 +40,10 @@ const statusThemes: Record<Appointment["status"], { bg: string; text: string; bo
 };
 
 const statusLabel: Record<Appointment["status"], string> = {
-    PENDENTE: "Pendente",
-    CONFIRMADO: "Confirmado",
-    CANCELADO: "Cancelado",
-    REALIZADO: "Realizado",
+    PENDING: "Pendente",
+    CONFIRMED: "Confirmado",
+    CANCELLED: "Cancelado",
+    COMPLETED: "Realizado",
 };
 
 export function PatientAppointmentsSection({ patientId, initialAppointments }: PatientAppointmentsSectionProps) {
@@ -55,7 +55,7 @@ export function PatientAppointmentsSection({ patientId, initialAppointments }: P
     const [editScheduledAt, setEditScheduledAt] = useState("");
     const [editServiceType, setEditServiceType] = useState("");
     const [editEstimatedValue, setEditEstimatedValue] = useState("");
-    const [editStatus, setEditStatus] = useState<Appointment["status"]>("PENDENTE");
+    const [editStatus, setEditStatus] = useState<Appointment["status"]>("PENDING");
 
     const sortedAppointments = useMemo(
         () => [...appointments].sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime()),
@@ -128,7 +128,7 @@ export function PatientAppointmentsSection({ patientId, initialAppointments }: P
             ) : (
                 <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1 scrollbar-thin">
                     {sortedAppointments.map((appt) => {
-                        const theme = statusThemes[appt.status] || statusThemes.PENDENTE;
+                        const theme = statusThemes[appt.status] || statusThemes.PENDING;
                         const isEditing = editingId === appt.id;
 
                         return (
@@ -147,10 +147,10 @@ export function PatientAppointmentsSection({ patientId, initialAppointments }: P
                                                 <Badge
                                                     className={cn(
                                                         "font-bold rounded-full px-2 py-0.5 text-[9px] uppercase tracking-wider",
-                                                        appt.status === "CONFIRMADO" && "bg-emerald-100 text-emerald-800 border-emerald-250",
-                                                        appt.status === "PENDENTE" && "bg-amber-100 text-amber-800 border-amber-250",
-                                                        appt.status === "CANCELADO" && "bg-rose-100 text-rose-850 border-rose-200",
-                                                        appt.status === "REALIZADO" && "bg-slate-100 text-slate-800 border-slate-350"
+                                                        appt.status === "CONFIRMED" && "bg-emerald-100 text-emerald-800 border-emerald-250",
+                                                        appt.status === "PENDING" && "bg-amber-100 text-amber-800 border-amber-250",
+                                                        appt.status === "CANCELLED" && "bg-rose-100 text-rose-850 border-rose-200",
+                                                        appt.status === "COMPLETED" && "bg-slate-100 text-slate-800 border-slate-350"
                                                     )}
                                                 >
                                                     {statusLabel[appt.status]}
@@ -226,10 +226,10 @@ export function PatientAppointmentsSection({ patientId, initialAppointments }: P
                                                     onChange={(e) => setEditStatus(e.target.value as Appointment["status"])}
                                                     className="w-full h-8 px-2 rounded-lg border border-slate-200 bg-white text-xs outline-none focus:border-blue-500"
                                                 >
-                                                    <option value="PENDENTE">Pendente</option>
-                                                    <option value="CONFIRMADO">Confirmado</option>
-                                                    <option value="CANCELADO">Cancelado</option>
-                                                    <option value="REALIZADO">Realizado</option>
+                                                    <option value="PENDING">Pendente</option>
+                                                    <option value="CONFIRMED">Confirmado</option>
+                                                    <option value="CANCELLED">Cancelado</option>
+                                                    <option value="COMPLETED">Realizado</option>
                                                 </select>
                                             </div>
                                         </div>

@@ -91,12 +91,12 @@ model Patient {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  history      PatientHistory[]
-  anamneses    Anamnese[]
-  odontogram   Odontogram?
-  appointments Appointment[]
-  trabalhos    TrabalhoProtetico[]
-  tasks        PatientTask[]
+  history       PatientHistory[]
+  anamneses     Anamnese[]
+  odontogram    Odontogram?
+  appointments  Appointment[]
+  protheticWork ProtheticWork[]
+  tasks         PatientTask[]
 }
 
 model PatientHistory {
@@ -210,14 +210,14 @@ model Tooth {
 }
 
 enum ToothStatus {
-  SAUDAVEL
-  CARIE
-  ENDODONTIA
-  PROTESE
-  IMPLANTE
-  EXTRAIDO
-  RETIDO
-  OUTRO
+  HEALTHY     @map("SAUDAVEL")
+  CAVITY      @map("CARIE")
+  ENDODONTICS @map("ENDODONTIA")
+  PROSTHESIS  @map("PROTESE")
+  IMPLANT     @map("IMPLANTE")
+  EXTRACTED   @map("EXTRAIDO")
+  RETAINED    @map("RETIDO")
+  OTHER       @map("OUTRO")
 }
 
 model Appointment {
@@ -231,7 +231,7 @@ model Appointment {
   serviceType    String
   estimatedValue Float
   description    String?
-  status         AppointmentStatus @default(PENDENTE)
+  status         AppointmentStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -241,34 +241,34 @@ model Appointment {
 }
 
 enum AppointmentStatus {
-  PENDENTE
-  CONFIRMADO
-  CANCELADO
-  REALIZADO
+  PENDING   @map("PENDENTE")
+  CONFIRMED @map("CONFIRMADO")
+  CANCELLED @map("CANCELADO")
+  COMPLETED @map("REALIZADO")
 }
 
-enum StatusTrabalho {
-  PENDENTE
-  CONCLUIDO
+enum WorkStatus {
+  PENDING @map("PENDENTE")
+  DONE    @map("CONCLUIDO")
 }
 
-model TrabalhoProtetico {
-  id               String         @id @default(auto()) @map("_id") @db.ObjectId
-  pacienteId       String?        @map("paciente_id") @db.ObjectId
-  paciente         Patient?       @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
-  nomePaciente     String         @map("nome_paciente")
-  cpfPaciente      String?        @map("cpf_paciente")
-  laboratorio      String         @map("laboratorio")
-  nomeTrabalho     String         @map("nome_trabalho")
-  descricao        String         @map("descricao")
-  status           StatusTrabalho @default(PENDENTE)
-  dataEnvio        DateTime       @map("data_envio")
-  dentesEnvolvidos String?        @map("dentes_envolvidos")
-  valor            Float?         @map("valor")
-  observacoes      String?        @map("observacoes")
-  createdBy        String         @map("created_by") @db.ObjectId
-  createdAt        DateTime       @default(now()) @map("created_at")
-  updatedAt        DateTime       @updatedAt @map("updated_at")
+model ProtheticWork {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  patientId     String?    @map("paciente_id") @db.ObjectId
+  patient       Patient?   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  patientName   String     @map("nome_paciente")
+  patientCpf    String?    @map("cpf_paciente")
+  laboratory    String     @map("laboratorio")
+  workName      String     @map("nome_trabalho")
+  description   String     @map("descricao")
+  status        WorkStatus @default(PENDING)
+  sentAt        DateTime   @map("data_envio")
+  teethInvolved String?    @map("dentes_envolvidos")
+  value         Float?     @map("valor")
+  notes         String?    @map("observacoes")
+  createdBy     String     @map("created_by") @db.ObjectId
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
 
   @@map("trabalhos_proteticos")
 }

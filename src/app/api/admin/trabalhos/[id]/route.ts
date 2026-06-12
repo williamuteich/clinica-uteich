@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
-import { trabalhoSchema } from "@/src/schemas/trabalho";
+import { protheticWorkSchema } from "@/src/schemas/trabalho";
 import { withAudit } from "@/src/lib/audit";
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -13,15 +13,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
 
-    const trabalho = await prisma.trabalhoProtetico.findUnique({
+    const protheticWork = await prisma.protheticWork.findUnique({
         where: { id },
     });
 
-    if (!trabalho) {
+    if (!protheticWork) {
         return NextResponse.json({ error: "Trabalho protético não encontrado" }, { status: 404 });
     }
 
-    return NextResponse.json(trabalho);
+    return NextResponse.json(protheticWork);
 }
 
 async function _PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -35,14 +35,14 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
 
     try {
         const body = await request.json();
-        const validated = trabalhoSchema.safeParse(body);
+        const validated = protheticWorkSchema.safeParse(body);
         if (!validated.success) {
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const { pacienteId, ...rest } = validated.data;
+        const { patientId, ...rest } = validated.data;
 
-        const original = await prisma.trabalhoProtetico.findUnique({
+        const original = await prisma.protheticWork.findUnique({
             where: { id },
             select: { status: true },
         });
@@ -51,23 +51,23 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
             return NextResponse.json({ error: "Trabalho protético não encontrado" }, { status: 404 });
         }
 
-        const trabalho = await prisma.$transaction(async (tx) => {
-            const updated = await tx.trabalhoProtetico.update({
+        const protheticWork = await prisma.$transaction(async (tx) => {
+            const updated = await tx.protheticWork.update({
                 where: { id },
                 data: {
                     ...rest,
-                    pacienteId: pacienteId || null,
-                    descricao: rest.descricao ?? "",
+                    patientId: patientId || null,
+                    description: rest.description ?? "",
                 } as any,
             });
 
-            if (pacienteId && original.status !== rest.status) {
-                let statusLabel = rest.status === "PENDENTE" ? "Pendente" : "Concluído";
+            if (patientId && original.status !== rest.status) {
+                const statusLabel = rest.status === "PENDING" ? "Pendente" : "Concluído";
 
                 await tx.patientHistory.create({
                     data: {
-                        patientId: pacienteId,
-                        description: `Trabalho protético "${rest.nomeTrabalho}" alterou status para: ${statusLabel}.`,
+                        patientId: patientId,
+                        description: `Trabalho protético "${rest.workName}" alterou status para: ${statusLabel}.`,
                     },
                 });
             }
@@ -75,7 +75,7 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
             return updated;
         });
 
-        return NextResponse.json(trabalho);
+        return NextResponse.json(protheticWork);
     } catch (error) {
         console.error("Erro ao atualizar trabalho protético:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -84,7 +84,7 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
 
 export const PUT = withAudit(_PUT, {
     resource: "pacientes",
-    getResourceName: (data: any) => `${data.nomeTrabalho} (${data.nomePaciente})`,
+    getResourceName: (data: any) => `${data.workName} (${data.patientName})`,
 });
 
 async function _DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -97,9 +97,9 @@ async function _DELETE(request: Request, { params }: { params: Promise<{ id: str
     const { id } = await params;
 
     try {
-        const original = await prisma.trabalhoProtetico.findUnique({
+        const original = await prisma.protheticWork.findUnique({
             where: { id },
-            select: { pacienteId: true, nomeTrabalho: true },
+            select: { patientId: true, workName: true },
         });
 
         if (!original) {
@@ -107,13 +107,13 @@ async function _DELETE(request: Request, { params }: { params: Promise<{ id: str
         }
 
         await prisma.$transaction(async (tx) => {
-            await tx.trabalhoProtetico.delete({ where: { id } });
+            await tx.protheticWork.delete({ where: { id } });
 
-            if (original.pacienteId) {
+            if (original.patientId) {
                 await tx.patientHistory.create({
                     data: {
-                        patientId: original.pacienteId,
-                        description: `Trabalho protético "${original.nomeTrabalho}" foi removido do sistema.`,
+                        patientId: original.patientId,
+                        description: `Trabalho protético "${original.workName}" foi removido do sistema.`,
                     },
                 });
             }
