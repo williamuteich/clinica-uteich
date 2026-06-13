@@ -158,6 +158,9 @@ export interface HistoricoPatientResponse {
 
 export interface CreatePacienteDialogProps {
   onCreateSuccess: () => void;
+  defaultOpen?: boolean;
+  defaultName?: string;
+  defaultPhone?: string;
 }
 
 export interface PacienteHistoricoDialogProps {

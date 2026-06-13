@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Search, ChevronLeft, ChevronRight, FileText, User } from "lucide-react";
 import { PacientesResponse, PacienteFilters } from "@/src/types/dashboard/pacientes";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import { CreatePacienteDialog } from "./create-paciente-dialog";
 import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
@@ -71,6 +72,11 @@ const PacienteRow = memo(({
 PacienteRow.displayName = "PacienteRow";
 
 export function PacientesManagement({ initialData }: { initialData: PacientesResponse }) {
+    const searchParams = useSearchParams();
+    const defaultOpen = searchParams.get("newPatient") === "true" || searchParams.get("cadastrar") === "true";
+    const defaultName = searchParams.get("nome") || searchParams.get("name") || "";
+    const defaultPhone = searchParams.get("telefone") || searchParams.get("phone") || "";
+
     const [data, setData] = useState<PacientesResponse>(initialData);
     const [filters, setFilters] = useState<PacienteFilters>({ page: 1, limit: 20 });
     const [isPending, startTransition] = useTransition();
@@ -124,7 +130,12 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                     </div>
                     {isPending && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
                 </div>
-                <CreatePacienteDialog onCreateSuccess={() => fetchPacientes(filters)} />
+                <CreatePacienteDialog
+                    onCreateSuccess={() => fetchPacientes(filters)}
+                    defaultOpen={defaultOpen}
+                    defaultName={defaultName}
+                    defaultPhone={defaultPhone}
+                />
             </div>
 
             <div className="border rounded-xl bg-white shadow-xs overflow-hidden">

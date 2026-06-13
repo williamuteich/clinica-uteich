@@ -26,6 +26,7 @@ export const pacienteQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(20),
   name: z.string().optional(),
   cpf: z.string().optional(),
+  phone: z.string().optional(),
 });
 
 export type PacienteQueryInput = z.infer<typeof pacienteQuerySchema>;

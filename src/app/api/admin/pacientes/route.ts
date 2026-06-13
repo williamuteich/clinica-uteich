@@ -71,7 +71,44 @@ export async function GET(request: Request) {
     const validated = pacienteQuerySchema.safeParse(Object.fromEntries(searchParams.entries()));
     if (!validated.success) return NextResponse.json({ error: "Parâmetros inválidos" }, { status: 400 });
 
-    const { page, limit, name, cpf } = validated.data;
+    const { page, limit, name, cpf, phone } = validated.data;
+    const dataRequisicao = new Date().toISOString();
+
+    if (phone) {
+        const cleanSearch = phone.replace(/\D/g, "");
+        const searchNumber = cleanSearch.startsWith("55") && cleanSearch.length > 10 ? cleanSearch.slice(2) : cleanSearch;
+
+        const allPatients = await prisma.patient.findMany({
+            orderBy: { name: "asc" },
+        });
+
+        const matched: any[] = [];
+        for (const p of allPatients) {
+            try {
+                const decryptedPhone = await decrypt(p.phone);
+                const cleanDbPhone = decryptedPhone.replace(/\D/g, "");
+                const dbNumber = cleanDbPhone.startsWith("55") && cleanDbPhone.length > 10 ? cleanDbPhone.slice(2) : cleanDbPhone;
+
+                if (dbNumber === searchNumber) {
+                    matched.push(p);
+                }
+            } catch (e) {
+                console.error(`Erro ao descriptografar telefone do paciente ${p.id}:`, e);
+            }
+        }
+
+        const paginated = matched.slice((page - 1) * limit, page * limit);
+        const decryptedPacientes = await Promise.all(paginated.map(p => decryptData(p)));
+
+        return NextResponse.json({
+            pacientes: decryptedPacientes,
+            total: matched.length,
+            page,
+            totalPages: Math.ceil(matched.length / limit),
+            limit,
+            dataRequisicao,
+        });
+    }
 
     const searchCpf = cpf ? await encryptDeterministic(cpf) : undefined;
 
@@ -80,7 +117,7 @@ export async function GET(request: Request) {
         ...(searchCpf && { cpf: searchCpf }),
     };
 
-    const { pacientes, total, dataRequisicao } = await getPacientesFromDb(where, page, limit);
+    const { pacientes, total } = await getPacientesFromDb(where, page, limit);
 
     const decryptedPacientes = await Promise.all(pacientes.map(p => decryptData(p)));
 

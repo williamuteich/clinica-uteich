@@ -14,14 +14,15 @@ import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { CreatePacienteDialogProps } from "@/src/types/dashboard/pacientes";
 import { toast } from "react-toastify";
 
-export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogProps) {
-    const [open, setOpen] = useState(false);
+export function CreatePacienteDialog({ onCreateSuccess, defaultOpen = false, defaultName = "", defaultPhone = "" }: CreatePacienteDialogProps) {
+    const [open, setOpen] = useState(defaultOpen);
+    const [name, setName] = useState(defaultName);
     const [cpf, setCpf] = useState("");
-    const [phone, setPhone] = useState("");
+    const [phone, setPhone] = useState(defaultPhone ? maskPhone(defaultPhone) : "");
 
     const [state, formAction, isPending] = useActionState(async (_prev: any, formData: FormData) => {
         const payload = {
-            name: formData.get("name") as string,
+            name,
             cpf,
             birthDate: formData.get("birthDate") as string,
             phone,
@@ -31,6 +32,7 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
         if (result.success) {
             toast.success("Paciente cadastrado com sucesso!");
             setOpen(false);
+            setName("");
             setCpf("");
             setPhone("");
             onCreateSuccess();
@@ -64,7 +66,7 @@ export function CreatePacienteDialog({ onCreateSuccess }: CreatePacienteDialogPr
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2 space-y-1.5">
                             <Label className="text-xs font-bold text-slate-500 uppercase">Nome Completo</Label>
-                            <Input name="name" placeholder="João da Silva" required className="h-10" />
+                            <Input name="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="João da Silva" required className="h-10" />
                         </div>
 
                         <div className="space-y-1.5">
