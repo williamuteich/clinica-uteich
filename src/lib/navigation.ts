@@ -1,4 +1,4 @@
-import { ShieldCheck, Key, CalendarDays, History, Users, ClipboardList, Package } from "lucide-react";
+import { ShieldCheck, Key, CalendarDays, History, Users, ClipboardList, Package, Puzzle } from "lucide-react";
 import { NavConfig } from "../types/dashboard/navigation";
 
 export type NavSection = "CLÍNICA" | "ADMINISTRAÇÃO" | "SISTEMA";
@@ -52,6 +52,13 @@ export const ADMIN_NAVIGATION: NavConfig[] = [
         href: "/admin/auditoria",
         icon: History,
         resource: "auditoria",
+        section: "SISTEMA"
+    },
+    {
+        title: "Extensão WhatsApp",
+        href: "/admin/extensao",
+        icon: Puzzle,
+        resource: "extensao",
         section: "SISTEMA"
     },
 ];
