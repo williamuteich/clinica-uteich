@@ -19,19 +19,70 @@ import {
   Stethoscope,
   Smile,
   ShieldCheck,
-  CalendarCheck
+  CalendarCheck,
+  Sparkles
 } from "lucide-react";
 
 const PROCEDURES = [
   "Consulta de Avaliação",
   "Limpeza e Profilaxia",
   "Clareamento Dental",
-  "Aparelho Ortodôntico",
   "Implante Dentário",
   "Prótese Dentária",
   "Extração",
   "Restauração",
   "Outros / Falar com atendente",
+];
+
+const PROCEDURES_INFO = [
+  {
+    name: "Consulta de Avaliação",
+    label: "Consulta de Avaliação / Diagnóstico",
+    description: "Primeira consulta para avaliar sua saúde bucal, tirar dúvidas e planejar tratamentos.",
+    icon: Stethoscope,
+  },
+  {
+    name: "Limpeza e Profilaxia",
+    label: "Limpeza Profissional (Profilaxia)",
+    description: "Remoção de tártaro e placas bacterianas, polimento e prevenção de cáries/gengivite.",
+    icon: Smile,
+  },
+  {
+    name: "Clareamento Dental",
+    label: "Clareamento Dental",
+    description: "Clareamento dos dentes para remover manchas e deixar o sorriso mais branco.",
+    icon: Sparkles,
+  },
+  {
+    name: "Implante Dentário",
+    label: "Implante Dentário",
+    description: "Substituição de dentes perdidos por pinos de titânio e dentes fixos definitivos.",
+    icon: User,
+  },
+  {
+    name: "Prótese Dentária",
+    label: "Prótese Dentária",
+    description: "Restauração de dentes faltantes com próteses parciais ou totais (removíveis ou fixas).",
+    icon: Smile,
+  },
+  {
+    name: "Extração",
+    label: "Extração de Dente",
+    description: "Remoção cirúrgica e segura de dentes comprometidos ou dentes do siso.",
+    icon: AlertCircle,
+  },
+  {
+    name: "Restauração",
+    label: "Restauração (Obturação)",
+    description: "Tratamento de cáries ou fraturas com materiais estéticos da cor do dente.",
+    icon: ShieldCheck,
+  },
+  {
+    name: "Outros / Falar com atendente",
+    label: "Outros Procedimentos",
+    description: "Dúvidas ou outros tratamentos? Escolha esta opção para conversar diretamente conosco.",
+    icon: MessageSquare,
+  },
 ];
 
 const generateTimeSlots = () => {
@@ -58,7 +109,7 @@ function SchedulingForm() {
   const getMappedService = (srv: string) => {
     if (!srv) return "Consulta de Avaliação";
     if (srv === "Avaliação Gratuita") return "Consulta de Avaliação";
-    if (srv === "Aparelho Ortodôntico") return "Aparelho Ortodôntico";
+    if (srv === "Aparelho Ortodôntico") return "Outros / Falar com atendente";
     if (srv === "Prótese e Implante") return "Prótese Dentária";
     if (srv === "Estética e Clareamento") return "Clareamento Dental";
     if (srv === "Extração e Restauração") return "Extração";
@@ -306,7 +357,7 @@ function SchedulingForm() {
                       <Smile className="h-4 w-4 text-accent" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold">Atendimento Sem Dor</p>
+                      <p className="text-xs font-semibold">Atendimento Sem Dol</p>
                       <p className="text-[11px] text-white/70">Cuidado humanizado e conforto absoluto.</p>
                     </div>
                   </div>
@@ -455,10 +506,12 @@ function SchedulingForm() {
                         <select
                           value={serviceType}
                           onChange={(e) => setServiceType(e.target.value)}
-                          className="w-full h-11 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-semibold text-slate-800 bg-white"
+                          className="w-full h-11 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-semibold text-slate-800 bg-white cursor-pointer"
                         >
-                          {PROCEDURES.map((p) => (
-                            <option key={p} value={p}>{p}</option>
+                          {PROCEDURES_INFO.map((p) => (
+                            <option key={p.name} value={p.name}>
+                              {p.label}
+                            </option>
                           ))}
                         </select>
                       </div>
