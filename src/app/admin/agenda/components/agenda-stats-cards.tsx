@@ -12,7 +12,10 @@ export function AgendaStatsCards({ stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-none">Agendados</p>
-                    <p className="text-sm font-black text-slate-800 mt-1 leading-none">{stats.total}</p>
+                    <div className="flex items-baseline mt-1 gap-1">
+                        <p className="text-sm font-black text-slate-800">{stats.total}</p>
+                        <span className="text-[9px] text-slate-400">Este mês</span>
+                    </div>
                 </div>
             </div>
 
@@ -22,7 +25,10 @@ export function AgendaStatsCards({ stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-none">Confirmados</p>
-                    <p className="text-sm font-black text-emerald-700 mt-1 leading-none">{stats.confirmados}</p>
+                    <div className="flex items-baseline mt-1 gap-1">
+                        <p className="text-sm font-black text-emerald-700">{stats.confirmados}</p>
+                        <span className="text-[9px] text-slate-400">Este mês</span>
+                    </div>
                 </div>
             </div>
 
@@ -32,7 +38,10 @@ export function AgendaStatsCards({ stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-none">Pendentes</p>
-                    <p className="text-sm font-black text-amber-700 mt-1 leading-none">{stats.pendentes}</p>
+                    <div className="flex items-baseline mt-1 gap-1">
+                        <p className="text-sm font-black text-amber-700">{stats.pendentes}</p>
+                        <span className="text-[9px] text-slate-400">Este mês</span>
+                    </div>
                 </div>
             </div>
 
@@ -42,7 +51,10 @@ export function AgendaStatsCards({ stats }: AgendaStatsCardsProps) {
                 </div>
                 <div className="min-w-0">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider leading-none">Cancelados</p>
-                    <p className="text-sm font-black text-rose-605 mt-1 leading-none">{stats.cancelados}</p>
+                    <div className="flex items-baseline mt-1 gap-1">
+                        <p className="text-sm font-black text-rose-605">{stats.cancelados}</p>
+                        <span className="text-[9px] text-slate-400">Este mês</span>
+                    </div>
                 </div>
             </div>
         </div>
