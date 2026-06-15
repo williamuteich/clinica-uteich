@@ -16,6 +16,7 @@ export const PROCEDURES = [
     "Tratamento de Canal",
     "Cirurgia Oral",
     "Periodontia",
+    "Outros / Falar com atendente",
     "Outro",
 ] as const;
 
