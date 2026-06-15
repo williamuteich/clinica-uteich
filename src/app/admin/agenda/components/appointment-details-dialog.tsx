@@ -9,7 +9,7 @@ import {
     DialogContent,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { phoneToWhatsapp } from "@/src/lib/masks";
+import { phoneToWhatsapp, maskPhone } from "@/src/lib/masks";
 import { Appointment } from "@/src/types/dashboard/agendamento";
 import { ProcedureSelect, PROCEDURES } from "./procedure-select";
 import { CreatePatientLinkDialog } from "@/src/app/components/admin/create-dialog-link";
@@ -216,7 +216,7 @@ export function AppointmentDetailsDialog({
                                         rel="noopener noreferrer"
                                         className="w-full flex items-center justify-between h-10 px-3 border border-emerald-200 bg-emerald-50 text-emerald-800 rounded-lg outline-none font-bold text-xs hover:bg-emerald-100 transition-colors cursor-pointer group"
                                     >
-                                        <span>{phone}</span>
+                                        <span>{maskPhone(phone)}</span>
                                         <span className="flex items-center gap-1 text-[8px] font-black text-emerald-700 bg-white/80 px-2 py-0.5 rounded border border-emerald-200 uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all">
                                             WhatsApp
                                         </span>

@@ -13,6 +13,16 @@ function formatCPF(value: string) {
         .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 }
 
+function formatPhone(value: string) {
+    let clean = value.replace(/\D/g, "");
+    if (clean.startsWith("55") && (clean.length === 12 || clean.length === 13)) {
+        clean = clean.slice(2);
+    }
+    return clean
+        .replace(/(\d{2})(\d)/, "($1) $2")
+        .replace(/(\d{4,5})(\d{4})$/, "$1-$2");
+}
+
 const PROCEDURES = [
     "Consulta de Avaliação",
     "Profilaxia e Limpeza",
@@ -260,7 +270,7 @@ export function SidebarQuickSchedule() {
                                             <p className="text-xs font-bold text-slate-800">{patientFound.name}</p>
                                             <p className="text-[10px] font-mono text-slate-500 mt-0.5">{patientFound.cpf}</p>
                                             {patientFound.phone && (
-                                                <p className="text-[10px] text-slate-500 mt-0.5">{patientFound.phone}</p>
+                                                <p className="text-[10px] text-slate-500 mt-0.5">{formatPhone(patientFound.phone)}</p>
                                             )}
                                         </div>
                                     )}
