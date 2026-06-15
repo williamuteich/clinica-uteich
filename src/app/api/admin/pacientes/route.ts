@@ -64,6 +64,19 @@ async function getPacientesFromDb(where: any, page: number, limit: number) {
     return { pacientes, total, dataRequisicao };
 }
 
+function normalizePhoneForMatching(phoneStr: string): string {
+    let clean = phoneStr.replace(/\D/g, "");
+
+    if (clean.startsWith("55") && (clean.length === 12 || clean.length === 13)) {
+        clean = clean.slice(2);
+    }
+
+    if (clean.length === 11 && clean[2] === "9") {
+        clean = clean.slice(0, 2) + clean.slice(3);
+    }
+    return clean;
+}
+
 export async function GET(request: Request) {
     const session = await checkAdminApi();
     if (!session) return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
@@ -79,8 +92,7 @@ export async function GET(request: Request) {
     const dataRequisicao = new Date().toISOString();
 
     if (phone) {
-        const cleanSearch = phone.replace(/\D/g, "");
-        const searchNumber = cleanSearch.startsWith("55") && cleanSearch.length > 11 ? cleanSearch.slice(2) : cleanSearch;
+        const searchNumber = normalizePhoneForMatching(phone);
 
         const allPatients = await prisma.patient.findMany({
             orderBy: { name: "asc" },
@@ -90,8 +102,7 @@ export async function GET(request: Request) {
         for (const p of allPatients) {
             try {
                 const decryptedPhone = await decrypt(p.phone);
-                const cleanDbPhone = decryptedPhone.replace(/\D/g, "");
-                const dbNumber = cleanDbPhone.startsWith("55") && cleanDbPhone.length > 11 ? cleanDbPhone.slice(2) : cleanDbPhone;
+                const dbNumber = normalizePhoneForMatching(decryptedPhone);
 
                 if (dbNumber === searchNumber) {
                     matched.push(p);
