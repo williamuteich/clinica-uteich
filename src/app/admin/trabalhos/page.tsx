@@ -9,11 +9,13 @@ export const metadata = {
     description: "Controle de trabalhos enviados a laboratórios parceiros.",
 };
 
-async function TrabalhosContent() {
+async function TrabalhosContent({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
     await requirePermission("pacientes", "visualizar");
+    const resolvedParams = await searchParams;
+    const query = resolvedParams.q || "";
 
     const [initialData, stats] = await Promise.all([
-        getProtheticWorks({ page: 1, limit: 20 }),
+        getProtheticWorks({ page: 1, limit: 20, query: query || undefined }),
         getProtheticWorkDashboard(),
     ]);
 
@@ -21,6 +23,7 @@ async function TrabalhosContent() {
         <TrabalhosManagement
             initialData={initialData ?? { protheticWorks: [], total: 0, page: 1, limit: 20, totalPages: 0 }}
             stats={stats ?? { pending: 0, done: 0 }}
+            initialSearch={query}
         />
     );
 }
@@ -44,7 +47,7 @@ function TrabalhosSkeleton() {
     );
 }
 
-export default async function TrabalhosPage() {
+export default async function TrabalhosPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
     return (
         <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
@@ -58,7 +61,7 @@ export default async function TrabalhosPage() {
             </div>
 
             <Suspense fallback={<TrabalhosSkeleton />}>
-                <TrabalhosContent />
+                <TrabalhosContent searchParams={searchParams} />
             </Suspense>
         </div>
     );

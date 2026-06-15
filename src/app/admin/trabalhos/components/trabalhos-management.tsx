@@ -42,16 +42,18 @@ function formatDate(dateStr?: string | null) {
 export function TrabalhosManagement({
     initialData,
     stats,
+    initialSearch = "",
 }: {
     initialData: ProtheticWorksResponse;
     stats: DashboardStats;
+    initialSearch?: string;
 }) {
     const [data, setData] = useState<ProtheticWorksResponse>(initialData);
     const [statsData, setStatsData] = useState<DashboardStats>(stats);
     const [filters, setFilters] = useState<any>({ page: 1, limit: 20 });
     const [isPending, startTransition] = useTransition();
 
-    const [searchTerm, setSearchTerm] = useState("");
+    const [searchTerm, setSearchTerm] = useState(initialSearch);
     const [statusFilter, setStatusFilter] = useState("");
 
     const debouncedSearchTerm = useDebounce(searchTerm, 700);

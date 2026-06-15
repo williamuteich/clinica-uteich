@@ -5,13 +5,14 @@ import { ProtheticWork, ProtheticWorksResponse, DashboardStats } from "@/src/typ
 
 const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-export async function getProtheticWorks(filters: { page?: number; limit?: number; status?: string; query?: string } = { page: 1, limit: 20 }): Promise<ProtheticWorksResponse | null> {
+export async function getProtheticWorks(filters: { page?: number; limit?: number; status?: string; query?: string; patientId?: string } = { page: 1, limit: 20 }): Promise<ProtheticWorksResponse | null> {
     const cookie = (await headers()).get("cookie") || "";
     const params = new URLSearchParams();
     if (filters.page) params.set("page", String(filters.page));
     if (filters.limit) params.set("limit", String(filters.limit));
     if (filters.status) params.set("status", filters.status);
     if (filters.query) params.set("query", filters.query);
+    if (filters.patientId) params.set("patientId", filters.patientId);
 
     const query = params.toString();
     const res = await fetch(

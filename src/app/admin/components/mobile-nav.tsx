@@ -7,6 +7,8 @@ import {
     Sheet,
     SheetContent,
     SheetTrigger,
+    SheetTitle,
+    SheetDescription,
 } from "@/components/ui/sheet";
 import { SidebarContent } from "./sidebar-content";
 import { useSession } from "next-auth/react";
@@ -24,6 +26,8 @@ export function MobileNav() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72 border-none">
+                <SheetTitle className="sr-only">Menu de Navegação Lateral</SheetTitle>
+                <SheetDescription className="sr-only">Links de acesso rápido para gerenciamento da clínica</SheetDescription>
                 {open && (
                     session ? (
                         <SidebarContent session={session} onClose={() => setOpen(false)} />

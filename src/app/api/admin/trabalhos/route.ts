@@ -51,9 +51,11 @@ export async function GET(request: Request) {
     const limit = Number(searchParams.get("limit") || "20");
     const status = searchParams.get("status") || undefined;
     const query = searchParams.get("query") || "";
+    const patientId = searchParams.get("patientId") || undefined;
 
     const where: any = {};
     if (status) where.status = status;
+    if (patientId) where.patientId = patientId;
 
     if (query) {
         where.OR = [
@@ -110,15 +112,6 @@ async function _POST(request: Request) {
                     createdBy: session.user.id,
                 } as any,
             });
-
-            if (patientId) {
-                await tx.patientHistory.create({
-                    data: {
-                        patientId: patientId,
-                        description: `Trabalho protético registrado: "${rest.workName}" enviado para o laboratório "${rest.laboratory}".`,
-                    },
-                });
-            }
 
             return created;
         });

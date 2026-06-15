@@ -3,12 +3,12 @@ import { getPaciente } from "@/src/services/pacientes";
 import { getOdontogramaPaciente } from "@/src/services/odontograma";
 import { getHistoricoPaciente } from "@/src/services/historico";
 import { getAgendamentos } from "@/src/services/agendamento";
+import { getProtheticWorks } from "@/src/services/trabalhos";
 import OdontogramaTab from "./nav-links/odontograma/odontograma-tab";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import {
     Plus,
-    Calendar,
     User,
     MessageCircle,
     FileText,
@@ -18,22 +18,25 @@ import { PatientPageProps } from "@/src/types/dashboard/pacientes";
 import { TasksModal } from "./components/tasks-modal";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { PatientAppointmentsSection } from "./components/patient-appointments-section";
+import { PatientProtheticWorksSection } from "./components/patient-prothetic-works-section";
 
 
 export default async function PatientOverviewPage({ params }: PatientPageProps) {
     const { id } = await params;
 
-    const [paciente, odontogram, historico, agendamentosRes] = await Promise.all([
+    const [paciente, odontogram, historico, agendamentosRes, trabalhosRes] = await Promise.all([
         getPaciente(id),
         getOdontogramaPaciente(id),
         getHistoricoPaciente(id),
         getAgendamentos({ patientId: id, page: 1, limit: 100 }),
+        getProtheticWorks({ patientId: id, limit: 100 }),
     ]);
 
     if (!paciente) return null;
 
     const appointments = agendamentosRes?.agendamentos ?? [];
     const latestEvolutions = historico?.slice(0, 3) ?? [];
+    const protheticWorks = trabalhosRes?.protheticWorks ?? [];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full animate-in fade-in duration-500">
@@ -179,6 +182,12 @@ export default async function PatientOverviewPage({ params }: PatientPageProps) 
                         initialOdontogram={odontogram}
                     />
                 </div>
+
+                <PatientProtheticWorksSection
+                    patientId={id}
+                    patientName={paciente.name}
+                    protheticWorks={protheticWorks}
+                />
             </div>
         </div>
     );

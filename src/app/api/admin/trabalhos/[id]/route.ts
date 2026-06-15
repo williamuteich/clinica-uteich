@@ -97,17 +97,6 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
                 } as any,
             });
 
-            if (patientId && original.status !== rest.status) {
-                const statusLabel = rest.status === "PENDING" ? "Pendente" : "Concluído";
-
-                await tx.patientHistory.create({
-                    data: {
-                        patientId: patientId,
-                        description: `Trabalho protético "${rest.workName}" alterou status para: ${statusLabel}.`,
-                    },
-                });
-            }
-
             return updated;
         });
 
@@ -144,15 +133,6 @@ async function _DELETE(request: Request, { params }: { params: Promise<{ id: str
 
         await prisma.$transaction(async (tx) => {
             await tx.protheticWork.delete({ where: { id } });
-
-            if (original.patientId) {
-                await tx.patientHistory.create({
-                    data: {
-                        patientId: original.patientId,
-                        description: `Trabalho protético "${original.workName}" foi removido do sistema.`,
-                    },
-                });
-            }
         });
 
         return NextResponse.json(original);
