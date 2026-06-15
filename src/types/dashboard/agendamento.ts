@@ -15,7 +15,7 @@ export interface Appointment {
     time: string;
     procedure: string;
     estimatedValue: number;
-    status: "Confirmado" | "Pendente" | "Cancelado";
+    status: "Confirmado" | "Pendente" | "Cancelado" | "Finalizado";
     isNew?: boolean;
     isGuest?: boolean;
     patientId?: string;

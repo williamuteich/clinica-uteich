@@ -17,6 +17,9 @@ const STATUS_THEMES = {
     Pendente: {
         bg: "bg-amber-50/40 border-amber-100/70 border-l-amber-500 text-amber-900 hover:bg-amber-50/80",
     },
+    Finalizado: {
+        bg: "bg-indigo-50/40 border-indigo-100/70 border-l-indigo-500 text-indigo-800 hover:bg-indigo-50/80",
+    },
     Cancelado: {
         bg: "bg-slate-50/40 border-slate-200/75 border-l-slate-400 text-slate-400 hover:bg-slate-50/80 opacity-60 line-through",
     },

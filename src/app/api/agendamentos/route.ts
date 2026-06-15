@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const description = `Agendado pelo site.\nTelefone/WhatsApp: ${phone}\nStatus cadastro: ${matchedPatient ? "Paciente já cadastrado" : "Cliente sem cadastro no sistema"}${observation ? `\nObservação: ${observation}` : ""}`;
+    const description = `WhatsApp: ${phone}${observation ? `\nObservação: ${observation}` : ""}`;
 
     const encryptedServiceType = await encrypt(serviceType);
 

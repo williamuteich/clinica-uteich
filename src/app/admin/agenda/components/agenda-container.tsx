@@ -54,9 +54,11 @@ export default function AgendaContainer() {
 
             if (data.agendamentos) {
                 const mapped: Appointment[] = data.agendamentos.map((apt: any) => {
-                    let mappedStatus: "Confirmado" | "Pendente" | "Cancelado" = "Pendente";
-                    if (apt.status === "CONFIRMED" || apt.status === "COMPLETED") {
+                    let mappedStatus: "Confirmado" | "Pendente" | "Cancelado" | "Finalizado" = "Pendente";
+                    if (apt.status === "CONFIRMED") {
                         mappedStatus = "Confirmado";
+                    } else if (apt.status === "COMPLETED") {
+                        mappedStatus = "Finalizado";
                     } else if (apt.status === "CANCELLED") {
                         mappedStatus = "Cancelado";
                     }
@@ -121,7 +123,8 @@ export default function AgendaContainer() {
 
                 ...(updatedFields.status ? {
                     status: updatedFields.status === "Confirmado" ? "CONFIRMED" :
-                        updatedFields.status === "Cancelado" ? "CANCELLED" : "PENDING"
+                        updatedFields.status === "Cancelado" ? "CANCELLED" :
+                        updatedFields.status === "Finalizado" ? "COMPLETED" : "PENDING"
                 } : {}),
             };
 

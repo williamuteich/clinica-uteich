@@ -13,19 +13,6 @@ import { maskCPF, rawCPF } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
 import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
 
-const TIME_SLOTS = (() => {
-    const slots = [];
-    let startMinutes = 8 * 60;
-    const endMinutes = 20 * 60;
-    while (startMinutes <= endMinutes) {
-        const hours = Math.floor(startMinutes / 60);
-        const mins = startMinutes % 60;
-        slots.push(`${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`);
-        startMinutes += 15;
-    }
-    return slots;
-})();
-
 export function AddAppointmentDialog({
     open,
     onOpenChange,
@@ -42,21 +29,24 @@ export function AddAppointmentDialog({
     const [guestName, setGuestName] = useState("");
     const [procedure, setProcedure] = useState("");
     const [customProcedure, setCustomProcedure] = useState("");
-    const [estimatedValue, setEstimatedValue] = useState("");
     const [time, setTime] = useState("09:00");
     const [submitting, setSubmitting] = useState(false);
 
-    // Auto-select first available slot when modal opens
+    const bookedTimes = appointments
+        .filter((apt) => apt.date === selectedDateStr && apt.status !== "Cancelado")
+        .map((apt) => apt.time)
+        .sort();
+
+    const isTimeBooked = bookedTimes.includes(time);
+
     useEffect(() => {
         if (open && selectedDateStr) {
-            const firstAvailable = TIME_SLOTS.find(slot => {
-                const isBooked = appointments.some(
-                    (apt) => apt.date === selectedDateStr && apt.time === slot && apt.status !== "Cancelado"
-                );
-                return !isBooked;
-            });
+            const defaultSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
+            const firstAvailable = defaultSlots.find(slot => !bookedTimes.includes(slot));
             if (firstAvailable) {
                 setTime(firstAvailable);
+            } else {
+                setTime("09:00");
             }
         }
     }, [open, selectedDateStr, appointments]);
@@ -69,7 +59,6 @@ export function AddAppointmentDialog({
         setGuestName("");
         setProcedure("");
         setCustomProcedure("");
-        setEstimatedValue("");
         setTime("09:00");
     };
 
@@ -119,16 +108,13 @@ export function AddAppointmentDialog({
         const name = isGuest ? guestName : patientFound?.name;
         if (!name) return;
 
-        const parsedValue = Number(estimatedValue);
-        if (Number.isNaN(parsedValue) || parsedValue < 0) return;
-
         setSubmitting(true);
         onAdd({
             patientName: name,
             date: selectedDateStr,
             time,
             procedure: finalProcedure,
-            estimatedValue: parsedValue,
+            estimatedValue: 0,
             status: "Pendente",
             isNew: true,
             isGuest,
@@ -140,7 +126,7 @@ export function AddAppointmentDialog({
 
     return (
         <Dialog open={open} onOpenChange={handleOpen}>
-            <DialogContent className="sm:max-w-lg border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
+            <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
                 <div className="bg-blue-600 px-6 py-6 text-white">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -278,22 +264,6 @@ export function AddAppointmentDialog({
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                            Valor Estimado <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={estimatedValue}
-                            onChange={(e) => setEstimatedValue(e.target.value)}
-                            placeholder="Ex: 250"
-                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                            required
-                        />
-                    </div>
-
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
@@ -311,25 +281,44 @@ export function AddAppointmentDialog({
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
                                 Horário
                             </label>
-                            <select
+                            <input
+                                type="time"
                                 value={time}
                                 onChange={(e) => setTime(e.target.value)}
-                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer bg-white"
+                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
                                 required
-                            >
-                                {TIME_SLOTS.map((slot) => {
-                                    const isBooked = appointments.some(
-                                        (apt) => apt.date === selectedDateStr && apt.time === slot && apt.status !== "Cancelado"
-                                    );
-                                    return (
-                                        <option key={slot} value={slot} disabled={isBooked}>
-                                            {slot} {isBooked ? " (Já agendado)" : ""}
-                                        </option>
-                                    );
-                                })}
-                            </select>
+                            />
                         </div>
                     </div>
+
+                    {bookedTimes.length > 0 && (
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-1.5">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                                Horários Agendados neste Dia:
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {bookedTimes.map((bt) => (
+                                    <span
+                                        key={bt}
+                                        className={cn(
+                                            "text-[9px] font-bold px-2 py-0.5 rounded border transition-colors",
+                                            time === bt
+                                                ? "bg-rose-50 border-rose-200 text-rose-700"
+                                                : "bg-slate-100 border-slate-200 text-slate-600"
+                                        )}
+                                    >
+                                        {bt}
+                                    </span>
+                                ))}
+                            </div>
+                            {isTimeBooked && (
+                                <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1 mt-1 animate-pulse">
+                                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                    Aviso: Horário já reservado (permitido somente para emergência).
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     <div className="pt-4 border-t border-slate-100 flex gap-3">
                         <button

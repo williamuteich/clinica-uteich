@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -19,7 +19,7 @@ interface EditAppointmentDialogProps {
     onUpdate: (id: string | number, updatedFields: Partial<Appointment>) => void;
 }
 
-const STATUS_OPTIONS = ["Pendente", "Confirmado", "Cancelado"] as const;
+const STATUS_OPTIONS = ["Pendente", "Confirmado", "Finalizado", "Cancelado"] as const;
 
 export function EditAppointmentDialog({
     open,
@@ -32,19 +32,19 @@ export function EditAppointmentDialog({
     const [estimatedValue, setEstimatedValue] = useState("");
     const [date, setDate] = useState("");
     const [time, setTime] = useState("");
-    const [status, setStatus] = useState<"Confirmado" | "Pendente" | "Cancelado">("Pendente");
+    const [status, setStatus] = useState<"Confirmado" | "Pendente" | "Cancelado" | "Finalizado">("Pendente");
 
-    const handleOpenChange = (v: boolean) => {
-        if (v && appointment) {
-            setProcedure(PROCEDURES.includes(appointment.procedure as any) ? appointment.procedure : "Outro");
-            setCustomProcedure(PROCEDURES.includes(appointment.procedure as any) ? "" : appointment.procedure);
+    useEffect(() => {
+        if (open && appointment) {
+            const isDefaultProc = PROCEDURES.includes(appointment.procedure as any);
+            setProcedure(isDefaultProc ? appointment.procedure : "Outro");
+            setCustomProcedure(isDefaultProc ? "" : appointment.procedure);
             setEstimatedValue(String(appointment.estimatedValue ?? 0));
             setDate(appointment.date);
             setTime(appointment.time);
             setStatus(appointment.status);
         }
-        onOpenChange(v);
-    };
+    }, [open, appointment]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,11 +53,11 @@ export function EditAppointmentDialog({
         if (!finalProcedure) return;
 
         const parsedValue = Number(estimatedValue);
-        if (Number.isNaN(parsedValue) || parsedValue < 0) return;
+        const finalValue = Number.isNaN(parsedValue) || parsedValue < 0 ? 0 : parsedValue;
 
         onUpdate(appointment.id, {
             procedure: finalProcedure,
-            estimatedValue: parsedValue,
+            estimatedValue: finalValue,
             date,
             time,
             status,
@@ -66,8 +66,8 @@ export function EditAppointmentDialog({
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogContent className="sm:max-w-lg border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
                 <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-6 text-white">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -87,27 +87,30 @@ export function EditAppointmentDialog({
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
                             Status do Agendamento
                         </label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                             {STATUS_OPTIONS.map((statusOption) => (
                                 <button
                                     key={statusOption}
                                     type="button"
                                     onClick={() => setStatus(statusOption)}
                                     className={cn(
-                                        "flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border-2 text-[10px] font-black transition-all cursor-pointer uppercase tracking-wider",
+                                        "flex items-center justify-center gap-1 px-1.5 py-2.5 rounded-xl border-2 text-[10px] font-black transition-all cursor-pointer uppercase tracking-wider",
                                         status === statusOption
                                             ? statusOption === "Confirmado"
                                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700"
-                                                : statusOption === "Cancelado"
-                                                    ? "border-rose-500 bg-rose-50 text-rose-700"
-                                                    : "border-amber-500 bg-amber-50 text-amber-705"
+                                                : statusOption === "Finalizado"
+                                                    ? "border-indigo-500 bg-indigo-50 text-indigo-705"
+                                                    : statusOption === "Cancelado"
+                                                        ? "border-rose-500 bg-rose-50 text-rose-700"
+                                                        : "border-amber-500 bg-amber-50 text-amber-705"
                                             : "border-slate-200 bg-white text-slate-500 hover:border-slate-350"
                                     )}
                                 >
                                     <span
                                         className={cn(
-                                            "w-2 h-2 rounded-full",
+                                            "w-2 h-2 rounded-full shrink-0",
                                             statusOption === "Confirmado" && "bg-emerald-500",
+                                            statusOption === "Finalizado" && "bg-indigo-500",
                                             statusOption === "Cancelado" && "bg-rose-500",
                                             statusOption === "Pendente" && "bg-amber-500"
                                         )}
@@ -127,21 +130,6 @@ export function EditAppointmentDialog({
                             onChange={setProcedure}
                             customValue={customProcedure}
                             onCustomChange={setCustomProcedure}
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                            Valor Estimado <span className="text-rose-500">*</span>
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={estimatedValue}
-                            onChange={(e) => setEstimatedValue(e.target.value)}
-                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                            required
                         />
                     </div>
 
