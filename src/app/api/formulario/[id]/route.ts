@@ -5,14 +5,7 @@ import { encrypt, encryptDeterministic } from "@/src/lib/encrypted-fields";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 
-const normalizeName = (name: string) => {
-    return name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, " ");
-};
+
 
 export async function POST(
     request: Request,
@@ -60,17 +53,6 @@ export async function POST(
         }
 
         const { formData, queixaPrincipal, responses } = validated.data;
-
-        const normalizedLinkName = normalizeName(generatedLink.patientName);
-        const normalizedFormName = normalizeName(formData.name);
-
-        if (normalizedLinkName !== normalizedFormName) {
-            return NextResponse.json(
-                { error: "O nome informado não corresponde ao nome associado a este convite de cadastro." },
-                { status: 400 }
-            );
-        }
-
         const encryptedCpf = formData.cpf ? await encryptDeterministic(formData.cpf) : null;
         const encryptedPhone = await encryptDeterministic(formData.phone);
         const encryptedNumber = formData.number ? await encrypt(formData.number) : null;

@@ -80,7 +80,7 @@ export async function GET(request: Request) {
 
     if (phone) {
         const cleanSearch = phone.replace(/\D/g, "");
-        const searchNumber = cleanSearch.startsWith("55") && cleanSearch.length > 10 ? cleanSearch.slice(2) : cleanSearch;
+        const searchNumber = cleanSearch.startsWith("55") && cleanSearch.length > 11 ? cleanSearch.slice(2) : cleanSearch;
 
         const allPatients = await prisma.patient.findMany({
             orderBy: { name: "asc" },
@@ -91,7 +91,7 @@ export async function GET(request: Request) {
             try {
                 const decryptedPhone = await decrypt(p.phone);
                 const cleanDbPhone = decryptedPhone.replace(/\D/g, "");
-                const dbNumber = cleanDbPhone.startsWith("55") && cleanDbPhone.length > 10 ? cleanDbPhone.slice(2) : cleanDbPhone;
+                const dbNumber = cleanDbPhone.startsWith("55") && cleanDbPhone.length > 11 ? cleanDbPhone.slice(2) : cleanDbPhone;
 
                 if (dbNumber === searchNumber) {
                     matched.push(p);
