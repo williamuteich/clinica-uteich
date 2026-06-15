@@ -167,7 +167,7 @@ export default async function PatientOverviewPage({ params }: PatientPageProps) 
                 </div>
             </div>
 
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4">
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                         <h3 className="text-base font-black text-slate-900">

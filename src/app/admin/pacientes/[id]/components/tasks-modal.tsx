@@ -116,14 +116,17 @@ function TaskForm({
         <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
                 <label htmlFor="task-title" className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
-                    Título <span className="text-rose-500">*</span>
+                    Título / Ação <span className="text-rose-500">*</span>
                 </label>
+                <p className="text-[10px] text-slate-400 font-medium leading-normal -mt-0.5">
+                    Defina o objetivo principal. Exemplos: <span className="italic font-semibold text-slate-600">"Solicitar guia de convênio"</span>, <span className="italic font-semibold text-slate-600">"Ligar pós-operatório"</span> ou <span className="italic font-semibold text-slate-600">"Cobrar prótese do laboratório"</span>.
+                </p>
                 <input
                     id="task-title"
                     type="text"
                     value={form.title}
                     onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Qual tarefa você precisa fazer?"
+                    placeholder="Ex: Ligar pós-operatório de implante"
                     className="w-full h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all"
                     autoFocus
                 />
@@ -131,14 +134,17 @@ function TaskForm({
 
             <div className="space-y-1.5">
                 <label htmlFor="task-desc" className="text-[11px] font-black text-slate-500 uppercase tracking-wider block">
-                    Descrição
+                    Detalhes / Observações
                 </label>
+                <p className="text-[10px] text-slate-400 font-medium leading-normal -mt-0.5">
+                    Adicione observações importantes para quem for executar. Exemplo: <span className="italic font-semibold text-slate-600">"Confirmar se o paciente está tomando o antibiótico e se há dor residual."</span>
+                </p>
                 <textarea
                     id="task-desc"
                     value={form.description}
                     onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Adicione detalhes sobre a tarefa..."
-                    className="w-full h-28 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all resize-none"
+                    placeholder="Ex: Ligar após as 14h. Número secundário: (51) 99999-9999."
+                    className="w-full h-24 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm font-semibold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all resize-none"
                 />
             </div>
 

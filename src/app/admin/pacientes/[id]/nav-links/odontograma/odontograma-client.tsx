@@ -19,14 +19,14 @@ const Odontogram = dynamic(
 );
 
 export const statusConfig = {
-    HEALTHY:     { label: "Saudável",   color: "bg-emerald-500", border: "border-emerald-500", text: "text-emerald-700", bgLight: "bg-emerald-50/60",  fill: "#ffffff", stroke: "#94a3b8" },
-    CAVITY:      { label: "Cárie",      color: "bg-rose-500",    border: "border-rose-500",    text: "text-rose-700",    bgLight: "bg-rose-50/60",     fill: "#ef4444", stroke: "#b91c1c" },
-    ENDODONTICS: { label: "Endodontia", color: "bg-blue-500",    border: "border-blue-500",    text: "text-blue-700",    bgLight: "bg-blue-50/60",     fill: "#3b82f6", stroke: "#1d4ed8" },
-    PROSTHESIS:  { label: "Prótese",    color: "bg-violet-500",  border: "border-violet-500",  text: "text-violet-700",  bgLight: "bg-violet-50/60",   fill: "#a855f7", stroke: "#7e22ce" },
-    IMPLANT:     { label: "Implante",   color: "bg-amber-500",   border: "border-amber-500",   text: "text-amber-700",   bgLight: "bg-amber-50/60",    fill: "#f59e0b", stroke: "#b45309" },
-    EXTRACTED:   { label: "Extraído",   color: "bg-slate-400",   border: "border-slate-400",   text: "text-slate-700",   bgLight: "bg-slate-100",      fill: "#cbd5e1", stroke: "#475569" },
-    RETAINED:    { label: "Retido",     color: "bg-orange-500",  border: "border-orange-500",  text: "text-orange-700",  bgLight: "bg-orange-50/60",   fill: "#f97316", stroke: "#c2410c" },
-    OTHER:       { label: "Outro",      color: "bg-indigo-500",  border: "border-indigo-500",  text: "text-indigo-700",  bgLight: "bg-indigo-50/60",   fill: "#6366f1", stroke: "#4338ca" },
+    HEALTHY: { label: "Saudável", color: "bg-emerald-500", border: "border-emerald-500", text: "text-emerald-700", bgLight: "bg-emerald-50/60", fill: "#ffffff", stroke: "#94a3b8" },
+    CAVITY: { label: "Cárie", color: "bg-rose-500", border: "border-rose-500", text: "text-rose-700", bgLight: "bg-rose-50/60", fill: "#ef4444", stroke: "#b91c1c" },
+    ENDODONTICS: { label: "Endodontia", color: "bg-blue-500", border: "border-blue-500", text: "text-blue-700", bgLight: "bg-blue-50/60", fill: "#3b82f6", stroke: "#1d4ed8" },
+    PROSTHESIS: { label: "Prótese", color: "bg-violet-500", border: "border-violet-500", text: "text-violet-700", bgLight: "bg-violet-50/60", fill: "#a855f7", stroke: "#7e22ce" },
+    IMPLANT: { label: "Implante", color: "bg-amber-500", border: "border-amber-500", text: "text-amber-700", bgLight: "bg-amber-50/60", fill: "#f59e0b", stroke: "#b45309" },
+    EXTRACTED: { label: "Extraído", color: "bg-slate-400", border: "border-slate-400", text: "text-slate-700", bgLight: "bg-slate-100", fill: "#cbd5e1", stroke: "#475569" },
+    RETAINED: { label: "Retido", color: "bg-orange-500", border: "border-orange-500", text: "text-orange-700", bgLight: "bg-orange-50/60", fill: "#f97316", stroke: "#c2410c" },
+    OTHER: { label: "Outro", color: "bg-indigo-500", border: "border-indigo-500", text: "text-indigo-700", bgLight: "bg-indigo-50/60", fill: "#6366f1", stroke: "#4338ca" },
 } satisfies Record<ToothStatus, { label: string; color: string; border: string; text: string; bgLight: string; fill: string; stroke: string }>;
 
 const upperTeethRight = [18, 17, 16, 15, 14, 13, 12, 11];
@@ -322,10 +322,9 @@ export default function OdontogramaClient({ patientId, initialOdontogram }: { pa
 
     return (
         <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
-            <ToastContainer position="top-right" autoClose={3000} theme="colored" />
-
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
+                    <ToastContainer position="top-right" autoClose={3000} theme="colored" />
                     <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
                         <Stethoscope className="h-5 w-5 text-blue-600 shrink-0" />
                         Odontograma Clínico
