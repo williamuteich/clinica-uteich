@@ -3,6 +3,7 @@ import { prisma } from "@/src/lib/prisma";
 import { pacienteSchema } from "@/src/schemas/paciente";
 import { encrypt, encryptDeterministic } from "@/src/lib/encrypted-fields";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { z } from "zod";
 
 const normalizeName = (name: string) => {
     return name
@@ -37,22 +38,35 @@ export async function POST(
         }
 
         const body = await request.json();
-        const { formData, queixaPrincipal, responses } = body;
 
-        const normalizedLinkName = normalizeName(generatedLink.patientName);
-        const normalizedFormName = formData?.name ? normalizeName(formData.name) : "";
+        const schema = z.object({
+            formData: pacienteSchema,
+            queixaPrincipal: z.string().optional().nullable(),
+            responses: z.record(
+                z.string(),
+                z.object({
+                    answer: z.string(),
+                    notes: z.string().optional().nullable(),
+                })
+            ).optional().nullable(),
+        });
 
-        if (normalizedLinkName !== normalizedFormName) {
+        const validated = schema.safeParse(body);
+        if (!validated.success) {
             return NextResponse.json(
-                { error: "O nome informado não corresponde ao nome associado a este convite de cadastro." },
+                { error: validated.error.issues[0].message },
                 { status: 400 }
             );
         }
 
-        const validatedPatient = pacienteSchema.safeParse(formData);
-        if (!validatedPatient.success) {
+        const { formData, queixaPrincipal, responses } = validated.data;
+
+        const normalizedLinkName = normalizeName(generatedLink.patientName);
+        const normalizedFormName = normalizeName(formData.name);
+
+        if (normalizedLinkName !== normalizedFormName) {
             return NextResponse.json(
-                { error: validatedPatient.error.issues[0].message },
+                { error: "O nome informado não corresponde ao nome associado a este convite de cadastro." },
                 { status: 400 }
             );
         }
