@@ -44,4 +44,5 @@ export interface AddAppointmentDialogProps {
     selectedDateStr: string | null;
     onDateChange: (date: string) => void;
     onAdd: (apt: Omit<Appointment, "id">) => void;
+    appointments?: Appointment[];
 }

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AgendaStatsCards } from "./agenda-stats-cards";
 import { CalendarNavBar } from "./calendar-nav-bar";
@@ -13,16 +12,13 @@ import { Appointment, CalendarGridProps } from "@/src/types/dashboard/agendament
 
 const STATUS_THEMES = {
     Confirmado: {
-        bg: "bg-emerald-50 hover:bg-emerald-100/80 border-emerald-250 text-emerald-800",
-        dot: "bg-emerald-500",
+        bg: "bg-emerald-50/40 border-emerald-100/70 border-l-emerald-500 text-emerald-800 hover:bg-emerald-50/80",
     },
     Pendente: {
-        bg: "bg-amber-50 hover:bg-amber-100/80 border-amber-250 text-amber-900",
-        dot: "bg-amber-500",
+        bg: "bg-amber-50/40 border-amber-100/70 border-l-amber-500 text-amber-900 hover:bg-amber-50/80",
     },
     Cancelado: {
-        bg: "bg-rose-50 hover:bg-rose-100/80 border-rose-250 text-rose-800 opacity-60",
-        dot: "bg-rose-500",
+        bg: "bg-slate-50/40 border-slate-200/75 border-l-slate-400 text-slate-400 hover:bg-slate-50/80 opacity-60 line-through",
     },
 };
 
@@ -107,7 +103,7 @@ export default function CalendarGrid({
     };
 
     return (
-        <div className="space-y-6 w-full animate-in fade-in duration-500">
+        <div className="space-y-4 w-full animate-in fade-in duration-500">
             <AgendaStatsCards monthName={monthName} stats={stats} />
 
             <CalendarNavBar
@@ -119,62 +115,55 @@ export default function CalendarGrid({
                 onAddThisMonth={() => openAddModal(new Date().toISOString().split("T")[0])}
             />
 
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-md overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
                 <div className="grid grid-cols-7 bg-slate-900 border-b border-slate-950">
                     {["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"].map((day) => (
                         <div
                             key={day}
-                            className="py-3 text-center text-[10px] font-black uppercase tracking-wider border-r border-slate-800 last:border-r-0 text-white"
+                            className="py-3 text-center text-[10px] font-black uppercase tracking-wider border-r border-slate-800 last:border-r-0 text-white select-none"
                         >
                             {day}
                         </div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-7 grid-rows-6 divide-x divide-y divide-slate-150">
+                <div className="grid grid-cols-7 grid-rows-6 divide-x divide-y divide-slate-150 border-b border-slate-150">
                     {cells.map((cell, idx) => {
                         const cellApts = appointments.filter((apt) => apt.date === cell.dateStr);
+                        const isSunday = idx % 7 === 0;
 
                         return (
                             <div
                                 key={`${cell.dateStr}-${idx}`}
+                                onClick={() => openAddModal(cell.dateStr)}
                                 className={cn(
-                                    "min-h-[110px] p-2 flex flex-col justify-between group transition-all duration-200 relative",
-                                    cell.isCurrentMonth ? "bg-white" : "bg-slate-50/40 text-slate-400",
-                                    cell.isToday && "bg-blue-50/60 border-2 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.18)] z-10"
+                                    "min-h-[120px] p-2 flex flex-col justify-between transition-all duration-200 relative select-none cursor-pointer",
+                                    isSunday
+                                        ? "bg-slate-50/30 hover:bg-slate-100/30 text-slate-400"
+                                        : cell.isCurrentMonth
+                                            ? "bg-white hover:bg-slate-50/50"
+                                            : "bg-slate-50/15 text-slate-400 hover:bg-slate-50/50",
+                                    cell.isToday && "bg-blue-50/20 border-2 border-blue-500/80 shadow-3xs z-10"
                                 )}
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-1.5">
                                         <span
                                             className={cn(
-                                                "text-xs font-black w-6 h-6 flex items-center justify-center rounded-full transition-all",
+                                                "text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full transition-all",
                                                 cell.isToday
-                                                    ? "bg-blue-600 text-white shadow-md font-black ring-2 ring-blue-150"
+                                                    ? "bg-blue-600 text-white shadow-xs font-black ring-4 ring-blue-100"
                                                     : cell.isCurrentMonth
-                                                        ? "text-slate-700 group-hover:text-blue-600"
-                                                        : "text-slate-350"
+                                                        ? "text-slate-700"
+                                                        : "text-slate-400"
                                             )}
                                         >
                                             {cell.dayNum}
                                         </span>
-                                        {cell.isToday && (
-                                            <span className="px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[8px] font-black tracking-wider uppercase shadow-xs animate-pulse">
-                                                Hoje
-                                            </span>
-                                        )}
                                     </div>
-
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); openAddModal(cell.dateStr); }}
-                                        className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md bg-blue-50 hover:bg-blue-600 hover:text-white flex items-center justify-center text-blue-600 transition-all cursor-pointer shadow-xs border border-blue-100"
-                                        title="Novo agendamento para este dia"
-                                    >
-                                        <Plus className="h-3 w-3" />
-                                    </button>
                                 </div>
 
-                                <div className="flex-1 mt-2 space-y-1 overflow-y-auto max-h-[85px] custom-scrollbar pr-0.5">
+                                <div className="flex-1 mt-2 space-y-1.5 overflow-y-auto max-h-[85px] custom-scrollbar pr-0.5">
                                     {cellApts.map((apt) => {
                                         const theme = STATUS_THEMES[apt.status] || STATUS_THEMES.Pendente;
                                         return (
@@ -188,20 +177,21 @@ export default function CalendarGrid({
                                                 role="button"
                                                 tabIndex={0}
                                                 className={cn(
-                                                    "w-full text-left p-1 py-0.5 border text-[10px] font-bold transition-all truncate flex items-center gap-1 shadow-2xs hover:scale-[1.02]",
+                                                    "w-full text-left p-1.5 border-t border-r border-b border-l-3 text-[10px] font-semibold rounded-md transition-all truncate flex items-center justify-between gap-1.5 shadow-3xs hover:translate-x-0.5 cursor-pointer leading-tight",
                                                     theme.bg
                                                 )}
                                             >
-                                                <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", theme.dot)} />
-                                                <span className="font-semibold text-slate-700 opacity-90">{apt.time}</span>
-                                                <span className="truncate flex-1 font-black tracking-tight">{apt.patientName}</span>
+                                                <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
+                                                    <span className="font-bold text-[9px] opacity-75 shrink-0">{apt.time}</span>
+                                                    <span className="truncate text-slate-800 font-semibold">{apt.patientName}</span>
+                                                </div>
                                                 {apt.patientId && !apt.isGuest && (
                                                     <Link
                                                         href={`/admin/pacientes/${apt.patientId}`}
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="ml-1 rounded-md bg-white/70 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white transition-colors"
+                                                        className="ml-1.5 rounded bg-white/90 px-1 py-0.5 text-[8px] font-bold text-blue-600 border border-blue-100 hover:bg-blue-650 hover:text-white transition-all shrink-0"
                                                     >
-                                                        Prontuário
+                                                        Ficha
                                                     </Link>
                                                 )}
                                             </div>
@@ -210,7 +200,7 @@ export default function CalendarGrid({
                                 </div>
 
                                 {cellApts.length > 0 && (
-                                    <div className="mt-1 flex items-center justify-between text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                    <div className="mt-1 flex items-center justify-between text-[7.5px] font-bold uppercase tracking-wider text-slate-400">
                                         <span>
                                             {cellApts.length} {cellApts.length === 1 ? "Consulta" : "Consultas"}
                                         </span>
@@ -236,6 +226,7 @@ export default function CalendarGrid({
                 selectedDateStr={selectedDateStr}
                 onDateChange={setSelectedDateStr}
                 onAdd={onAdd}
+                appointments={appointments}
             />
 
             <EditAppointmentDialog

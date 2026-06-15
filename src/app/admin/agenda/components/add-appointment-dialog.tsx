@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Loader2, Search, AlertCircle, Info, UserCheck, UserX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -13,12 +13,26 @@ import { maskCPF, rawCPF } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
 import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
 
+const TIME_SLOTS = (() => {
+    const slots = [];
+    let startMinutes = 8 * 60;
+    const endMinutes = 20 * 60;
+    while (startMinutes <= endMinutes) {
+        const hours = Math.floor(startMinutes / 60);
+        const mins = startMinutes % 60;
+        slots.push(`${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}`);
+        startMinutes += 15;
+    }
+    return slots;
+})();
+
 export function AddAppointmentDialog({
     open,
     onOpenChange,
     selectedDateStr,
     onDateChange,
     onAdd,
+    appointments = [],
 }: AddAppointmentDialogProps) {
     const [mode, setMode] = useState<"registered" | "guest">("registered");
     const [cpfInput, setCpfInput] = useState("");
@@ -31,6 +45,21 @@ export function AddAppointmentDialog({
     const [estimatedValue, setEstimatedValue] = useState("");
     const [time, setTime] = useState("09:00");
     const [submitting, setSubmitting] = useState(false);
+
+    // Auto-select first available slot when modal opens
+    useEffect(() => {
+        if (open && selectedDateStr) {
+            const firstAvailable = TIME_SLOTS.find(slot => {
+                const isBooked = appointments.some(
+                    (apt) => apt.date === selectedDateStr && apt.time === slot && apt.status !== "Cancelado"
+                );
+                return !isBooked;
+            });
+            if (firstAvailable) {
+                setTime(firstAvailable);
+            }
+        }
+    }, [open, selectedDateStr, appointments]);
 
     const resetForm = () => {
         setMode("registered");
@@ -112,7 +141,7 @@ export function AddAppointmentDialog({
     return (
         <Dialog open={open} onOpenChange={handleOpen}>
             <DialogContent className="sm:max-w-lg border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
-                <div className="bg-linear-to-r from-blue-600 to-blue-700 px-6 py-6 text-white">
+                <div className="bg-blue-600 px-6 py-6 text-white">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
                             <Plus className="h-5 w-5 text-white" />
@@ -282,13 +311,23 @@ export function AddAppointmentDialog({
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
                                 Horário
                             </label>
-                            <input
-                                type="time"
+                            <select
                                 value={time}
                                 onChange={(e) => setTime(e.target.value)}
-                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer bg-white"
                                 required
-                            />
+                            >
+                                {TIME_SLOTS.map((slot) => {
+                                    const isBooked = appointments.some(
+                                        (apt) => apt.date === selectedDateStr && apt.time === slot && apt.status !== "Cancelado"
+                                    );
+                                    return (
+                                        <option key={slot} value={slot} disabled={isBooked}>
+                                            {slot} {isBooked ? " (Já agendado)" : ""}
+                                        </option>
+                                    );
+                                })}
+                            </select>
                         </div>
                     </div>
 
