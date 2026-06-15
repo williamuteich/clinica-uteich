@@ -11,12 +11,14 @@ export const createAppointmentSchema = z
   .object({
     patientId: z.string().min(1).optional().or(z.literal("")),
     guestName: z.string().min(2, "Nome do paciente é obrigatório").optional().or(z.literal("")),
+    guestPhone: z.string().optional().nullable(),
     scheduledAt: z.coerce.date({ message: "Data e hora inválidas" }),
     serviceType: z.string().min(2, "Tipo de serviço é obrigatório"),
     estimatedValue: z.coerce
       .number({ message: "Valor estimado inválido" })
       .min(0, "Valor estimado não pode ser negativo"),
     status: appointmentStatusSchema.default("PENDING").optional(),
+    description: z.string().optional().nullable(),
   })
   .refine(
     (data) => {
@@ -37,6 +39,7 @@ export const updateAppointmentSchema = z.object({
   status: appointmentStatusSchema.optional(),
   description: z.string().optional().nullable(),
   guestName: z.string().optional().nullable(),
+  guestPhone: z.string().optional().nullable(),
 });
 
 export const listAppointmentsQuerySchema = z.object({

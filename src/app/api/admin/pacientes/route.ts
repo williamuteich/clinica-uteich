@@ -3,21 +3,21 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { pacienteSchema, pacienteQuerySchema } from "@/src/schemas/paciente";
 import { withAudit } from "@/src/lib/audit";
-import { encrypt, decrypt, encryptDeterministic } from "@/src/lib/encrypted-fields";
+import { encrypt, decrypt, encryptDeterministic, isEncrypted } from "@/src/lib/encrypted-fields";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
 const ENCRYPTED_FIELDS = [
-    { name: "cpf", action: encryptDeterministic, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "phone", action: encryptDeterministic, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "number", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "complement", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
+    { name: "cpf", action: encryptDeterministic, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "phone", action: encryptDeterministic, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "number", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "complement", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
 ] as const;
 
 const DECRYPT_FIELDS = [
-    { name: "cpf", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "phone", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "number", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "complement", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
+    { name: "cpf", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "phone", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "number", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "complement", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS) {

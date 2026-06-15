@@ -3,22 +3,22 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { anamneseSchema } from "@/src/schemas/anamnese";
 import { withAudit } from "@/src/lib/audit";
-import { encrypt, decrypt } from "@/src/lib/encrypted-fields";
+import { encrypt, decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
 type Ctx = { params: Promise<{ id: string }> };
 const getId = async (ctx: Ctx) => (await ctx.params).id;
 
 const ENCRYPTED_FIELDS = [
-    { name: "observations", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "doctorRecommendations", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "panicOrBehaviorNotes", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
+    { name: "observations", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "doctorRecommendations", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "panicOrBehaviorNotes", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
 ] as const;
 
 const DECRYPT_FIELDS = [
-    { name: "observations", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "doctorRecommendations", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "panicOrBehaviorNotes", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
+    { name: "observations", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "doctorRecommendations", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "panicOrBehaviorNotes", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
 ] as const;
 
 async function processObject(obj: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {
@@ -44,6 +44,9 @@ async function encryptAnamnese(data: any): Promise<any> {
     if (base.diseases && Array.isArray(base.diseases)) {
         base.diseases = await Promise.all(base.diseases.map(async (d: any) => {
             const res = { ...d };
+            if (res.name && typeof res.name === "string" && !res.name.includes(":")) {
+                res.name = await encrypt(res.name);
+            }
             if (res.observations && typeof res.observations === "string" && !res.observations.includes(":")) {
                 res.observations = await encrypt(res.observations);
             }
@@ -54,6 +57,9 @@ async function encryptAnamnese(data: any): Promise<any> {
     if (base.allergies && Array.isArray(base.allergies)) {
         base.allergies = await Promise.all(base.allergies.map(async (a: any) => {
             const res = { ...a };
+            if (res.substance && typeof res.substance === "string" && !res.substance.includes(":")) {
+                res.substance = await encrypt(res.substance);
+            }
             if (res.reaction && typeof res.reaction === "string" && !res.reaction.includes(":")) {
                 res.reaction = await encrypt(res.reaction);
             }
@@ -64,6 +70,9 @@ async function encryptAnamnese(data: any): Promise<any> {
     if (base.medications && Array.isArray(base.medications)) {
         base.medications = await Promise.all(base.medications.map(async (m: any) => {
             const res = { ...m };
+            if (res.medication && typeof res.medication === "string" && !res.medication.includes(":")) {
+                res.medication = await encrypt(res.medication);
+            }
             if (res.dosage && typeof res.dosage === "string" && !res.dosage.includes(":")) res.dosage = await encrypt(res.dosage);
             if (res.frequency && typeof res.frequency === "string" && !res.frequency.includes(":")) res.frequency = await encrypt(res.frequency);
             if (res.medicalFollowUp && typeof res.medicalFollowUp === "string" && !res.medicalFollowUp.includes(":")) res.medicalFollowUp = await encrypt(res.medicalFollowUp);
@@ -81,6 +90,9 @@ async function decryptAnamnese(data: any): Promise<any> {
     if (base.diseases && Array.isArray(base.diseases)) {
         base.diseases = await Promise.all(base.diseases.map(async (d: any) => {
             const res = { ...d };
+            if (res.name && typeof res.name === "string" && res.name.includes(":")) {
+                res.name = await decrypt(res.name);
+            }
             if (res.observations && typeof res.observations === "string" && res.observations.includes(":")) {
                 res.observations = await decrypt(res.observations);
             }
@@ -91,6 +103,9 @@ async function decryptAnamnese(data: any): Promise<any> {
     if (base.allergies && Array.isArray(base.allergies)) {
         base.allergies = await Promise.all(base.allergies.map(async (a: any) => {
             const res = { ...a };
+            if (res.substance && typeof res.substance === "string" && res.substance.includes(":")) {
+                res.substance = await decrypt(res.substance);
+            }
             if (res.reaction && typeof res.reaction === "string" && res.reaction.includes(":")) {
                 res.reaction = await decrypt(res.reaction);
             }
@@ -101,6 +116,9 @@ async function decryptAnamnese(data: any): Promise<any> {
     if (base.medications && Array.isArray(base.medications)) {
         base.medications = await Promise.all(base.medications.map(async (m: any) => {
             const res = { ...m };
+            if (res.medication && typeof res.medication === "string" && res.medication.includes(":")) {
+                res.medication = await decrypt(res.medication);
+            }
             if (res.dosage && typeof res.dosage === "string" && res.dosage.includes(":")) res.dosage = await decrypt(res.dosage);
             if (res.frequency && typeof res.frequency === "string" && res.frequency.includes(":")) res.frequency = await decrypt(res.frequency);
             if (res.medicalFollowUp && typeof res.medicalFollowUp === "string" && res.medicalFollowUp.includes(":")) res.medicalFollowUp = await decrypt(res.medicalFollowUp);

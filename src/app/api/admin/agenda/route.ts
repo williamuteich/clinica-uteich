@@ -6,16 +6,22 @@ import {
   createAppointmentSchema,
   listAppointmentsQuerySchema,
 } from "@/src/schemas/agendamento";
-import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { Appointment, AgendamentosResponse } from "@/src/types/dashboard/pacientes";
-import { decrypt, encrypt } from "@/src/lib/encrypted-fields";
+import { decrypt, encrypt, isEncrypted } from "@/src/lib/encrypted-fields";
 
 const ENCRYPTED_FIELDS = [
-  { name: "serviceType", action: encrypt, shouldProcess: (val: string) => !val.includes(":") && val.trim() !== "" },
+  { name: "serviceType", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+  { name: "description", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+  { name: "guestName", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+  { name: "guestPhone", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
 ] as const;
 
 const DECRYPT_FIELDS = [
-  { name: "serviceType", action: decrypt, shouldProcess: (val: string) => val.includes(":") && val.trim() !== "" },
+  { name: "serviceType", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+  { name: "description", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+  { name: "guestName", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+  { name: "guestPhone", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {
@@ -56,6 +62,7 @@ async function getAppointmentsFromDb(where: any, page: number, limit: number) {
           select: {
             id: true,
             name: true,
+            phone: true,
           },
         },
       },
@@ -72,6 +79,8 @@ function mapAppointment(appointment: any): Appointment {
     patientId: appointment.patientId || null,
     patientName: appointment.patient?.name || appointment.guestName || "Paciente",
     guestName: appointment.guestName || null,
+    guestPhone: appointment.guestPhone || null,
+    phone: appointment.patient?.phone || appointment.guestPhone || null,
     scheduledAt: appointment.scheduledAt?.toISOString?.() || String(appointment.scheduledAt),
     serviceType: appointment.serviceType,
     estimatedValue: appointment.estimatedValue,
@@ -108,16 +117,26 @@ export async function GET(request: Request) {
     ...(status ? { status } : {}),
     ...((startDate || endDate)
       ? {
-          scheduledAt: {
-            ...(startDate ? { gte: startDate } : {}),
-            ...(endDate ? { lte: endDate } : {}),
-          },
-        }
+        scheduledAt: {
+          ...(startDate ? { gte: startDate } : {}),
+          ...(endDate ? { lte: endDate } : {}),
+        },
+      }
       : {}),
   };
 
   const { appointments, total } = await getAppointmentsFromDb(where, page, limit);
   const decryptedAppointments = await decryptData(appointments);
+
+  for (const apt of decryptedAppointments) {
+    if (apt.patient?.phone) {
+      try {
+        apt.patient.phone = await decrypt(apt.patient.phone);
+      } catch (err) {
+        console.error("Erro ao descriptografar telefone do paciente:", err);
+      }
+    }
+  }
 
   const payload: AgendamentosResponse = {
     agendamentos: decryptedAppointments.map(mapAppointment),
@@ -158,25 +177,36 @@ async function _POST(request: Request) {
     const created = await prisma.appointment.create({
       data: {
         ...(isGuest
-          ? { guestName: encryptedBody.guestName }
+          ? { guestName: encryptedBody.guestName, guestPhone: encryptedBody.guestPhone }
           : { patientId: encryptedBody.patientId }),
         scheduledAt: encryptedBody.scheduledAt,
         serviceType: encryptedBody.serviceType,
         estimatedValue: encryptedBody.estimatedValue,
         status: encryptedBody.status || "PENDING",
+        description: encryptedBody.description || null,
       },
       include: {
         patient: {
           select: {
             id: true,
             name: true,
+            phone: true,
           },
         },
       },
     });
 
+    const decryptedCreated = await decryptData(created);
+    if (decryptedCreated.patient?.phone) {
+      try {
+        decryptedCreated.patient.phone = await decrypt(decryptedCreated.patient.phone);
+      } catch (err) {
+        console.error("Erro ao descriptografar telefone do paciente criado:", err);
+      }
+    }
+
     revalidateTag("agenda-list", "max");
-    return NextResponse.json(mapAppointment(await decryptData(created)), { status: 201 });
+    return NextResponse.json(mapAppointment(decryptedCreated), { status: 201 });
   } catch (error: any) {
     if (error.code === "P2003") {
       return NextResponse.json(

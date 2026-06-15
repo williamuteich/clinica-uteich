@@ -60,6 +60,8 @@ export interface Appointment {
   patientId: string | null;
   patientName: string;
   guestName?: string | null;
+  guestPhone?: string | null;
+  phone?: string | null;
   scheduledAt: string;
   serviceType: string;
   estimatedValue: number;

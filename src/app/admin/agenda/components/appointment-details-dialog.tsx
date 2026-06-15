@@ -28,32 +28,6 @@ const STATUS_THEMES = {
     },
 };
 
-function extractPhone(desc?: string | null): string | null {
-    if (!desc) return null;
-    const match = desc.match(/(?:Telefone\/WhatsApp:\s*|WhatsApp:\s*|Telefone:\s*)([^\n]+)/i);
-    if (match?.[1]) return match[1].trim();
-    const numbersMatch = desc.match(/(?:\(?\d{2}\)?\s*?\d{4,5}-?\d{4})/);
-    if (numbersMatch) return numbersMatch[0].trim();
-    return null;
-}
-
-function cleanDescription(desc?: string | null): string {
-    if (!desc) return "";
-    return desc
-        .split("\n")
-        .filter(line => {
-            const l = line.toLowerCase();
-            return !l.includes("agendado pelo site") &&
-                !l.includes("telefone/whatsapp") &&
-                !l.includes("whatsapp:") &&
-                !l.includes("telefone:") &&
-                !l.includes("status cadastro");
-        })
-        .map(line => line.replace(/^observação:\s*/i, ""))
-        .join("\n")
-        .trim();
-}
-
 interface AppointmentDetailsDialogProps {
     open: boolean;
     onOpenChange: (v: boolean) => void;
@@ -96,8 +70,8 @@ export function AppointmentDetailsDialog({
     if (!appointment) return null;
 
     const theme = STATUS_THEMES[status] || STATUS_THEMES.Pendente;
-    const phone = extractPhone(appointment.description);
-    const cleanedObs = cleanDescription(appointment.description);
+    const phone = appointment.phone;
+    const cleanedObs = appointment.description;
 
     const handleSave = () => {
         const finalProcedure = procedure === "Outro" ? customProcedure : procedure;

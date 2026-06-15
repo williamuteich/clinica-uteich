@@ -3,9 +3,43 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { taskSchema, taskQuerySchema } from "@/src/schemas/tarefa";
 import { withAudit } from "@/src/lib/audit";
+import { encrypt, decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
 
 type Ctx = { params: Promise<{ id: string }> };
 const getId = async (ctx: Ctx) => (await ctx.params).id;
+
+const ENCRYPTED_FIELDS = [
+    { name: "title", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "description", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+] as const;
+
+const DECRYPT_FIELDS = [
+    { name: "title", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "description", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+] as const;
+
+async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {
+    if (!data) return data;
+    if (Array.isArray(data)) {
+        return Promise.all(data.map(item => processData(item, fields)));
+    }
+
+    const res = { ...data };
+    for (const field of fields) {
+        const val = res[field.name];
+        if (typeof val === "string" && val.trim() !== "" && field.shouldProcess(val)) {
+            try {
+                res[field.name] = await field.action(val);
+            } catch (error) {
+                console.error("Erro ao processar campo", field.name, error);
+            }
+        }
+    }
+    return res;
+}
+
+const encryptData = (data: any) => processData(data, ENCRYPTED_FIELDS);
+const decryptData = (data: any) => processData(data, DECRYPT_FIELDS);
 
 export async function GET(request: Request, ctx: Ctx) {
     const session = await checkAdminApi();
@@ -28,7 +62,8 @@ export async function GET(request: Request, ctx: Ctx) {
         orderBy: [{ completed: "asc" }, { createdAt: "desc" }],
     });
 
-    return NextResponse.json({ tasks, total: tasks.length });
+    const decryptedTasks = await decryptData(tasks);
+    return NextResponse.json({ tasks: decryptedTasks, total: decryptedTasks.length });
 }
 
 async function _POST(request: Request, ctx: Ctx) {
@@ -46,16 +81,22 @@ async function _POST(request: Request, ctx: Ctx) {
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
+        const encryptedBody = await encryptData({
+            title: validated.data.title,
+            description: validated.data.description ?? null,
+        });
+
         const task = await prisma.patientTask.create({
             data: {
                 patientId: id,
-                title: validated.data.title,
-                description: validated.data.description ?? null,
+                title: encryptedBody.title,
+                description: encryptedBody.description ?? null,
                 dueDate: validated.data.dueDate ? new Date(validated.data.dueDate) : null,
             },
         });
 
-        return NextResponse.json(task, { status: 201 });
+        const decryptedTask = await decryptData(task);
+        return NextResponse.json(decryptedTask, { status: 201 });
     } catch (error) {
         console.error("Erro ao criar tarefa:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
@@ -90,9 +131,13 @@ async function _PUT(request: Request, ctx: Ctx) {
             return NextResponse.json({ error: "ID da tarefa é obrigatório" }, { status: 400 });
         }
 
-        const data: any = {};
-        if (title !== undefined) data.title = title;
-        if (description !== undefined) data.description = description;
+        const updatePayload: any = {};
+        if (title !== undefined) updatePayload.title = title;
+        if (description !== undefined) updatePayload.description = description;
+
+        const encryptedPayload = await encryptData(updatePayload);
+
+        const data: any = { ...encryptedPayload };
         if (dueDate !== undefined) data.dueDate = dueDate ? new Date(dueDate) : null;
         if (completed !== undefined) data.completed = completed;
 
@@ -101,7 +146,8 @@ async function _PUT(request: Request, ctx: Ctx) {
             data,
         });
 
-        return NextResponse.json(task);
+        const decryptedTask = await decryptData(task);
+        return NextResponse.json(decryptedTask);
     } catch (error) {
         console.error("Erro ao atualizar tarefa:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

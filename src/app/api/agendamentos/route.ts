@@ -137,18 +137,20 @@ export async function POST(request: Request) {
       }
     }
 
-    const description = `WhatsApp: ${phone}${observation ? `\nObservação: ${observation}` : ""}`;
-
     const encryptedServiceType = await encrypt(serviceType);
+    const encryptedDescription = observation ? (await encrypt(observation)) : null;
+    const encryptedGuestName = matchedPatient ? null : (await encrypt(name));
+    const encryptedGuestPhone = matchedPatient ? null : (await encrypt(phone));
 
     const newAppointment = await prisma.appointment.create({
       data: {
         patientId: matchedPatient ? matchedPatient.id : null,
-        guestName: matchedPatient ? null : name,
+        guestName: encryptedGuestName,
+        guestPhone: encryptedGuestPhone,
         scheduledAt: proposedDate,
         serviceType: encryptedServiceType,
         estimatedValue: 0,
-        description,
+        description: encryptedDescription,
         status: "PENDING",
       },
     });

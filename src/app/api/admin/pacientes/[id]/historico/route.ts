@@ -3,18 +3,18 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { evolutionSchema } from "@/src/schemas/paciente";
 import { withAudit } from "@/src/lib/audit";
-import { encrypt, decrypt } from "@/src/lib/encrypted-fields";
+import { encrypt, decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
 type Ctx = { params: Promise<{ id: string }> };
 const getId = async (ctx: Ctx) => (await ctx.params).id;
 
 const ENCRYPTED_FIELDS = [
-    { name: "description", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
+    { name: "description", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
 ] as const;
 
 const DECRYPT_FIELDS = [
-    { name: "description", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
+    { name: "description", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {

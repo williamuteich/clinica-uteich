@@ -3,6 +3,41 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { protheticWorkSchema } from "@/src/schemas/trabalho";
 import { withAudit } from "@/src/lib/audit";
+import { encrypt, decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
+
+const ENCRYPTED_FIELDS = [
+    { name: "patientCpf", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+    { name: "description", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+    { name: "teethInvolved", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+] as const;
+
+const DECRYPT_FIELDS = [
+    { name: "patientCpf", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+    { name: "description", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+    { name: "teethInvolved", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+] as const;
+
+async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {
+    if (!data) return data;
+    if (Array.isArray(data)) {
+        return Promise.all(data.map((item) => processData(item, fields)));
+    }
+    const res = { ...data };
+    for (const field of fields) {
+        const val = res[field.name];
+        if (typeof val === "string" && val.trim() !== "" && field.shouldProcess(val)) {
+            try {
+                res[field.name] = await field.action(val);
+            } catch (error) {
+                console.error("Erro ao processar campo", field.name, error);
+            }
+        }
+    }
+    return res;
+}
+
+const encryptData = (data: any) => processData(data, ENCRYPTED_FIELDS);
+const decryptData = (data: any) => processData(data, DECRYPT_FIELDS);
 
 export async function GET(request: Request) {
     const session = await checkAdminApi();
@@ -19,6 +54,7 @@ export async function GET(request: Request) {
 
     const where: any = {};
     if (status) where.status = status;
+
     if (query) {
         where.OR = [
             { patientName: { contains: query, mode: "insensitive" } },
@@ -37,8 +73,10 @@ export async function GET(request: Request) {
         prisma.protheticWork.count({ where }),
     ]);
 
+    const decryptedWorks = await decryptData(protheticWorks);
+
     return NextResponse.json({
-        protheticWorks,
+        protheticWorks: decryptedWorks,
         total,
         page,
         totalPages: Math.ceil(total / limit),
@@ -60,7 +98,8 @@ async function _POST(request: Request) {
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const { patientId, ...rest } = validated.data;
+        const encryptedBody = await encryptData(validated.data);
+        const { patientId, ...rest } = encryptedBody;
 
         const protheticWork = await prisma.$transaction(async (tx) => {
             const created = await tx.protheticWork.create({
@@ -84,7 +123,8 @@ async function _POST(request: Request) {
             return created;
         });
 
-        return NextResponse.json(protheticWork, { status: 201 });
+        const decrypted = await decryptData(protheticWork);
+        return NextResponse.json(decrypted, { status: 201 });
     } catch (error) {
         console.error("Erro ao criar trabalho protético:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });

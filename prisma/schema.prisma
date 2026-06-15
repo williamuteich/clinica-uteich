@@ -226,6 +226,7 @@ model Appointment {
   patientId String?  @db.ObjectId
   patient   Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
   guestName String?
+  guestPhone String?
 
   scheduledAt    DateTime
   serviceType    String

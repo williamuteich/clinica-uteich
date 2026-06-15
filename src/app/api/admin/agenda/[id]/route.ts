@@ -3,19 +3,25 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { withAudit } from "@/src/lib/audit";
 import { updateAppointmentSchema } from "@/src/schemas/agendamento";
-import { cacheLife, cacheTag, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { Appointment } from "@/src/types/dashboard/pacientes";
-import { decrypt, encrypt } from "@/src/lib/encrypted-fields";
+import { decrypt, encrypt, isEncrypted } from "@/src/lib/encrypted-fields";
 
 type Ctx = { params: Promise<{ id: string }> };
 const getId = async (ctx: Ctx) => (await ctx.params).id;
 
 const ENCRYPTED_FIELDS = [
-  { name: "serviceType", action: encrypt, shouldProcess: (val: string) => !val.includes(":") && val.trim() !== "" },
+  { name: "serviceType", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+  { name: "description", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+  { name: "guestName", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+  { name: "guestPhone", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
 ] as const;
 
 const DECRYPT_FIELDS = [
-  { name: "serviceType", action: decrypt, shouldProcess: (val: string) => val.includes(":") && val.trim() !== "" },
+  { name: "serviceType", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+  { name: "description", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+  { name: "guestName", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+  { name: "guestPhone", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {
@@ -52,6 +58,7 @@ async function getAppointmentFromDb(id: string) {
         select: {
           id: true,
           name: true,
+          phone: true,
         },
       },
     },
@@ -64,6 +71,8 @@ function mapAppointment(appointment: any): Appointment {
     patientId: appointment.patientId || null,
     patientName: appointment.patient?.name || appointment.guestName || "Paciente",
     guestName: appointment.guestName || null,
+    guestPhone: appointment.guestPhone || null,
+    phone: appointment.patient?.phone || appointment.guestPhone || null,
     scheduledAt: appointment.scheduledAt?.toISOString?.() || String(appointment.scheduledAt),
     serviceType: appointment.serviceType,
     estimatedValue: appointment.estimatedValue,
@@ -88,7 +97,16 @@ export async function GET(_req: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
   }
 
-  return NextResponse.json(mapAppointment(await decryptData(appointment)));
+  const decrypted = await decryptData(appointment);
+  if (decrypted.patient?.phone) {
+    try {
+      decrypted.patient.phone = await decrypt(decrypted.patient.phone);
+    } catch (err) {
+      console.error("Erro ao descriptografar telefone do paciente:", err);
+    }
+  }
+
+  return NextResponse.json(mapAppointment(decrypted));
 }
 
 async function _PUT(request: Request, ctx: Ctx) {
@@ -121,23 +139,34 @@ async function _PUT(request: Request, ctx: Ctx) {
         ...(typeof encryptedBody.estimatedValue === "number"
           ? { estimatedValue: encryptedBody.estimatedValue }
           : {}),
-        
+
         ...(encryptedBody.status ? { status: encryptedBody.status } : {}),
         ...(encryptedBody.description !== undefined ? { description: encryptedBody.description } : {}),
         ...(encryptedBody.guestName !== undefined ? { guestName: encryptedBody.guestName } : {}),
+        ...(encryptedBody.guestPhone !== undefined ? { guestPhone: encryptedBody.guestPhone } : {}),
       },
       include: {
         patient: {
           select: {
             id: true,
             name: true,
+            phone: true,
           },
         },
       },
     });
 
+    const decryptedUpdated = await decryptData(updated);
+    if (decryptedUpdated.patient?.phone) {
+      try {
+        decryptedUpdated.patient.phone = await decrypt(decryptedUpdated.patient.phone);
+      } catch (err) {
+        console.error("Erro ao descriptografar telefone do paciente atualizado:", err);
+      }
+    }
+
     revalidateTag("agenda-list", "max");
-    return NextResponse.json(mapAppointment(await decryptData(updated)));
+    return NextResponse.json(mapAppointment(decryptedUpdated));
   } catch (error: any) {
     if (error.code === "P2025") {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
@@ -175,13 +204,23 @@ async function _DELETE(_req: Request, ctx: Ctx) {
           select: {
             id: true,
             name: true,
+            phone: true,
           },
         },
       },
     });
 
+    const decryptedDeleted = await decryptData(deleted);
+    if (decryptedDeleted.patient?.phone) {
+      try {
+        decryptedDeleted.patient.phone = await decrypt(decryptedDeleted.patient.phone);
+      } catch (err) {
+        console.error("Erro ao descriptografar telefone do paciente deletado:", err);
+      }
+    }
+
     revalidateTag("agenda-list", "max");
-    return NextResponse.json(mapAppointment(await decryptData(deleted)));
+    return NextResponse.json(mapAppointment(decryptedDeleted));
   } catch (error: any) {
     if (error.code === "P2025") {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });

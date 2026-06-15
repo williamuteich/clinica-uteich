@@ -77,3 +77,13 @@ export async function encryptDeterministic(data: string): Promise<string> {
         encrypted.toString("hex"),
     ].join(":");
 }
+
+export function isEncrypted(data: string | null | undefined): boolean {
+    if (!data) return false;
+    const parts = data.split(":");
+    if (parts.length !== 3) return false;
+    const [iv, tag, cipher] = parts;
+    const isValidIv = (iv.length === 24 || iv.length === 32) && /^[0-9a-fA-F]+$/.test(iv);
+    const isValidTag = tag.length === 32 && /^[0-9a-fA-F]+$/.test(tag);
+    return isValidIv && isValidTag;
+}

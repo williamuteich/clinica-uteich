@@ -20,6 +20,8 @@ export interface Appointment {
     isGuest?: boolean;
     patientId?: string;
     description?: string;
+    guestPhone?: string | null;
+    phone?: string | null;
 }
 
 export interface CalendarGridProps {

@@ -3,24 +3,24 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { pacienteSchema } from "@/src/schemas/paciente";
 import { withAudit } from "@/src/lib/audit";
-import { encrypt, decrypt, encryptDeterministic } from "@/src/lib/encrypted-fields";
+import { encrypt, decrypt, encryptDeterministic, isEncrypted } from "@/src/lib/encrypted-fields";
 import { revalidateTag } from "next/cache";
 
 type Ctx = { params: Promise<{ id: string }> };
 const getId = async (ctx: Ctx) => (await ctx.params).id;
 
 const ENCRYPTED_FIELDS = [
-    { name: "cpf", action: encryptDeterministic, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "phone", action: encryptDeterministic, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "number", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
-    { name: "complement", action: encrypt, shouldProcess: (val: string) => !val.includes(":") },
+    { name: "cpf", action: encryptDeterministic, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "phone", action: encryptDeterministic, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "number", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "complement", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
 ] as const;
 
 const DECRYPT_FIELDS = [
-    { name: "cpf", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "phone", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "number", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
-    { name: "complement", action: decrypt, shouldProcess: (val: string) => val.includes(":") },
+    { name: "cpf", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "phone", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "number", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "complement", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS) {
@@ -76,7 +76,6 @@ async function _PUT(request: Request, ctx: Ctx) {
 
         const { birthDate, ...rest } = validated.data;
 
-        // Verificar se CPF já existe (excluindo o próprio paciente)
         if (rest.cpf) {
             const encryptedCpf = await encryptDeterministic(rest.cpf);
             const existingCpf = await prisma.patient.findFirst({ where: { cpf: encryptedCpf, NOT: { id } } });
@@ -85,7 +84,6 @@ async function _PUT(request: Request, ctx: Ctx) {
             }
         }
 
-        // Verificar se telefone já existe (excluindo o próprio paciente)
         if (rest.phone) {
             const cleanPhone = rest.phone.replace(/\D/g, "");
             const encryptedPhone = await encryptDeterministic(rest.phone);

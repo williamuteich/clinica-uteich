@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { withAudit } from "@/src/lib/audit";
-import { encrypt, decrypt } from "@/src/lib/encrypted-fields";
+import { encrypt, decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
 import { odontogramSchema } from "@/src/schemas/odontograma";
 import { cacheLife, cacheTag, revalidateTag } from "next/cache";
 
@@ -10,13 +10,13 @@ type Ctx = { params: Promise<{ id: string }> };
 const getId = async (ctx: Ctx) => (await ctx.params).id;
 
 const ENCRYPTED_FIELDS = [
-    { name: "customName", action: encrypt, shouldProcess: (val: string) => !val.includes(":") && val.trim() !== "" },
-    { name: "notes", action: encrypt, shouldProcess: (val: string) => !val.includes(":") && val.trim() !== "" },
+    { name: "customName", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+    { name: "notes", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
 ] as const;
 
 const DECRYPT_FIELDS = [
-    { name: "customName", action: decrypt, shouldProcess: (val: string) => val.includes(":") && val.trim() !== "" },
-    { name: "notes", action: decrypt, shouldProcess: (val: string) => val.includes(":") && val.trim() !== "" },
+    { name: "customName", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+    { name: "notes", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {

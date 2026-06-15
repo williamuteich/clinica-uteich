@@ -8,24 +8,26 @@ import { Appointment, CreateAgendamentoInput } from "@/src/types/dashboard/pacie
 import { toast } from "react-toastify";
 import { AgendamentoCreateModalProps } from "@/src/types/dashboard/components";
 import { createAgendamento } from "@/src/services/agendamento";
+import { ProcedureSelect } from "@/src/app/admin/agenda/components/procedure-select";
 
 export default function AgendamentoCreateModal({ patientId, open, onOpenChange, onCreated }: AgendamentoCreateModalProps) {
     const [isPending, startTransition] = useTransition();
     const [scheduledAt, setScheduledAt] = useState("");
-    const [serviceType, setServiceType] = useState("");
-    const [estimatedValue, setEstimatedValue] = useState("");
+    const [procedure, setProcedure] = useState("");
+    const [customProcedure, setCustomProcedure] = useState("");
     const [status, setStatus] = useState<CreateAgendamentoInput["status"]>("PENDING");
 
     const resetForm = () => {
         setScheduledAt("");
-        setServiceType("");
-        setEstimatedValue("");
+        setProcedure("");
+        setCustomProcedure("");
         setStatus("PENDING");
     };
 
     const handleSubmit = () => {
-        if (!scheduledAt || !serviceType || estimatedValue === "") {
-            toast.error("Preencha data/hora, tipo de serviço e valor estimado.");
+        const serviceType = procedure === "Outro" ? customProcedure : procedure;
+        if (!scheduledAt || !serviceType) {
+            toast.error("Preencha a data/hora e o procedimento clínico.");
             return;
         }
 
@@ -33,7 +35,7 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
             patientId,
             scheduledAt,
             serviceType,
-            estimatedValue: Number(estimatedValue),
+            estimatedValue: 0,
             status,
         };
 
@@ -62,54 +64,45 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
                 </div>
 
                 <div className="p-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">Data e Hora</label>
-                            <input
-                                type="datetime-local"
-                                value={scheduledAt}
-                                onChange={(e) => setScheduledAt(e.target.value)}
-                                className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            <label className="text-xs font-semibold text-slate-600">Procedimento Clínico</label>
+                            <ProcedureSelect
+                                value={procedure}
+                                onChange={setProcedure}
+                                customValue={customProcedure}
+                                onCustomChange={setCustomProcedure}
                             />
                         </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">Tipo de Serviço</label>
-                            <input
-                                type="text"
-                                value={serviceType}
-                                onChange={(e) => setServiceType(e.target.value)}
-                                placeholder="Ex: Limpeza e profilaxia"
-                                className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">Valor Estimado</label>
-                            <input
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                value={estimatedValue}
-                                onChange={(e) => setEstimatedValue(e.target.value)}
-                                placeholder="Ex: 250"
-                                className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            />
-                        </div>
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-semibold text-slate-600">Status</label>
-                            <select
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value as CreateAgendamentoInput["status"])}
-                                className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                            >
-                                <option value="PENDING">Pendente</option>
-                                <option value="CONFIRMED">Confirmado</option>
-                                <option value="CANCELLED">Cancelado</option>
-                                <option value="COMPLETED">Realizado</option>
-                            </select>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-600">Data e Hora</label>
+                                <input
+                                    type="datetime-local"
+                                    value={scheduledAt}
+                                    onChange={(e) => setScheduledAt(e.target.value)}
+                                    className="w-full h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-slate-600">Status</label>
+                                <select
+                                    value={status}
+                                    onChange={(e) => setStatus(e.target.value as CreateAgendamentoInput["status"])}
+                                    className="w-full h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 cursor-pointer"
+                                >
+                                    <option value="PENDING">Pendente</option>
+                                    <option value="CONFIRMED">Confirmado</option>
+                                    <option value="CANCELLED">Cancelado</option>
+                                    <option value="COMPLETED">Realizado</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
                         <Button
                             type="button"
                             variant="outline"
@@ -117,12 +110,16 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
                                 resetForm();
                                 onOpenChange(false);
                             }}
-                            className="rounded-xl border-slate-200"
+                            className="h-10 rounded-xl border-slate-200 px-4 text-xs font-bold uppercase tracking-wider text-slate-500"
                         >
                             Cancelar
                         </Button>
-                        <Button onClick={handleSubmit} disabled={isPending} className="h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold">
-                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Agendamento"}
+                        <Button 
+                            onClick={handleSubmit} 
+                            disabled={isPending} 
+                            className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold uppercase tracking-wider"
+                        >
+                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
                         </Button>
                     </div>
                 </div>

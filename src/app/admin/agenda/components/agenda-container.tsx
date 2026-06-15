@@ -74,6 +74,8 @@ export default function AgendaContainer() {
                         isGuest: !apt.patientId || apt.patientId === "",
                         patientId: apt.patientId || undefined,
                         description: apt.description || undefined,
+                        guestPhone: apt.guestPhone || undefined,
+                        phone: apt.phone || undefined,
                     };
                 });
                 setAppointments(mapped);

@@ -3,6 +3,41 @@ import { prisma } from "@/src/lib/prisma";
 import { checkAdminApi, hasPermission } from "@/src/lib/auth-helpers-server";
 import { protheticWorkSchema } from "@/src/schemas/trabalho";
 import { withAudit } from "@/src/lib/audit";
+import { encrypt, decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
+
+const ENCRYPTED_FIELDS = [
+    { name: "patientCpf", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+    { name: "description", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+    { name: "teethInvolved", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) && val.trim() !== "" },
+] as const;
+
+const DECRYPT_FIELDS = [
+    { name: "patientCpf", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+    { name: "description", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+    { name: "teethInvolved", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) && val.trim() !== "" },
+] as const;
+
+async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS): Promise<any> {
+    if (!data) return data;
+    if (Array.isArray(data)) {
+        return Promise.all(data.map((item) => processData(item, fields)));
+    }
+    const res = { ...data };
+    for (const field of fields) {
+        const val = res[field.name];
+        if (typeof val === "string" && val.trim() !== "" && field.shouldProcess(val)) {
+            try {
+                res[field.name] = await field.action(val);
+            } catch (error) {
+                console.error("Erro ao processar campo", field.name, error);
+            }
+        }
+    }
+    return res;
+}
+
+const encryptData = (data: any) => processData(data, ENCRYPTED_FIELDS);
+const decryptData = (data: any) => processData(data, DECRYPT_FIELDS);
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const session = await checkAdminApi();
@@ -21,7 +56,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: "Trabalho protético não encontrado" }, { status: 404 });
     }
 
-    return NextResponse.json(protheticWork);
+    return NextResponse.json(await decryptData(protheticWork));
 }
 
 async function _PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -40,8 +75,6 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const { patientId, ...rest } = validated.data;
-
         const original = await prisma.protheticWork.findUnique({
             where: { id },
             select: { status: true },
@@ -50,6 +83,9 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
         if (!original) {
             return NextResponse.json({ error: "Trabalho protético não encontrado" }, { status: 404 });
         }
+
+        const encryptedBody = await encryptData(validated.data);
+        const { patientId, ...rest } = encryptedBody;
 
         const protheticWork = await prisma.$transaction(async (tx) => {
             const updated = await tx.protheticWork.update({
@@ -75,7 +111,7 @@ async function _PUT(request: Request, { params }: { params: Promise<{ id: string
             return updated;
         });
 
-        return NextResponse.json(protheticWork);
+        return NextResponse.json(await decryptData(protheticWork));
     } catch (error) {
         console.error("Erro ao atualizar trabalho protético:", error);
         return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
