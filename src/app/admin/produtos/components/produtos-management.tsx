@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast, ToastContainer } from "react-toastify";
 import { deleteProduct, getProducts, getMovements } from "@/src/services/produtos";
-import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
+import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { GerenciarEstoqueModal } from "./gerenciar-estoque-modal";
 import { VisualizarAlertasModal } from "./visualizar-alertas-modal";
 import { ProdutosManagementProps, Product, StockMovement } from "@/src/types/dashboard/produtos";

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarDays, ClipboardList, Clock, Pencil, Activity, Plus, Trash2 } from "lucide-react";
 import { EvolucaoItemProps, HistoricoPatient } from "@/src/types/dashboard/pacientes";
-import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
+import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createHistoricoPaciente, deleteHistoricoPaciente, updateHistoricoPaciente } from "@/src/services/historico";

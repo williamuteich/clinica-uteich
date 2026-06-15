@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import { CreatePacienteDialog } from "./create-paciente-dialog";
-import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
+import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { getPacientes, deletePaciente } from "@/src/services/pacientes";
 import { useDebounce } from "@/src/hook/use-debounce";

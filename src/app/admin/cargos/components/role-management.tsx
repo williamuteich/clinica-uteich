@@ -27,7 +27,7 @@ import { Role, PermissionToRole } from "@/src/types/dashboard/admins";
 import { ALL_RESOURCES, ALL_ACTIONS } from "@/src/lib/navigation";
 import { ViewPermissions } from "./view-permissions";
 import { createRole, updateRole, deleteRole, getRoles } from "@/src/services/roles";
-import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
+import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { toast, ToastContainer } from "react-toastify";
 
 export function RoleManagement({ initialRoles }: { initialRoles: Role[] }) {

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { getProtheticWorks, updateProtheticWork, deleteProtheticWork } from "@/src/services/trabalhos";
 import { toast, ToastContainer } from "react-toastify";
-import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
+import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { maskCPF } from "@/src/lib/masks";
 import Link from "next/link";
 import { ProtheticWork, ProtheticWorksResponse, DashboardStats } from "@/src/types/dashboard/trabalho";

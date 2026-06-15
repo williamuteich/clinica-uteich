@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { Admin, Role, AdminsResponse, AdminFilters } from "@/src/types/dashboard/admins";
 import { createAdmin, updateAdmin, deleteAdmin, getAdmins } from "@/src/services/administrator";
-import { DeleteDialogGeneric } from "@/src/app/components/delete-dialog-generic";
+import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { toast, ToastContainer } from "react-toastify";
 import { useDebounce } from "@/src/hook/use-debounce";
 
