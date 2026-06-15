@@ -1,7 +1,7 @@
 "use server";
 import { Role, AdminsResponse, AdminFilters } from "@/src/types/dashboard/admins";
 import { headers } from "next/headers";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
@@ -13,7 +13,8 @@ export async function getUsuariosInit(filters: AdminFilters = { page: 1, limit: 
     if (filters.name) params.set("name", filters.name);
 
     const res = await fetch(`${API_URL}/api/admin/usuarios/init?${params.toString()}`, {
-        headers: { Cookie: cookie }
+        headers: { Cookie: cookie },
+        next: { tags: ["usuarios-list"] }
     });
     if (res.status === 403 || res.status === 401) return null;
     if (!res.ok) return null;
@@ -37,7 +38,10 @@ export async function getAdmins(filters: AdminFilters = { page: 1, limit: 20 }):
     if (filters.limit) params.set("limit", String(filters.limit));
     if (filters.name) params.set("name", filters.name);
 
-    const res = await fetch(`${API_URL}/api/admin/usuarios?${params.toString()}`, { headers: { Cookie: cookie } });
+    const res = await fetch(`${API_URL}/api/admin/usuarios?${params.toString()}`, {
+        headers: { Cookie: cookie },
+        next: { tags: ["usuarios-list"] }
+    });
     if (res.status === 403 || res.status === 401) return null;
     if (!res.ok) throw new Error("Failed to fetch admins");
     return await res.json();
@@ -69,6 +73,7 @@ export async function createAdmin(data: { name: string; email: string; roleId: s
     if (!res.ok) return { success: false, error: result.error || "Erro ao criar administrador" };
 
     revalidatePath("/admin/usuarios");
+    revalidateTag("usuarios-list", "max");
     return { success: true };
 }
 
@@ -88,6 +93,7 @@ export async function updateAdmin(id: string, data: { name: string; email: strin
     if (!res.ok) return { success: false, error: result.error || "Erro ao atualizar administrador" };
 
     revalidatePath("/admin/usuarios");
+    revalidateTag("usuarios-list", "max");
     return { success: true };
 }
 
@@ -103,5 +109,6 @@ export async function deleteAdmin(id: string): Promise<{ success: boolean; error
     if (!res.ok) return { success: false, error: result.error || "Erro ao excluir administrador" };
 
     revalidatePath("/admin/usuarios");
+    revalidateTag("usuarios-list", "max");
     return { success: true };
 }

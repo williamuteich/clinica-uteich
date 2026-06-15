@@ -70,6 +70,7 @@ async function FormPage({
                 patientName={generatedLink.patientName}
                 formType={generatedLink.formType}
                 token={generatedLink.token}
+                hasAnamnesis={generatedLink.hasAnamnesis}
             />
         </div>
     );

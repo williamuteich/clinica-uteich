@@ -21,6 +21,7 @@ export function AddressFields({ values, onChange, required = true, className }: 
             onChange({
                 state: data.uf || "",
                 city: data.localidade || "",
+                neighborhood: data.bairro || "",
                 street: data.logradouro || "",
             });
         }
@@ -78,6 +79,21 @@ export function AddressFields({ values, onChange, required = true, className }: 
                         value={values.city}
                         onChange={(e) => onChange({ city: e.target.value })}
                         placeholder="Porto Alegre"
+                        required={required}
+                        className="h-10 bg-white"
+                    />
+                </div>
+
+                <div className="col-span-2 space-y-1.5">
+                    <Label htmlFor="neighborhood" className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Bairro
+                    </Label>
+                    <Input
+                        id="neighborhood"
+                        name="neighborhood"
+                        value={values.neighborhood || ""}
+                        onChange={(e) => onChange({ neighborhood: e.target.value })}
+                        placeholder="Centro"
                         required={required}
                         className="h-10 bg-white"
                     />

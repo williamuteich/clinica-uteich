@@ -17,12 +17,14 @@ type PatientRegistrationWizardProps = {
     patientName: string;
     formType: string;
     token: string;
+    hasAnamnesis: boolean;
 };
 
 export default function PatientRegistrationWizard({
     patientName,
     formType,
     token,
+    hasAnamnesis,
 }: PatientRegistrationWizardProps) {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +35,7 @@ export default function PatientRegistrationWizard({
         cpf: "",
         birthDate: "",
         phone: "",
+        email: "",
         profession: "",
         gender: "",
         howKnewClinic: "",
@@ -48,12 +51,16 @@ export default function PatientRegistrationWizard({
         street: "",
         number: "",
         complement: "",
+        observations: "",
     });
 
     const [queixaPrincipal, setQueixaPrincipal] = useState("");
     const [responses, setResponses] = useState<Record<string, AnamneseResponseValue>>({});
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const [isMinor, setIsMinor] = useState(false);
+    const [hasRepresentative, setHasRepresentative] = useState(false);
+
     useEffect(() => {
         if (!formData.birthDate) {
             setIsMinor(false);
@@ -68,6 +75,12 @@ export default function PatientRegistrationWizard({
         }
         setIsMinor(age < 18);
     }, [formData.birthDate]);
+
+    useEffect(() => {
+        if (formType === "CHILD_ANAMNESIS" || isMinor) {
+            setHasRepresentative(true);
+        }
+    }, [formType, isMinor]);
 
     useEffect(() => {
         const cleanCep = formData.zipCode.replace(/\D/g, "");
@@ -102,10 +115,14 @@ export default function PatientRegistrationWizard({
     };
 
     const validateStep1 = () => {
-        const required = ["name", "cpf", "birthDate", "phone", "gender", "zipCode", "state", "city", "neighborhood", "street", "number"];
-        if (isMinor) {
+        const required = ["name", "birthDate", "phone", "gender", "zipCode", "state", "city", "neighborhood", "street", "number"];
+        if (formType !== "CHILD_ANAMNESIS") {
+            required.push("cpf");
+        }
+        if (hasRepresentative) {
             required.push("representativeName", "representativeCpf", "representativeBirthDate");
         }
+
         for (const f of required) {
             if (!formData[f as keyof typeof formData]) return false;
         }
@@ -118,34 +135,67 @@ export default function PatientRegistrationWizard({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
 
-        setTimeout(() => {
+        if (!validateStep1()) {
+            setSubmitError("Por favor, preencha todos os campos obrigatórios dos Dados Pessoais.");
+            setStep(1);
+            return;
+        }
+
+        if (hasAnamnesis && !validateStep2()) {
+            setSubmitError("Por favor, descreva sua queixa principal.");
+            setStep(2);
+            return;
+        }
+
+        setIsSubmitting(true);
+        setSubmitError(null);
+
+        try {
+            const res = await fetch(`/api/formulario/${token}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    formData,
+                    queixaPrincipal,
+                    responses,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setSubmitError(data.error || "Ocorreu um erro ao enviar seu cadastro.");
+            } else {
+                setIsSuccess(true);
+            }
+        } catch (error) {
+            console.error(error);
+            setSubmitError("Erro ao se conectar com o servidor. Tente novamente mais tarde.");
+        } finally {
             setIsSubmitting(false);
-            setIsSuccess(true);
-        }, 1500);
+        }
     };
 
     if (isSuccess) {
         return (
-            <div className="max-w-2xl w-full bg-white rounded-3xl p-8 md:p-12 border border-slate-100 shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                    <CheckCircle className="h-10 w-10" />
+            <div className="flex flex-col items-center justify-center space-y-4 py-16 text-center animate-in fade-in duration-500">
+                <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center shadow-inner mb-2">
+                    <CheckCircle className="h-8 w-8" />
                 </div>
-                <h1 className="text-3xl font-black text-slate-800 tracking-tight">Cadastro Recebido!</h1>
-                <p className="text-slate-600 max-w-md mx-auto leading-relaxed">
-                    Obrigado, <strong className="text-slate-800 font-bold">{formData.name}</strong>. Seus dados cadastrais e questionário de anamnese foram recebidos e salvos com sucesso no sistema da clínica.
+                <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Cadastro enviado com sucesso!</h1>
+                <p className="text-sm text-slate-500 max-w-sm">
+                    Agradecemos a sua colaboração. Seus dados já estão salvos no sistema da clínica.
                 </p>
-                <div className="pt-4 border-t border-slate-100 max-w-sm mx-auto text-xs text-slate-400">
-                    Você já pode fechar esta página. Nos vemos em breve na Uteich Odontologia!
-                </div>
             </div>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-3xl w-full bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px] transition-all">
-            <div className="bg-slate-900 text-white p-8 md:w-80 flex flex-col justify-between shrink-0">
+        <form onSubmit={handleSubmit} className="w-full bg-white rounded-3xl border border-slate-100 shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px] transition-all">
+            <div className="bg-slate-900 hidden text-white p-8 md:w-80 md:flex flex-col justify-between shrink-0">
                 <div className="space-y-8">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center shadow-md">
@@ -168,25 +218,17 @@ export default function PatientRegistrationWizard({
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === 2 ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/20" : "bg-slate-800 text-slate-400"}`}>
-                                <ClipboardList className="h-4 w-4" />
+                        {hasAnamnesis && (
+                            <div className="flex items-center gap-4">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === 2 ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/20" : "bg-slate-800 text-slate-400"}`}>
+                                    <ClipboardList className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-slate-400">Passo 2</p>
+                                    <h3 className="text-sm font-bold text-white">Anamnese</h3>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-xs font-bold text-slate-400">Passo 2</p>
-                                <h3 className="text-sm font-bold text-white">Anamnese</h3>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${step === 3 ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/20" : "bg-slate-800 text-slate-400"}`}>
-                                <Send className="h-4 w-4" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-slate-400">Passo 3</p>
-                                <h3 className="text-sm font-bold text-white">Revisar & Enviar</h3>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -208,7 +250,7 @@ export default function PatientRegistrationWizard({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">Nome Completo</Label>
+                                    <Label className="text-xs font-bold text-slate-700">Nome Completo <span className="text-rose-500">*</span></Label>
                                     <Input
                                         value={formData.name}
                                         onChange={(e) => handleInputChange("name", e.target.value)}
@@ -219,18 +261,21 @@ export default function PatientRegistrationWizard({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">CPF</Label>
+                                    <Label className="text-xs font-bold text-slate-700">
+                                        CPF {formType !== "CHILD_ANAMNESIS" && <span className="text-rose-500">*</span>}
+                                    </Label>
                                     <Input
                                         value={formData.cpf}
                                         onChange={(e) => handleInputChange("cpf", e.target.value)}
                                         placeholder="000.000.000-00"
                                         className="h-10 text-sm focus-visible:ring-blue-500"
-                                        required
+                                        required={formType !== "CHILD_ANAMNESIS"}
+                                        maxLength={14}
                                     />
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">Data de Nascimento</Label>
+                                    <Label className="text-xs font-bold text-slate-700">Data de Nascimento <span className="text-rose-500">*</span></Label>
                                     <Input
                                         type="date"
                                         value={formData.birthDate}
@@ -241,13 +286,25 @@ export default function PatientRegistrationWizard({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">Telefone / WhatsApp</Label>
+                                    <Label className="text-xs font-bold text-slate-700">Telefone / WhatsApp <span className="text-rose-500">*</span></Label>
                                     <Input
                                         value={formData.phone}
                                         onChange={(e) => handleInputChange("phone", e.target.value)}
                                         placeholder="(00) 00000-0000"
                                         className="h-10 text-sm focus-visible:ring-blue-500"
                                         required
+                                        maxLength={15}
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-slate-700">E-mail</Label>
+                                    <Input
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => handleInputChange("email", e.target.value)}
+                                        placeholder="Ex: joao@email.com"
+                                        className="h-10 text-sm focus-visible:ring-blue-500"
                                     />
                                 </div>
 
@@ -262,7 +319,7 @@ export default function PatientRegistrationWizard({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">Gênero</Label>
+                                    <Label className="text-xs font-bold text-slate-700">Gênero <span className="text-rose-500">*</span></Label>
                                     <Select value={formData.gender} onValueChange={(val) => handleInputChange("gender", val)}>
                                         <SelectTrigger className="h-10 text-sm">
                                             <SelectValue placeholder="Selecione..." />
@@ -275,7 +332,7 @@ export default function PatientRegistrationWizard({
                                     </Select>
                                 </div>
 
-                                <div className="space-y-2 md:col-span-2">
+                                <div className="space-y-2">
                                     <Label className="text-xs font-bold text-slate-700">Como conheceu a clínica?</Label>
                                     <Select value={formData.howKnewClinic} onValueChange={(val) => handleInputChange("howKnewClinic", val)}>
                                         <SelectTrigger className="h-10 text-sm">
@@ -292,15 +349,32 @@ export default function PatientRegistrationWizard({
                                 </div>
                             </div>
 
-                            {isMinor && (
+                            {(!isMinor && formType !== "CHILD_ANAMNESIS") && (
+                                <div className="flex items-center gap-2 pt-2 select-none">
+                                    <input
+                                        type="checkbox"
+                                        id="hasRepresentativeManual"
+                                        checked={hasRepresentative}
+                                        onChange={(e) => setHasRepresentative(e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                    />
+                                    <Label htmlFor="hasRepresentativeManual" className="text-xs font-bold text-slate-700 cursor-pointer">
+                                        Paciente possui responsável legal? (Tutela, curatela ou procuração)
+                                    </Label>
+                                </div>
+                            )}
+
+                            {hasRepresentative && (
                                 <div className="p-4 bg-amber-50/50 border border-amber-100 rounded-2xl space-y-4 animate-in fade-in duration-300">
                                     <div className="flex items-center gap-2 text-amber-800">
                                         <ShieldAlert className="h-4 w-4 shrink-0" />
-                                        <h4 className="text-xs font-bold uppercase tracking-wider">Dados do Responsável Legal</h4>
+                                        <h4 className="text-xs font-bold uppercase tracking-wider">
+                                            Dados do Responsável Legal {(isMinor || formType === "CHILD_ANAMNESIS") && "(Obrigatório)"}
+                                        </h4>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-600">Nome do Responsável</Label>
+                                            <Label className="text-[10px] font-bold text-slate-600">Nome do Responsável <span className="text-rose-500">*</span></Label>
                                             <Input
                                                 value={formData.representativeName}
                                                 onChange={(e) => handleInputChange("representativeName", e.target.value)}
@@ -309,17 +383,18 @@ export default function PatientRegistrationWizard({
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-600">CPF do Responsável</Label>
+                                            <Label className="text-[10px] font-bold text-slate-600">CPF do Responsável <span className="text-rose-500">*</span></Label>
                                             <Input
                                                 value={formData.representativeCpf}
                                                 onChange={(e) => handleInputChange("representativeCpf", e.target.value)}
                                                 placeholder="000.000.000-00"
                                                 className="h-9 text-xs"
                                                 required
+                                                maxLength={14}
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-600">Data de Nasc. Responsável</Label>
+                                            <Label className="text-[10px] font-bold text-slate-600">Data de Nasc. Responsável <span className="text-rose-500">*</span></Label>
                                             <Input
                                                 type="date"
                                                 value={formData.representativeBirthDate}
@@ -331,23 +406,25 @@ export default function PatientRegistrationWizard({
                                     </div>
                                 </div>
                             )}
+
                             <div className="pt-4 border-t border-slate-100 space-y-4">
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
                                     <MapPin className="h-3 w-3" /> Endereço Residencial
                                 </h3>
                                 <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
                                     <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">CEP</Label>
+                                        <Label className="text-[10px] font-bold text-slate-600">CEP <span className="text-rose-500">*</span></Label>
                                         <Input
                                             value={formData.zipCode}
                                             onChange={(e) => handleInputChange("zipCode", e.target.value)}
                                             placeholder="00000-000"
                                             className="h-9 text-xs"
                                             required
+                                            maxLength={9}
                                         />
                                     </div>
                                     <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">Estado (UF)</Label>
+                                        <Label className="text-[10px] font-bold text-slate-600">Estado (UF) <span className="text-rose-500">*</span></Label>
                                         <Input
                                             value={formData.state}
                                             onChange={(e) => handleInputChange("state", e.target.value)}
@@ -356,7 +433,7 @@ export default function PatientRegistrationWizard({
                                         />
                                     </div>
                                     <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">Cidade</Label>
+                                        <Label className="text-[10px] font-bold text-slate-600">Cidade <span className="text-rose-500">*</span></Label>
                                         <Input
                                             value={formData.city}
                                             onChange={(e) => handleInputChange("city", e.target.value)}
@@ -365,7 +442,7 @@ export default function PatientRegistrationWizard({
                                         />
                                     </div>
                                     <div className="space-y-1 md:col-span-3">
-                                        <Label className="text-[10px] font-bold text-slate-600">Bairro</Label>
+                                        <Label className="text-[10px] font-bold text-slate-600">Bairro <span className="text-rose-500">*</span></Label>
                                         <Input
                                             value={formData.neighborhood}
                                             onChange={(e) => handleInputChange("neighborhood", e.target.value)}
@@ -374,7 +451,7 @@ export default function PatientRegistrationWizard({
                                         />
                                     </div>
                                     <div className="space-y-1 md:col-span-3">
-                                        <Label className="text-[10px] font-bold text-slate-600">Endereço / Logradouro</Label>
+                                        <Label className="text-[10px] font-bold text-slate-600">Endereço / Logradouro <span className="text-rose-500">*</span></Label>
                                         <Input
                                             value={formData.street}
                                             onChange={(e) => handleInputChange("street", e.target.value)}
@@ -383,7 +460,7 @@ export default function PatientRegistrationWizard({
                                         />
                                     </div>
                                     <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">Número</Label>
+                                        <Label className="text-[10px] font-bold text-slate-600">Número <span className="text-rose-500">*</span></Label>
                                         <Input
                                             value={formData.number}
                                             onChange={(e) => handleInputChange("number", e.target.value)}
@@ -423,9 +500,21 @@ export default function PatientRegistrationWizard({
                                             onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
                                             placeholder="(00) 00000-0000"
                                             className="h-9 text-xs"
+                                            maxLength={15}
                                         />
                                     </div>
                                 </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-slate-100 space-y-2">
+                                <Label className="text-xs font-bold text-slate-700">Observações</Label>
+                                <textarea
+                                    value={formData.observations}
+                                    onChange={(e) => handleInputChange("observations", e.target.value)}
+                                    placeholder="Ex: Algum cuidado extra, observações sobre o tratamento, etc."
+                                    rows={3}
+                                    className="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm shadow-xs placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 outline-none resize-none font-medium text-slate-800 transition-all"
+                                />
                             </div>
                         </div>
                     )}
@@ -473,51 +562,14 @@ export default function PatientRegistrationWizard({
                             )}
                         </div>
                     )}
-
-                    {step === 3 && (
-                        <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                            <div>
-                                <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                                    Revisão do Pré-Cadastro
-                                </h2>
-                                <p className="text-xs text-slate-500 mt-1">Revise suas respostas antes de finalizar o envio do questionário.</p>
-                            </div>
-
-                            <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 space-y-4 text-sm">
-                                <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-                                    <div>
-                                        <span className="text-xs font-bold text-slate-400 block uppercase">Paciente</span>
-                                        <span className="font-semibold text-slate-800">{formData.name}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-xs font-bold text-slate-400 block uppercase">CPF</span>
-                                        <span className="font-semibold text-slate-800">{formData.cpf}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-xs font-bold text-slate-400 block uppercase">Telefone</span>
-                                        <span className="font-semibold text-slate-800">{formData.phone}</span>
-                                    </div>
-                                    <div>
-                                        <span className="text-xs font-bold text-slate-400 block uppercase">Formulário</span>
-                                        <span className="font-semibold text-slate-850">
-                                            {formType === "DEFAULT_ANAMNESIS" && "Anamnese Padrão"}
-                                            {formType === "ORTHODONTIC_ANAMNESIS" && "Anamnese Ortodôntica"}
-                                            {formType === "CHILD_ANAMNESIS" && "Anamnese Infantil"}
-                                            {formType === "SURGICAL_IMPLANT_ANAMNESIS" && "Anamnese de Cirurgia/Implante"}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="border-t border-slate-200/60 pt-3">
-                                    <span className="text-xs font-bold text-slate-400 block uppercase">Queixa Principal</span>
-                                    <p className="text-slate-700 italic mt-1 leading-relaxed bg-white p-3 rounded-xl border border-slate-100">
-                                        "{queixaPrincipal}"
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
+
+                {submitError && (
+                    <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold p-4 rounded-xl mt-4 flex items-center gap-2 animate-in fade-in duration-300">
+                        <ShieldAlert className="h-4 w-4 shrink-0 text-rose-600" />
+                        <span>{submitError}</span>
+                    </div>
+                )}
 
                 <div className="flex items-center justify-between pt-8 border-t border-slate-100 mt-8 shrink-0">
                     {step > 1 ? (
@@ -534,14 +586,13 @@ export default function PatientRegistrationWizard({
                         <div />
                     )}
 
-                    {step < 3 ? (
+                    {(hasAnamnesis && step === 1) ? (
                         <Button
                             type="button"
                             onClick={() => {
-                                if (step === 1 && validateStep1()) {
+                                if (validateStep1()) {
                                     setStep(2);
-                                } else if (step === 2 && validateStep2()) {
-                                    setStep(3);
+                                    setSubmitError(null);
                                 } else {
                                     const form = document.querySelector("form");
                                     form?.reportValidity();
@@ -555,9 +606,16 @@ export default function PatientRegistrationWizard({
                         <Button
                             type="submit"
                             disabled={isSubmitting}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 text-xs flex items-center gap-1 shadow-md hover:shadow-lg transition-all cursor-pointer"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-10 text-xs flex items-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer min-w-[140px]"
                         >
-                            {isSubmitting ? "Enviando..." : "Finalizar & Enviar"}
+                            {isSubmitting ? (
+                                <>
+                                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <span>Enviando...</span>
+                                </>
+                            ) : (
+                                <span>Finalizar & Enviar</span>
+                            )}
                         </Button>
                     )}
                 </div>

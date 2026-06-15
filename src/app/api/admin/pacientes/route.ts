@@ -11,6 +11,8 @@ const ENCRYPTED_FIELDS = [
     { name: "phone", action: encryptDeterministic, shouldProcess: (val: string) => !isEncrypted(val) },
     { name: "number", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
     { name: "complement", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "representativeCpf", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
+    { name: "emergencyPhone", action: encrypt, shouldProcess: (val: string) => !isEncrypted(val) },
 ] as const;
 
 const DECRYPT_FIELDS = [
@@ -18,6 +20,8 @@ const DECRYPT_FIELDS = [
     { name: "phone", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
     { name: "number", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
     { name: "complement", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "representativeCpf", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
+    { name: "emergencyPhone", action: decrypt, shouldProcess: (val: string) => isEncrypted(val) },
 ] as const;
 
 async function processData(data: any, fields: typeof ENCRYPTED_FIELDS | typeof DECRYPT_FIELDS) {
@@ -145,11 +149,11 @@ async function _POST(request: Request) {
             return NextResponse.json({ error: validated.error.issues[0].message }, { status: 400 });
         }
 
-        const { birthDate, ...rest } = validated.data;
+        const { birthDate, representativeBirthDate, ...rest } = validated.data;
 
         if (rest.cpf) {
             const encryptedCpf = await encryptDeterministic(rest.cpf);
-            const existingCpf = await prisma.patient.findUnique({ where: { cpf: encryptedCpf } });
+            const existingCpf = await prisma.patient.findFirst({ where: { cpf: encryptedCpf } });
             if (existingCpf) {
                 return NextResponse.json({ error: "CPF já cadastrado" }, { status: 400 });
             }
@@ -190,6 +194,7 @@ async function _POST(request: Request) {
             data: {
                 ...encryptedBody,
                 birthDate: new Date(birthDate),
+                representativeBirthDate: representativeBirthDate ? new Date(representativeBirthDate) : null,
             },
         });
 

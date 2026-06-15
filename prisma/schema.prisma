@@ -75,21 +75,31 @@ model LogAdmin {
 }
 
 model Patient {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  cpf          String   @unique
-  birthDate    DateTime
-  phone        String   @unique
-  zipCode      String?
-  state        String?
-  city         String?
-  street       String?
-  number       String?
-  complement   String?
-  observations String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                      String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String
+  cpf                     String?
+  birthDate               DateTime
+  phone                   String    @unique
+  email                   String?
+  profession              String?
+  gender                  String?
+  howKnewClinic           String?
+  zipCode                 String?
+  state                   String?
+  city                    String?
+  neighborhood            String?
+  street                  String?
+  number                  String?
+  complement              String?
+  observations            String?
+  emergencyName           String?
+  emergencyPhone          String?
+  representativeName      String?
+  representativeCpf       String?
+  representativeBirthDate DateTime?
+  active                  Boolean   @default(true)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   history       PatientHistory[]
   anamneses     Anamnese[]
