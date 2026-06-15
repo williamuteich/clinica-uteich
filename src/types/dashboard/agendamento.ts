@@ -26,7 +26,7 @@ export interface CalendarGridProps {
     appointments: Appointment[];
     viewDate: Date;
     setViewDate: (date: Date) => void;
-    onStatusChange: (id: string | number, status: "Confirmado" | "Cancelado") => void;
+    onStatusChange: (id: string | number, status: "Confirmado" | "Cancelado" | "Finalizado" | "Pendente") => void;
     onUpdate: (id: string | number, updatedFields: Partial<Appointment>) => void;
     onAdd: (apt: Omit<Appointment, "id">) => void;
 }

@@ -7,7 +7,6 @@ import { AgendaStatsCards } from "./agenda-stats-cards";
 import { CalendarNavBar } from "./calendar-nav-bar";
 import { AppointmentDetailsDialog } from "./appointment-details-dialog";
 import { AddAppointmentDialog } from "./add-appointment-dialog";
-import { EditAppointmentDialog } from "./edit-appointment-dialog";
 import { Appointment, CalendarGridProps } from "@/src/types/dashboard/agendamento";
 
 const STATUS_THEMES = {
@@ -71,7 +70,6 @@ export default function CalendarGrid({
     const [selectedApt, setSelectedApt] = useState<Appointment | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isAddOpen, setIsAddOpen] = useState(false);
-    const [isEditOpen, setIsEditOpen] = useState(false);
 
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
@@ -98,11 +96,6 @@ export default function CalendarGrid({
     const openAddModal = (dateStr: string) => {
         setSelectedDateStr(dateStr);
         setIsAddOpen(true);
-    };
-
-    const handleEditClick = (apt: Appointment) => {
-        setSelectedApt(apt);
-        setIsEditOpen(true);
     };
 
     return (
@@ -132,41 +125,42 @@ export default function CalendarGrid({
 
                 <div className="grid grid-cols-7 grid-rows-6 divide-x divide-y divide-slate-150 border-b border-slate-150">
                     {cells.map((cell, idx) => {
-                        const cellApts = appointments.filter((apt) => apt.date === cell.dateStr);
-                        const isSunday = idx % 7 === 0;
+                        const cellApts = cell.isCurrentMonth
+                            ? appointments.filter((apt) => apt.date === cell.dateStr)
+                            : [];
 
                         return (
                             <div
                                 key={`${cell.dateStr}-${idx}`}
-                                onClick={() => openAddModal(cell.dateStr)}
+                                onClick={() => {
+                                    if (cell.isCurrentMonth) {
+                                        openAddModal(cell.dateStr);
+                                    }
+                                }}
                                 className={cn(
-                                    "min-h-[120px] p-2 flex flex-col justify-between transition-all duration-200 relative select-none cursor-pointer",
-                                    isSunday
-                                        ? "bg-slate-50/30 hover:bg-slate-100/30 text-slate-400"
-                                        : cell.isCurrentMonth
-                                            ? "bg-white hover:bg-slate-50/50"
-                                            : "bg-slate-50/15 text-slate-400 hover:bg-slate-50/50",
-                                    cell.isToday && "bg-blue-50/20 border-2 border-blue-500/80 shadow-3xs z-10"
+                                    "min-h-24 sm:min-h-28 p-2 flex flex-col justify-between select-none group",
+                                    !cell.isCurrentMonth
+                                        ? "bg-slate-50/30 text-slate-300 opacity-45 cursor-default"
+                                        : "hover:bg-slate-50 transition-colors cursor-pointer",
+                                    cell.isToday && "bg-blue-50/20"
                                 )}
                             >
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1.5">
-                                        <span
-                                            className={cn(
-                                                "text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full transition-all",
-                                                cell.isToday
-                                                    ? "bg-blue-600 text-white shadow-xs font-black ring-4 ring-blue-100"
-                                                    : cell.isCurrentMonth
-                                                        ? "text-slate-700"
-                                                        : "text-slate-400"
-                                            )}
-                                        >
-                                            {cell.dayNum}
-                                        </span>
-                                    </div>
+                                    <span
+                                        className={cn(
+                                            "text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full",
+                                            cell.isToday
+                                                ? "bg-blue-600 text-white"
+                                                : cell.isCurrentMonth
+                                                    ? "text-slate-700"
+                                                    : "text-slate-400"
+                                        )}
+                                    >
+                                        {cell.dayNum}
+                                    </span>
                                 </div>
 
-                                <div className="flex-1 mt-2 space-y-1.5 overflow-y-auto max-h-[85px] custom-scrollbar pr-0.5">
+                                <div className="mt-1 space-y-1.5 flex-1 overflow-y-auto overflow-x-hidden max-h-20 scrollbar-none">
                                     {cellApts.map((apt) => {
                                         const theme = STATUS_THEMES[apt.status] || STATUS_THEMES.Pendente;
                                         return (
@@ -217,10 +211,13 @@ export default function CalendarGrid({
 
             <AppointmentDetailsDialog
                 open={isDetailsOpen}
-                onOpenChange={setIsDetailsOpen}
+                onOpenChange={(v) => {
+                    setIsDetailsOpen(v);
+                    if (!v) setSelectedApt(null);
+                }}
                 appointment={selectedApt}
                 onStatusChange={onStatusChange}
-                onEditClick={handleEditClick}
+                onUpdate={onUpdate}
             />
 
             <AddAppointmentDialog
@@ -230,16 +227,6 @@ export default function CalendarGrid({
                 onDateChange={setSelectedDateStr}
                 onAdd={onAdd}
                 appointments={appointments}
-            />
-
-            <EditAppointmentDialog
-                open={isEditOpen}
-                onOpenChange={(v) => {
-                    setIsEditOpen(v);
-                    if (!v) setSelectedApt(null);
-                }}
-                appointment={selectedApt}
-                onUpdate={onUpdate}
             />
         </div>
     );

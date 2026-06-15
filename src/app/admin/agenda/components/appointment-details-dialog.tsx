@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Pencil, XCircle, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, Calendar } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { phoneToWhatsapp } from "@/src/lib/masks";
 import { Appointment } from "@/src/types/dashboard/agendamento";
+import { ProcedureSelect, PROCEDURES } from "./procedure-select";
 
 const STATUS_THEMES = {
     Confirmado: {
@@ -19,7 +21,7 @@ const STATUS_THEMES = {
         gradient: "from-amber-500 to-orange-600",
     },
     Finalizado: {
-        gradient: "from-indigo-600 to-indigo-750",
+        gradient: "from-indigo-600 to-indigo-800",
     },
     Cancelado: {
         gradient: "from-rose-500 to-rose-600",
@@ -42,10 +44,10 @@ function cleanDescription(desc?: string | null): string {
         .filter(line => {
             const l = line.toLowerCase();
             return !l.includes("agendado pelo site") &&
-                   !l.includes("telefone/whatsapp") &&
-                   !l.includes("whatsapp:") &&
-                   !l.includes("telefone:") &&
-                   !l.includes("status cadastro");
+                !l.includes("telefone/whatsapp") &&
+                !l.includes("whatsapp:") &&
+                !l.includes("telefone:") &&
+                !l.includes("status cadastro");
         })
         .map(line => line.replace(/^observação:\s*/i, ""))
         .join("\n")
@@ -56,38 +58,90 @@ interface AppointmentDetailsDialogProps {
     open: boolean;
     onOpenChange: (v: boolean) => void;
     appointment: Appointment | null;
-    onStatusChange: (id: string | number, status: "Confirmado" | "Cancelado") => void;
-    onEditClick: (apt: Appointment) => void;
+    onStatusChange: (id: string | number, status: "Confirmado" | "Cancelado" | "Finalizado" | "Pendente") => void;
+    onUpdate: (id: string | number, updatedFields: Partial<Appointment>) => void;
 }
 
 export function AppointmentDetailsDialog({
     open,
     onOpenChange,
     appointment,
-    onStatusChange,
-    onEditClick,
+    onUpdate,
 }: AppointmentDetailsDialogProps) {
+    const [patientName, setPatientName] = useState("");
+    const [procedure, setProcedure] = useState("");
+    const [customProcedure, setCustomProcedure] = useState("");
+    const [date, setDate] = useState("");
+    const [time, setTime] = useState("");
+    const [status, setStatus] = useState<"Confirmado" | "Pendente" | "Cancelado" | "Finalizado">("Pendente");
+
+    const resetFields = () => {
+        if (appointment) {
+            const isDefaultProc = PROCEDURES.includes(appointment.procedure as any);
+            setProcedure(isDefaultProc ? appointment.procedure : "Outro");
+            setCustomProcedure(isDefaultProc ? "" : appointment.procedure);
+            setPatientName(appointment.patientName);
+            setDate(appointment.date);
+            setTime(appointment.time);
+            setStatus(appointment.status);
+        }
+    };
+
+    useEffect(() => {
+        if (open && appointment) {
+            resetFields();
+        }
+    }, [open, appointment]);
+
     if (!appointment) return null;
 
-    const theme = STATUS_THEMES[appointment.status] || STATUS_THEMES.Pendente;
+    const theme = STATUS_THEMES[status] || STATUS_THEMES.Pendente;
     const phone = extractPhone(appointment.description);
     const cleanedObs = cleanDescription(appointment.description);
+
+    const handleSave = () => {
+        const finalProcedure = procedure === "Outro" ? customProcedure : procedure;
+        if (!finalProcedure) {
+            alert("O procedimento é obrigatório.");
+            return;
+        }
+
+        onUpdate(appointment.id, {
+            procedure: finalProcedure,
+            date,
+            time,
+            status,
+            isGuest: appointment.isGuest,
+            patientName: appointment.isGuest ? patientName : appointment.patientName,
+        });
+        onOpenChange(false);
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
                 <div className="bg-white">
-                    <div className={cn("px-6 py-6 text-white bg-linear-to-r", theme.gradient)}>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                                <Calendar className="h-5 w-5 text-white" />
+                    <div className={cn("px-6 py-6 text-white bg-linear-to-r transition-all duration-300", theme.gradient)}>
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                                    <Calendar className="h-5 w-5 text-white" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-base font-black text-white">
+                                        Detalhes do Agendamento
+                                    </DialogTitle>
+                                    <p className="text-xs text-white/95 font-medium">
+                                        Altere as informações diretamente e clique em salvar
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <DialogTitle className="text-base font-black text-white">
-                                    Detalhes do Agendamento
-                                </DialogTitle>
-                                <p className="text-xs text-white/90 font-medium">Informações gerais e controle clínico</p>
-                            </div>
+
+                            <span className={cn(
+                                "px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg border border-white/30 bg-white/20 text-white select-none shrink-0"
+                            )}>
+                                {status}
+                            </span>
                         </div>
                     </div>
 
@@ -97,64 +151,71 @@ export function AppointmentDetailsDialog({
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
                                     Paciente
                                 </label>
-                                <div className="relative flex items-center">
+                                {appointment.isGuest ? (
                                     <input
                                         type="text"
-                                        value={appointment.patientName}
-                                        readOnly
-                                        className="w-full h-10 pl-3 pr-24 text-xs border border-slate-200 bg-slate-50 text-slate-800 rounded-xl outline-none font-bold truncate"
+                                        value={patientName}
+                                        onChange={(e) => setPatientName(e.target.value)}
+                                        className="w-full h-10 px-3 text-xs border border-slate-200 bg-white text-slate-800 rounded-lg outline-none font-bold focus:ring-2 focus:ring-blue-500"
                                     />
-                                    {appointment.isGuest && (
-                                        <span className="absolute right-2.5 px-2 py-0.5 bg-violet-100 text-violet-750 text-[8px] font-black rounded uppercase tracking-wider">
-                                            Sem Cadastro
+                                ) : (
+                                    <div className="relative flex items-center w-full">
+                                        <input
+                                            type="text"
+                                            value={appointment.patientName}
+                                            readOnly
+                                            className="w-full h-10 pl-3 pr-24 text-xs border border-slate-200 bg-slate-50 text-slate-800 rounded-lg outline-none font-bold truncate cursor-not-allowed"
+                                        />
+                                        <span className="absolute right-2.5 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[8px] font-black rounded uppercase tracking-wider">
+                                            Cadastrado
                                         </span>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
-                                    Status
+                                    Tipo Cadastro
                                 </label>
-                                <div className={cn(
-                                    "w-full flex items-center h-10 px-3 border rounded-xl font-bold text-[10px] uppercase tracking-wider",
-                                    appointment.status === "Confirmado" && "border-emerald-200 bg-emerald-50 text-emerald-700",
-                                    appointment.status === "Pendente" && "border-amber-250 bg-amber-50 text-amber-800",
-                                    appointment.status === "Finalizado" && "border-indigo-250 bg-indigo-50 text-indigo-805",
-                                    appointment.status === "Cancelado" && "border-rose-250 bg-rose-50 text-rose-800"
-                                )}>
-                                    <span className={cn(
-                                        "w-2 h-2 rounded-full mr-2 shrink-0",
-                                        appointment.status === "Confirmado" && "bg-emerald-500",
-                                        appointment.status === "Pendente" && "bg-amber-500",
-                                        appointment.status === "Finalizado" && "bg-indigo-500",
-                                        appointment.status === "Cancelado" && "bg-rose-500"
-                                    )} />
-                                    {appointment.status}
+                                <div className="w-full flex items-center h-10 px-3 border border-slate-200 bg-slate-50 text-slate-800 rounded-lg font-bold text-xs select-none">
+                                    {appointment.isGuest ? "Sem Cadastro (Guest)" : "Paciente Cadastrado"}
                                 </div>
                             </div>
 
-                            <div>
+                            <div className="col-span-2">
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
                                     Procedimento Clínico
                                 </label>
-                                <input
-                                    type="text"
-                                    value={appointment.procedure}
-                                    readOnly
-                                    className="w-full h-10 px-3 text-xs border border-slate-200 bg-slate-50 text-slate-800 rounded-xl outline-none font-bold"
+                                <ProcedureSelect
+                                    value={procedure}
+                                    onChange={setProcedure}
+                                    customValue={customProcedure}
+                                    onCustomChange={setCustomProcedure}
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
-                                    Data & Horário
+                                    Data
                                 </label>
                                 <input
-                                    type="text"
-                                    value={`${appointment.date.split("-").reverse().join("/")} às ${appointment.time}`}
-                                    readOnly
-                                    className="w-full h-10 px-3 text-xs border border-slate-200 bg-slate-50 text-slate-800 rounded-xl outline-none font-bold"
+                                    type="date"
+                                    value={date}
+                                    onChange={(e) => setDate(e.target.value)}
+                                    className="w-full h-10 px-3 text-xs border border-slate-200 bg-white text-slate-800 rounded-lg outline-none font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                    Horário
+                                </label>
+                                <input
+                                    type="time"
+                                    value={time}
+                                    onChange={(e) => setTime(e.target.value)}
+                                    className="w-full h-10 px-3 text-xs border border-slate-200 bg-white text-slate-800 rounded-lg outline-none font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                                    required
                                 />
                             </div>
 
@@ -169,7 +230,7 @@ export function AppointmentDetailsDialog({
                                         )}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="w-full flex items-center justify-between h-10 px-3 border border-emerald-250 bg-emerald-50 text-emerald-800 rounded-xl outline-none font-bold text-xs hover:bg-emerald-100 transition-colors cursor-pointer group"
+                                        className="w-full flex items-center justify-between h-10 px-3 border border-emerald-200 bg-emerald-50 text-emerald-800 rounded-lg outline-none font-bold text-xs hover:bg-emerald-100 transition-colors cursor-pointer group"
                                     >
                                         <span>{phone}</span>
                                         <span className="flex items-center gap-1 text-[8px] font-black text-emerald-700 bg-white/80 px-2 py-0.5 rounded border border-emerald-200 uppercase tracking-wider group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition-all">
@@ -188,16 +249,76 @@ export function AppointmentDetailsDialog({
                                         readOnly
                                         value={cleanedObs}
                                         rows={3}
-                                        className="w-full p-3 text-xs border border-slate-200 bg-slate-50 text-slate-700 rounded-xl outline-none font-semibold resize-none leading-relaxed"
+                                        className="w-full p-3 text-xs border border-slate-200 bg-slate-50 text-slate-700 rounded-lg outline-none font-semibold resize-none leading-relaxed cursor-not-allowed"
                                     />
                                 </div>
                             )}
+
+                            <div className="col-span-2 space-y-1.5 mt-2">
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                                    Alterar Status da Consulta
+                                </label>
+                                <div className="grid grid-cols-4 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setStatus("Confirmado")}
+                                        className={cn(
+                                            "flex items-center justify-center gap-1.5 py-2.5 rounded-lg border text-[9px] font-black transition-all cursor-pointer uppercase tracking-wider",
+                                            status === "Confirmado"
+                                                ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-2xs"
+                                                : "border-slate-200 bg-white text-slate-500 hover:border-emerald-200 hover:bg-emerald-50/50 hover:text-emerald-700"
+                                        )}
+                                    >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                        Confirmar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setStatus("Finalizado")}
+                                        className={cn(
+                                            "flex items-center justify-center gap-1.5 py-2.5 rounded-lg border text-[9px] font-black transition-all cursor-pointer uppercase tracking-wider",
+                                            status === "Finalizado"
+                                                ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-2xs"
+                                                : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:bg-indigo-50/50 hover:text-indigo-700"
+                                        )}
+                                    >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                        Finalizar
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setStatus("Pendente")}
+                                        className={cn(
+                                            "flex items-center justify-center gap-1.5 py-2.5 rounded-lg border text-[9px] font-black transition-all cursor-pointer uppercase tracking-wider",
+                                            status === "Pendente"
+                                                ? "border-amber-500 bg-amber-50 text-amber-700 shadow-2xs"
+                                                : "border-slate-200 bg-white text-slate-500 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700"
+                                        )}
+                                    >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                        Pendente
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setStatus("Cancelado")}
+                                        className={cn(
+                                            "flex items-center justify-center gap-1.5 py-2.5 rounded-lg border text-[9px] font-black transition-all cursor-pointer uppercase tracking-wider",
+                                            status === "Cancelado"
+                                                ? "border-rose-500 bg-rose-50 text-rose-700 shadow-2xs"
+                                                : "border-slate-200 bg-white text-slate-500 hover:border-rose-200 hover:bg-rose-50/50 hover:text-rose-700"
+                                        )}
+                                    >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </div>
 
                             {appointment.patientId && !appointment.isGuest && (
                                 <div className="col-span-2 mt-1">
                                     <Link
                                         href={`/admin/pacientes/${appointment.patientId}`}
-                                        className="w-full inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-blue-750 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2.5 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer text-center"
+                                        className="w-full inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2.5 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer text-center"
                                     >
                                         Abrir Prontuário
                                     </Link>
@@ -205,46 +326,21 @@ export function AppointmentDetailsDialog({
                             )}
                         </div>
 
-                        {appointment.status === "Pendente" && (
-                            <div className="pt-2 flex gap-2">
-                                <button
-                                    onClick={() => {
-                                        onStatusChange(appointment.id, "Confirmado");
-                                        onOpenChange(false);
-                                    }}
-                                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-9.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold cursor-pointer transition-all"
-                                >
-                                    <Check className="h-4 w-4" />
-                                    Confirmar Agendamento
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        onStatusChange(appointment.id, "Cancelado");
-                                        onOpenChange(false);
-                                    }}
-                                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-9.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl text-xs font-bold cursor-pointer transition-all"
-                                >
-                                    <XCircle className="h-4 w-4" />
-                                    Cancelar
-                                </button>
-                            </div>
-                        )}
                         <div className="pt-4 border-t border-slate-100 flex justify-end gap-2">
                             <button
+                                type="button"
                                 onClick={() => onOpenChange(false)}
-                                className="h-10 px-4 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
+                                className="h-10 px-4 border border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
                             >
                                 Fechar
                             </button>
                             <button
-                                className="inline-flex items-center gap-2 h-10 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all cursor-pointer uppercase tracking-wider shadow-sm"
-                                onClick={() => {
-                                    onOpenChange(false);
-                                    onEditClick(appointment);
-                                }}
+                                type="button"
+                                onClick={handleSave}
+                                className="inline-flex items-center gap-2 h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer uppercase tracking-wider shadow-sm"
                             >
-                                <Pencil className="h-3.5 w-3.5" />
-                                Editar
+                                <Check className="h-3.5 w-3.5" />
+                                Salvar
                             </button>
                         </div>
                     </div>

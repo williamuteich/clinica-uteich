@@ -123,6 +123,8 @@ async function _PUT(request: Request, ctx: Ctx) {
           : {}),
         
         ...(encryptedBody.status ? { status: encryptedBody.status } : {}),
+        ...(encryptedBody.description !== undefined ? { description: encryptedBody.description } : {}),
+        ...(encryptedBody.guestName !== undefined ? { guestName: encryptedBody.guestName } : {}),
       },
       include: {
         patient: {

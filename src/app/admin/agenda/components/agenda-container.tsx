@@ -89,13 +89,17 @@ export default function AgendaContainer() {
         fetchAppointments();
     }, [fetchAppointments]);
 
-    const handleStatusChange = async (id: string | number, newStatus: "Confirmado" | "Cancelado") => {
+    const handleStatusChange = async (id: string | number, newStatus: "Confirmado" | "Cancelado" | "Finalizado" | "Pendente") => {
         try {
             setAppointments((prev) =>
                 prev.map((a) => (a.id === id ? { ...a, status: newStatus } : a))
             );
 
-            const backendStatus = newStatus === "Confirmado" ? "CONFIRMED" : "CANCELLED";
+            const backendStatus =
+                newStatus === "Confirmado" ? "CONFIRMED" :
+                newStatus === "Cancelado" ? "CANCELLED" :
+                newStatus === "Finalizado" ? "COMPLETED" : "PENDING";
+
             const res = await fetch(`/api/admin/agenda/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -126,6 +130,8 @@ export default function AgendaContainer() {
                         updatedFields.status === "Cancelado" ? "CANCELLED" :
                         updatedFields.status === "Finalizado" ? "COMPLETED" : "PENDING"
                 } : {}),
+                ...(updatedFields.description !== undefined ? { description: updatedFields.description } : {}),
+                ...(updatedFields.isGuest && updatedFields.patientName ? { guestName: updatedFields.patientName } : {}),
             };
 
             const res = await fetch(`/api/admin/agenda/${id}`, {

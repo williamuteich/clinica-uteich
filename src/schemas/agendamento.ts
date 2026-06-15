@@ -35,6 +35,8 @@ export const updateAppointmentSchema = z.object({
     .min(0, "Valor estimado não pode ser negativo")
     .optional(),
   status: appointmentStatusSchema.optional(),
+  description: z.string().optional().nullable(),
+  guestName: z.string().optional().nullable(),
 });
 
 export const listAppointmentsQuerySchema = z.object({
