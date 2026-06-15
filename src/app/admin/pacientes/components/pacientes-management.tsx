@@ -13,6 +13,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import { CreatePacienteDialog } from "./create-paciente-dialog";
+import { CreatePatientLinkDialog } from "@/src/app/components/admin/create-dialog-link";
 import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { getPacientes, deletePaciente } from "@/src/services/pacientes";
@@ -130,12 +131,15 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                     </div>
                     {isPending && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
                 </div>
-                <CreatePacienteDialog
-                    onCreateSuccess={() => fetchPacientes(filters)}
-                    defaultOpen={defaultOpen}
-                    defaultName={defaultName}
-                    defaultPhone={defaultPhone}
-                />
+                <div className="flex items-center gap-2">
+                    <CreatePatientLinkDialog />
+                    <CreatePacienteDialog
+                        onCreateSuccess={() => fetchPacientes(filters)}
+                        defaultOpen={defaultOpen}
+                        defaultName={defaultName}
+                        defaultPhone={defaultPhone}
+                    />
+                </div>
             </div>
 
             <div className="border rounded-xl bg-white shadow-xs overflow-hidden">

@@ -71,3 +71,16 @@ export interface IContinuousMedication {
     frequency?: string;
     medicalFollowUp?: string;
 }
+
+export type AnamneseResponseValue = {
+    answer: string;
+    notes?: string;
+};
+
+export type AnamneseComponentProps = {
+    responses: Record<string, AnamneseResponseValue>;
+    onChange: (responses: Record<string, AnamneseResponseValue>) => void;
+    queixaPrincipal: string;
+    onQueixaChange: (val: string) => void;
+    disabled?: boolean;
+};

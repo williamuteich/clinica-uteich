@@ -223,9 +223,9 @@ enum ToothStatus {
 model Appointment {
   id String @id @default(auto()) @map("_id") @db.ObjectId
 
-  patientId String?  @db.ObjectId
-  patient   Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  guestName String?
+  patientId  String?  @db.ObjectId
+  patient    Patient? @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  guestName  String?
   guestPhone String?
 
   scheduledAt    DateTime
@@ -303,4 +303,18 @@ model StockMovement {
   product Product @relation(fields: [productId], references: [id])
 
   @@map("movimentacoes_estoque")
+}
+
+model GeneratedLink {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  patientName  String
+  hasAnamnesis Boolean
+  formType     String
+  token        String    @unique
+  used         Boolean   @default(false)
+  usedAt       DateTime?
+  expiresAt    DateTime  @default(now()) @map("expires_at")
+  link         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }

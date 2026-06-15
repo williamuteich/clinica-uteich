@@ -2,6 +2,7 @@
 import { Paciente, PacienteFilters, PacientesResponse } from "@/src/types/dashboard/pacientes";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
+import { GeneratedLinkInput } from "@/src/schemas/paciente";
 
 const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
@@ -70,6 +71,18 @@ export async function deletePaciente(id: string): Promise<{ success: boolean; er
     if (!res.ok) return { success: false, error: result.error || "Erro ao excluir paciente" };
     revalidatePath("/admin/pacientes");
     return { success: true };
+}
+
+export async function createGeneratedLink(data: GeneratedLinkInput): Promise<{ success: boolean; data?: any; error?: string }> {
+    const cookie = (await headers()).get("cookie") || "";
+    const res = await fetch(`${API_URL}/api/admin/pacientes/link`, {
+        method: "POST",
+        headers: { Cookie: cookie, "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) return { success: false, error: result.error || "Erro ao criar link" };
+    return { success: true, data: result.generatedLink };
 }
 
 

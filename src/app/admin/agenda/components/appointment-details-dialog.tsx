@@ -12,6 +12,7 @@ import {
 import { phoneToWhatsapp } from "@/src/lib/masks";
 import { Appointment } from "@/src/types/dashboard/agendamento";
 import { ProcedureSelect, PROCEDURES } from "./procedure-select";
+import { CreatePatientLinkDialog } from "@/src/app/components/admin/create-dialog-link";
 
 const STATUS_THEMES = {
     Confirmado: {
@@ -154,6 +155,15 @@ export function AppointmentDetailsDialog({
                                 <div className="w-full flex items-center h-10 px-3 border border-slate-200 bg-slate-50 text-slate-800 rounded-lg font-bold text-xs select-none">
                                     {appointment.isGuest ? "Sem Cadastro (Guest)" : "Paciente Cadastrado"}
                                 </div>
+                                {appointment.isGuest && (
+                                    <div className="mt-1 flex justify-end">
+                                        <CreatePatientLinkDialog 
+                                            asLink 
+                                            defaultPatientName={patientName} 
+                                            defaultPatientPhone={appointment.guestPhone || appointment.phone || ""}
+                                        />
+                                    </div>
+                                )}
                             </div>
 
                             <div className="col-span-2">

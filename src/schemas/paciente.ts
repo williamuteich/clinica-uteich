@@ -37,3 +37,11 @@ export const evolutionSchema = z.object({
 });
 
 export type EvolutionInput = z.infer<typeof evolutionSchema>;
+
+export const generatedLinkSchema = z.object({
+  patientName: z.string().min(3, "Nome do paciente é obrigatório"),
+  hasAnamnesis: z.boolean(),
+  formType: z.enum(["DEFAULT_ANAMNESIS", "ORTHODONTIC_ANAMNESIS", "CHILD_ANAMNESIS", "SURGICAL_IMPLANT_ANAMNESIS"]),
+});
+
+export type GeneratedLinkInput = z.infer<typeof generatedLinkSchema>;
