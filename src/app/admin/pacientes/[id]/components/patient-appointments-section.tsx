@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Plus, Clock, Loader2, Edit3, CircleDollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Appointment, UpdateAgendamentoInput } from "@/src/types/dashboard/pacientes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -48,7 +49,6 @@ const statusLabel: Record<Appointment["status"], string> = {
 
 export function PatientAppointmentsSection({ patientId, initialAppointments }: PatientAppointmentsSectionProps) {
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
 
@@ -111,12 +111,21 @@ export function PatientAppointmentsSection({ patientId, initialAppointments }: P
                     <Calendar className="h-4.5 w-4.5 text-slate-500" />
                     Histórico de Consultas
                 </h3>
-                <Button
-                    onClick={() => setIsCreateOpen(true)}
-                    className="h-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 shadow-sm transition-all"
-                >
-                    <Plus className="mr-1 h-3.5 w-3.5" /> Novo
-                </Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button
+                            className="h-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 shadow-sm transition-all"
+                        >
+                            <Plus className="mr-1 h-3.5 w-3.5" /> Novo
+                        </Button>
+                    </DialogTrigger>
+                    <AgendamentoCreateModal
+                        patientId={patientId}
+                        onCreated={(appointment) => {
+                            setAppointments((prev) => [appointment, ...prev]);
+                        }}
+                    />
+                </Dialog>
             </div>
 
             {sortedAppointments.length === 0 ? (
@@ -260,15 +269,6 @@ export function PatientAppointmentsSection({ patientId, initialAppointments }: P
                 </div>
             )}
 
-            <AgendamentoCreateModal
-                patientId={patientId}
-                open={isCreateOpen}
-                onOpenChange={setIsCreateOpen}
-                onCreated={(appointment) => {
-                    setAppointments((prev) => [appointment, ...prev]);
-                    setIsCreateOpen(false);
-                }}
-            />
         </div>
     );
 }

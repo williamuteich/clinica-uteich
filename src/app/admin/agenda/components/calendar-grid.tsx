@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { AgendaStatsCards } from "./agenda-stats-cards";
 import { CalendarNavBar } from "./calendar-nav-bar";
 import { AppointmentDetailsDialog } from "./appointment-details-dialog";
@@ -66,11 +67,6 @@ export default function CalendarGrid({
     onUpdate,
     onAdd,
 }: CalendarGridProps) {
-    const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
-    const [selectedApt, setSelectedApt] = useState<Appointment | null>(null);
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-    const [isAddOpen, setIsAddOpen] = useState(false);
-
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
 
@@ -93,11 +89,6 @@ export default function CalendarGrid({
         cancelados: currentMonthApts.filter((a) => a.status === "Cancelado").length,
     };
 
-    const openAddModal = (dateStr: string) => {
-        setSelectedDateStr(dateStr);
-        setIsAddOpen(true);
-    };
-
     return (
         <div className="space-y-4 w-full animate-in fade-in duration-500">
             <AgendaStatsCards monthName={monthName} stats={stats} />
@@ -108,7 +99,24 @@ export default function CalendarGrid({
                 onPrevMonth={() => setViewDate(new Date(year, month - 1, 1))}
                 onNextMonth={() => setViewDate(new Date(year, month + 1, 1))}
                 onGoToday={() => setViewDate(new Date())}
-                onAddThisMonth={() => openAddModal(new Date().toISOString().split("T")[0])}
+                actionButton={
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <button
+                                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-[10px] font-black rounded-lg shadow-xs transition-all cursor-pointer uppercase tracking-wider"
+                            >
+                                <Plus className="h-3.5 w-3.5" />
+                                Agendar Neste Mês
+                            </button>
+                        </DialogTrigger>
+                        <AddAppointmentDialog
+                            selectedDateStr={new Date().toISOString().split("T")[0]}
+                            onDateChange={() => {}}
+                            onAdd={onAdd}
+                            appointments={appointments}
+                        />
+                    </Dialog>
+                }
             />
 
             <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
@@ -129,16 +137,10 @@ export default function CalendarGrid({
                             ? appointments.filter((apt) => apt.date === cell.dateStr)
                             : [];
 
-                        return (
+                        const cellContent = (
                             <div
-                                key={`${cell.dateStr}-${idx}`}
-                                onClick={() => {
-                                    if (cell.isCurrentMonth) {
-                                        openAddModal(cell.dateStr);
-                                    }
-                                }}
                                 className={cn(
-                                    "min-h-24 sm:min-h-28 p-2 flex flex-col justify-between select-none group",
+                                    "min-h-24 sm:min-h-28 p-2 flex flex-col justify-between select-none group transition-all duration-200 cursor-pointer",
                                     !cell.isCurrentMonth
                                         ? "bg-slate-50/30 text-slate-300 opacity-45 cursor-default"
                                         : "hover:bg-slate-50 transition-colors cursor-pointer",
@@ -164,34 +166,38 @@ export default function CalendarGrid({
                                     {cellApts.map((apt) => {
                                         const theme = STATUS_THEMES[apt.status] || STATUS_THEMES.Pendente;
                                         return (
-                                            <div
-                                                key={apt.id}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setSelectedApt(apt);
-                                                    setIsDetailsOpen(true);
-                                                }}
-                                                role="button"
-                                                tabIndex={0}
-                                                className={cn(
-                                                    "w-full text-left p-1.5 border-t border-r border-b border-l-3 text-[10px] font-semibold rounded-md transition-all truncate flex items-center justify-between gap-1.5 shadow-3xs hover:translate-x-0.5 cursor-pointer leading-tight",
-                                                    theme.bg
-                                                )}
-                                            >
-                                                <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
-                                                    <span className="font-bold text-[9px] opacity-75 shrink-0">{apt.time}</span>
-                                                    <span className="truncate text-slate-800 font-semibold">{apt.patientName}</span>
-                                                </div>
-                                                {apt.patientId && !apt.isGuest && (
-                                                    <Link
-                                                        href={`/admin/pacientes/${apt.patientId}`}
+                                            <Dialog key={apt.id}>
+                                                <DialogTrigger asChild>
+                                                    <div
                                                         onClick={(e) => e.stopPropagation()}
-                                                        className="ml-1.5 rounded bg-white/90 px-1 py-0.5 text-[8px] font-bold text-blue-600 border border-blue-100 hover:bg-blue-650 hover:text-white transition-all shrink-0"
+                                                        role="button"
+                                                        tabIndex={0}
+                                                        className={cn(
+                                                            "w-full text-left p-1.5 border-t border-r border-b border-l-3 text-[10px] font-semibold rounded-md transition-all truncate flex items-center justify-between gap-1.5 shadow-3xs hover:translate-x-0.5 cursor-pointer leading-tight",
+                                                            theme.bg
+                                                        )}
                                                     >
-                                                        Ficha
-                                                    </Link>
-                                                )}
-                                            </div>
+                                                        <div className="flex items-center gap-1.5 truncate flex-1 min-w-0">
+                                                            <span className="font-bold text-[9px] opacity-75 shrink-0">{apt.time}</span>
+                                                            <span className="truncate text-slate-800 font-semibold">{apt.patientName}</span>
+                                                        </div>
+                                                        {apt.patientId && !apt.isGuest && (
+                                                            <Link
+                                                                href={`/admin/pacientes/${apt.patientId}`}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="ml-1.5 rounded bg-white/90 px-1 py-0.5 text-[8px] font-bold text-blue-600 border border-blue-100 hover:bg-blue-650 hover:text-white transition-all shrink-0"
+                                                            >
+                                                                Ficha
+                                                            </Link>
+                                                        )}
+                                                    </div>
+                                                </DialogTrigger>
+                                                    <AppointmentDetailsDialog
+                                                        appointment={apt}
+                                                        onStatusChange={onStatusChange}
+                                                        onUpdate={onUpdate}
+                                                    />
+                                                </Dialog>
                                         );
                                     })}
                                 </div>
@@ -205,29 +211,27 @@ export default function CalendarGrid({
                                 )}
                             </div>
                         );
+
+                        if (!cell.isCurrentMonth) {
+                            return <div key={`${cell.dateStr}-${idx}`}>{cellContent}</div>;
+                        }
+
+                        return (
+                            <Dialog key={`${cell.dateStr}-${idx}`}>
+                                <DialogTrigger asChild>
+                                    {cellContent}
+                                </DialogTrigger>
+                                    <AddAppointmentDialog
+                                        selectedDateStr={cell.dateStr}
+                                        onDateChange={() => {}}
+                                        onAdd={onAdd}
+                                        appointments={appointments}
+                                    />
+                                </Dialog>
+                        );
                     })}
                 </div>
             </div>
-
-            <AppointmentDetailsDialog
-                open={isDetailsOpen}
-                onOpenChange={(v) => {
-                    setIsDetailsOpen(v);
-                    if (!v) setSelectedApt(null);
-                }}
-                appointment={selectedApt}
-                onStatusChange={onStatusChange}
-                onUpdate={onUpdate}
-            />
-
-            <AddAppointmentDialog
-                open={isAddOpen}
-                onOpenChange={setIsAddOpen}
-                selectedDateStr={selectedDateStr}
-                onDateChange={setSelectedDateStr}
-                onAdd={onAdd}
-                appointments={appointments}
-            />
         </div>
     );
 }

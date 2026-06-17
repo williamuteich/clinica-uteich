@@ -22,7 +22,7 @@ export interface CalendarNavBarProps {
     onPrevMonth: () => void;
     onNextMonth: () => void;
     onGoToday: () => void;
-    onAddThisMonth: () => void;
+    actionButton?: ReactNode;
 }
 
 // --- stats-panel ---
@@ -51,8 +51,6 @@ export interface PatientFound {
 // --- agendamentos-create-modal ---
 export interface AgendamentoCreateModalProps {
     patientId: string;
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
     onCreated: (appointment: Appointment) => void;
 }
 

@@ -9,7 +9,7 @@ export function CalendarNavBar({
     onPrevMonth,
     onNextMonth,
     onGoToday,
-    onAddThisMonth,
+    actionButton,
 }: CalendarNavBarProps) {
     return (
         <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
@@ -46,13 +46,7 @@ export function CalendarNavBar({
             </div>
 
             <div className="flex items-center gap-2">
-                <button
-                    onClick={onAddThisMonth}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-[10px] font-black rounded-lg shadow-xs transition-all cursor-pointer uppercase tracking-wider"
-                >
-                    <Plus className="h-3.5 w-3.5" />
-                    Agendar Neste Mês
-                </button>
+                {actionButton}
             </div>
         </div>
     );

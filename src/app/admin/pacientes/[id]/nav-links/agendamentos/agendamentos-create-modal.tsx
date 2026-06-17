@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useState, useTransition, useRef } from "react";
+import { DialogContent, DialogDescription, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Appointment, CreateAgendamentoInput } from "@/src/types/dashboard/pacientes";
@@ -10,12 +10,13 @@ import { AgendamentoCreateModalProps } from "@/src/types/dashboard/components";
 import { createAgendamento } from "@/src/services/agendamento";
 import { ProcedureSelect } from "@/src/app/admin/agenda/components/procedure-select";
 
-export default function AgendamentoCreateModal({ patientId, open, onOpenChange, onCreated }: AgendamentoCreateModalProps) {
+export default function AgendamentoCreateModal({ patientId, onCreated }: AgendamentoCreateModalProps) {
     const [isPending, startTransition] = useTransition();
     const [scheduledAt, setScheduledAt] = useState("");
     const [procedure, setProcedure] = useState("");
     const [customProcedure, setCustomProcedure] = useState("");
     const [status, setStatus] = useState<CreateAgendamentoInput["status"]>("PENDING");
+    const closeRef = useRef<HTMLButtonElement>(null);
 
     const resetForm = () => {
         setScheduledAt("");
@@ -48,20 +49,19 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
 
             onCreated(res.data);
             resetForm();
-            onOpenChange(false);
+            closeRef.current?.click();
             toast.success("Agendamento criado com sucesso!");
         });
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl bg-white">
-                <div className="border-b border-slate-200 bg-white px-6 py-5">
-                    <DialogTitle className="text-base font-black text-slate-900">Novo Agendamento</DialogTitle>
-                    <DialogDescription className="text-xs text-slate-500 mt-1">
-                        Registre uma nova consulta para este paciente.
-                    </DialogDescription>
-                </div>
+        <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl bg-white">
+            <div className="border-b border-slate-200 bg-white px-6 py-5">
+                <DialogTitle className="text-base font-black text-slate-900">Novo Agendamento</DialogTitle>
+                <DialogDescription className="text-xs text-slate-500 mt-1">
+                    Registre uma nova consulta para este paciente.
+                </DialogDescription>
+            </div>
 
                 <div className="p-6 space-y-4">
                     <div className="space-y-4">
@@ -103,17 +103,17 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => {
-                                resetForm();
-                                onOpenChange(false);
-                            }}
-                            className="h-10 rounded-xl border-slate-200 px-4 text-xs font-bold uppercase tracking-wider text-slate-500"
-                        >
-                            Cancelar
-                        </Button>
+                        <DialogClose ref={closeRef} className="hidden" />
+                        <DialogClose asChild>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={resetForm}
+                                className="h-10 rounded-xl border-slate-200 px-4 text-xs font-bold uppercase tracking-wider text-slate-500"
+                            >
+                                Cancelar
+                            </Button>
+                        </DialogClose>
                         <Button 
                             onClick={handleSubmit} 
                             disabled={isPending} 
@@ -124,6 +124,5 @@ export default function AgendamentoCreateModal({ patientId, open, onOpenChange, 
                     </div>
                 </div>
             </DialogContent>
-        </Dialog>
     );
 }

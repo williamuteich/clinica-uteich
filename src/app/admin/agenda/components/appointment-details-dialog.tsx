@@ -8,6 +8,7 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    DialogClose,
 } from "@/components/ui/dialog";
 import { phoneToWhatsapp, maskPhone } from "@/src/lib/masks";
 import { Appointment } from "@/src/types/dashboard/agendamento";
@@ -30,45 +31,22 @@ const STATUS_THEMES = {
 };
 
 interface AppointmentDetailsDialogProps {
-    open: boolean;
-    onOpenChange: (v: boolean) => void;
-    appointment: Appointment | null;
+    appointment: Appointment;
     onStatusChange: (id: string | number, status: "Confirmado" | "Cancelado" | "Finalizado" | "Pendente") => void;
     onUpdate: (id: string | number, updatedFields: Partial<Appointment>) => void;
 }
 
 export function AppointmentDetailsDialog({
-    open,
-    onOpenChange,
     appointment,
     onUpdate,
 }: AppointmentDetailsDialogProps) {
-    const [patientName, setPatientName] = useState("");
-    const [procedure, setProcedure] = useState("");
-    const [customProcedure, setCustomProcedure] = useState("");
-    const [date, setDate] = useState("");
-    const [time, setTime] = useState("");
-    const [status, setStatus] = useState<"Confirmado" | "Pendente" | "Cancelado" | "Finalizado">("Pendente");
-
-    const resetFields = () => {
-        if (appointment) {
-            const isDefaultProc = PROCEDURES.includes(appointment.procedure as any);
-            setProcedure(isDefaultProc ? appointment.procedure : "Outro");
-            setCustomProcedure(isDefaultProc ? "" : appointment.procedure);
-            setPatientName(appointment.patientName);
-            setDate(appointment.date);
-            setTime(appointment.time);
-            setStatus(appointment.status);
-        }
-    };
-
-    useEffect(() => {
-        if (open && appointment) {
-            resetFields();
-        }
-    }, [open, appointment]);
-
-    if (!appointment) return null;
+    const isDefaultProc = PROCEDURES.includes(appointment.procedure as any);
+    const [patientName, setPatientName] = useState(appointment.patientName);
+    const [procedure, setProcedure] = useState(isDefaultProc ? appointment.procedure : "Outro");
+    const [customProcedure, setCustomProcedure] = useState(isDefaultProc ? "" : appointment.procedure);
+    const [date, setDate] = useState(appointment.date);
+    const [time, setTime] = useState(appointment.time);
+    const [status, setStatus] = useState<"Confirmado" | "Pendente" | "Cancelado" | "Finalizado">(appointment.status);
 
     const theme = STATUS_THEMES[status] || STATUS_THEMES.Pendente;
     const phone = appointment.phone;
@@ -89,14 +67,12 @@ export function AppointmentDetailsDialog({
             isGuest: appointment.isGuest,
             patientName: appointment.isGuest ? patientName : appointment.patientName,
         });
-        onOpenChange(false);
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
-                <div className="bg-white">
-                    <div className={cn("px-6 py-6 text-white bg-linear-to-r transition-all duration-300", theme.gradient)}>
+        <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
+            <div className="bg-white">
+                <div className={cn("px-6 py-6 text-white bg-linear-to-r transition-all duration-300", theme.gradient)}>
                         <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -157,9 +133,9 @@ export function AppointmentDetailsDialog({
                                 </div>
                                 {appointment.isGuest && (
                                     <div className="mt-1 flex justify-end">
-                                        <CreatePatientLinkDialog 
-                                            asLink 
-                                            defaultPatientName={patientName} 
+                                        <CreatePatientLinkDialog
+                                            asLink
+                                            defaultPatientName={patientName}
                                             defaultPatientPhone={appointment.guestPhone || appointment.phone || ""}
                                         />
                                     </div>
@@ -312,25 +288,27 @@ export function AppointmentDetailsDialog({
                         </div>
 
                         <div className="pt-4 border-t border-slate-100 flex justify-end gap-2">
-                            <button
-                                type="button"
-                                onClick={() => onOpenChange(false)}
-                                className="h-10 px-4 border border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
-                            >
-                                Fechar
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleSave}
-                                className="inline-flex items-center gap-2 h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer uppercase tracking-wider shadow-sm"
-                            >
-                                <Check className="h-3.5 w-3.5" />
-                                Salvar
-                            </button>
+                            <DialogClose asChild>
+                                <button
+                                    type="button"
+                                    className="h-10 px-4 border border-slate-200 text-slate-500 text-xs font-bold rounded-lg hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
+                                >
+                                    Fechar
+                                </button>
+                            </DialogClose>
+                            <DialogClose asChild>
+                                <button
+                                    type="button"
+                                    onClick={handleSave}
+                                    className="inline-flex items-center gap-2 h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer uppercase tracking-wider shadow-sm"
+                                >
+                                    <Check className="h-3.5 w-3.5" />
+                                    Salvar
+                                </button>
+                            </DialogClose>
                         </div>
                     </div>
                 </div>
             </DialogContent>
-        </Dialog>
     );
 }

@@ -41,8 +41,6 @@ export interface PatientFound {
 }
 
 export interface AddAppointmentDialogProps {
-    open: boolean;
-    onOpenChange: (v: boolean) => void;
     selectedDateStr: string | null;
     onDateChange: (date: string) => void;
     onAdd: (apt: Omit<Appointment, "id">) => void;

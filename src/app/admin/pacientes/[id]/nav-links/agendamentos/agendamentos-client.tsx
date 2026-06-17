@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Plus, Clock, Loader2, ChevronRight, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Appointment, UpdateAgendamentoInput } from "@/src/types/dashboard/pacientes";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -23,7 +24,6 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
     const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
     const [newlyCreatedIds, setNewlyCreatedIds] = useState<string[]>([]);
     const [isPending, startTransition] = useTransition();
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const [editScheduledAt, setEditScheduledAt] = useState("");
@@ -106,12 +106,22 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                        <Button
-                            onClick={() => setIsCreateOpen(true)}
-                            className="h-10 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-sm"
-                        >
-                            <Plus className="mr-1 h-3.5 w-3.5" /> Novo Agendamento
-                        </Button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button
+                                    className="h-10 rounded-xl bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-sm"
+                                >
+                                    <Plus className="mr-1 h-3.5 w-3.5" /> Novo Agendamento
+                                </Button>
+                            </DialogTrigger>
+                            <AgendamentoCreateModal
+                                patientId={patientId}
+                                onCreated={(appointment) => {
+                                    setAppointments((prev) => [appointment, ...prev]);
+                                    setNewlyCreatedIds((prev) => [String(appointment.id), ...prev]);
+                                }}
+                            />
+                        </Dialog>
                         <div className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold text-slate-100">
                             <ListChecks className="h-4 w-4 text-blue-200" />
                             {summary.total} registros
@@ -269,15 +279,6 @@ export default function AgendamentosClient({ patientId, initialAppointments }: {
                 </div>
             )}
 
-            <AgendamentoCreateModal
-                patientId={patientId}
-                open={isCreateOpen}
-                onOpenChange={setIsCreateOpen}
-                onCreated={(appointment) => {
-                    setAppointments((prev) => [appointment, ...prev]);
-                    setNewlyCreatedIds((prev) => [String(appointment.id), ...prev]);
-                }}
-            />
 
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
         </div>

@@ -8,14 +8,13 @@ import {
     DialogContent,
     DialogDescription,
     DialogTitle,
+    DialogClose,
 } from "@/components/ui/dialog";
 import { maskCPF, rawCPF } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
 import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
 
 export function AddAppointmentDialog({
-    open,
-    onOpenChange,
     selectedDateStr,
     onDateChange,
     onAdd,
@@ -40,7 +39,7 @@ export function AddAppointmentDialog({
     const isTimeBooked = bookedTimes.includes(time);
 
     useEffect(() => {
-        if (open && selectedDateStr) {
+        if (selectedDateStr) {
             const defaultSlots = ["09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"];
             const firstAvailable = defaultSlots.find(slot => !bookedTimes.includes(slot));
             if (firstAvailable) {
@@ -49,23 +48,7 @@ export function AddAppointmentDialog({
                 setTime("09:00");
             }
         }
-    }, [open, selectedDateStr, appointments]);
-
-    const resetForm = () => {
-        setMode("registered");
-        setCpfInput("");
-        setPatientFound(null);
-        setCpfError("");
-        setGuestName("");
-        setProcedure("");
-        setCustomProcedure("");
-        setTime("09:00");
-    };
-
-    const handleOpen = (v: boolean) => {
-        if (!v) resetForm();
-        onOpenChange(v);
-    };
+    }, [selectedDateStr, appointments]);
 
     const handleCPFSearch = async () => {
         const raw = rawCPF(cpfInput);
@@ -121,12 +104,10 @@ export function AddAppointmentDialog({
             ...(mode === "registered" && patientFound ? { patientId: patientFound.id } : {}),
         } as Omit<Appointment, "id">);
         setSubmitting(false);
-        handleOpen(false);
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleOpen}>
-            <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
+        <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
                 <div className="bg-blue-600 px-6 py-6 text-white">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -321,29 +302,31 @@ export function AddAppointmentDialog({
                     )}
 
                     <div className="pt-4 border-t border-slate-100 flex gap-3">
-                        <button
-                            type="button"
-                            onClick={() => handleOpen(false)}
-                            className="flex-1 h-10 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={
-                                submitting ||
-                                !procedure ||
-                                (mode === "registered" && !patientFound) ||
-                                (mode === "guest" && !guestName.trim())
-                            }
-                            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 uppercase tracking-wider"
-                        >
-                            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                            Confirmar Agendamento
-                        </button>
+                        <DialogClose asChild>
+                            <button
+                                type="button"
+                                className="flex-1 h-10 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
+                            >
+                                Cancelar
+                            </button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                            <button
+                                type="submit"
+                                disabled={
+                                    submitting ||
+                                    !procedure ||
+                                    (mode === "registered" && !patientFound) ||
+                                    (mode === "guest" && !guestName.trim())
+                                }
+                                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 uppercase tracking-wider"
+                            >
+                                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                                Confirmar Agendamento
+                            </button>
+                        </DialogClose>
                     </div>
                 </form>
             </DialogContent>
-        </Dialog>
     );
 }
