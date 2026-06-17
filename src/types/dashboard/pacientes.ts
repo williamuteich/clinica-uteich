@@ -79,6 +79,7 @@ export interface Appointment {
   description?: string | null;
   createdAt: string;
   updatedAt: string;
+  billingType?: string | null;
 }
 
 export interface AgendamentosResponse {

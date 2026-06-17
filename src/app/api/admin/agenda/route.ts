@@ -86,6 +86,7 @@ function mapAppointment(appointment: any): Appointment {
     estimatedValue: appointment.estimatedValue,
     status: appointment.status,
     description: appointment.description || null,
+    billingType: appointment.billingType || "Particular",
     createdAt: appointment.createdAt?.toISOString?.() || String(appointment.createdAt),
     updatedAt: appointment.updatedAt?.toISOString?.() || String(appointment.updatedAt),
   };
@@ -184,6 +185,7 @@ async function _POST(request: Request) {
         estimatedValue: encryptedBody.estimatedValue,
         status: encryptedBody.status || "PENDING",
         description: encryptedBody.description || null,
+        billingType: encryptedBody.billingType || "Particular",
       },
       include: {
         patient: {

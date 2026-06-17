@@ -243,6 +243,7 @@ model Appointment {
   estimatedValue Float
   description    String?
   status         AppointmentStatus @default(PENDING)
+  billingType    String            @default("Particular")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -76,6 +76,7 @@ export default function AgendaContainer() {
                         description: apt.description || undefined,
                         guestPhone: apt.guestPhone || undefined,
                         phone: apt.phone || undefined,
+                        billingType: apt.billingType || "Particular",
                     };
                 });
                 setAppointments(mapped);
@@ -126,7 +127,7 @@ export default function AgendaContainer() {
                 ...(scheduledAt ? { scheduledAt } : {}),
                 ...(updatedFields.procedure ? { serviceType: updatedFields.procedure } : {}),
                 ...(typeof updatedFields.estimatedValue === "number" ? { estimatedValue: updatedFields.estimatedValue } : {}),
-
+                ...(updatedFields.billingType ? { billingType: updatedFields.billingType } : {}),
                 ...(updatedFields.status ? {
                     status: updatedFields.status === "Confirmado" ? "CONFIRMED" :
                         updatedFields.status === "Cancelado" ? "CANCELLED" :
@@ -160,6 +161,7 @@ export default function AgendaContainer() {
                 scheduledAt: scheduledAt.toISOString(),
                 serviceType: apt.procedure,
                 estimatedValue: apt.estimatedValue,
+                billingType: apt.billingType || "Particular",
                 status: "PENDING",
             };
 
@@ -186,6 +188,26 @@ export default function AgendaContainer() {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
     }).format(hoje);
 
+    const currentMonthApts = appointments.filter(apt => {
+        if (apt.status === "Cancelado") return false;
+        const aptDate = new Date(`${apt.date}T00:00:00`);
+        return aptDate.getMonth() === viewDate.getMonth() && aptDate.getFullYear() === viewDate.getFullYear();
+    });
+
+    const particularSum = currentMonthApts
+        .filter(apt => (apt.billingType || "Particular") === "Particular")
+        .reduce((sum, apt) => sum + (apt.estimatedValue || 0), 0);
+
+    const planoSum = currentMonthApts
+        .filter(apt => apt.billingType === "Plano")
+        .reduce((sum, apt) => sum + (apt.estimatedValue || 0), 0);
+
+    const totalSum = particularSum + planoSum;
+
+    const formatCurrency = (val: number) => {
+        return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(val);
+    };
+
     return (
         <div className="space-y-6 w-full animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-4 gap-4">
@@ -202,6 +224,36 @@ export default function AgendaContainer() {
                         Atualizando dados...
                     </div>
                 )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="bg-white p-4 rounded-xl border border-slate-200/60 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Particular</p>
+                        <p className="text-lg font-black text-emerald-600 mt-1">{formatCurrency(particularSum)}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs select-none">
+                        P
+                    </div>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-slate-200/60 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Plano / Convênio</p>
+                        <p className="text-lg font-black text-blue-600 mt-1">{formatCurrency(planoSum)}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs select-none">
+                        C
+                    </div>
+                </div>
+                <div className="bg-white p-4 rounded-xl border border-slate-200/60 shadow-3xs flex items-center justify-between">
+                    <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Faturamento Estimado do Mês</p>
+                        <p className="text-lg font-black text-slate-800 mt-1">{formatCurrency(totalSum)}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-slate-105 text-slate-700 flex items-center justify-center font-bold text-xs select-none">
+                        $
+                    </div>
+                </div>
             </div>
 
             <CalendarGrid

@@ -21,7 +21,13 @@ export const PROCEDURES = [
     "Outro",
 ] as const;
 
-export function ProcedureSelect({ value, onChange, customValue = "", onCustomChange }: ProcedureSelectProps) {
+export function ProcedureSelect({
+    value,
+    onChange,
+    customValue = "",
+    onCustomChange,
+    onSelectTreatment,
+}: ProcedureSelectProps) {
     const [open, setOpen] = useState(false);
     const [dbProcedures, setDbProcedures] = useState<TreatmentOption[]>([]);
     const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -118,6 +124,10 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
         const lookup = value === "Outro" ? customValue : value;
         return allOptions.find((opt) => opt.name === lookup);
     }, [allOptions, value, customValue]);
+
+    useEffect(() => {
+        onSelectTreatment?.(selectedTreatment || null);
+    }, [selectedTreatment, onSelectTreatment]);
 
     return (
         <div ref={containerRef} className="relative w-full">

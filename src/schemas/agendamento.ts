@@ -19,6 +19,7 @@ export const createAppointmentSchema = z
       .min(0, "Valor estimado não pode ser negativo"),
     status: appointmentStatusSchema.default("PENDING").optional(),
     description: z.string().optional().nullable(),
+    billingType: z.string().optional().default("Particular"),
   })
   .refine(
     (data) => {
@@ -40,6 +41,7 @@ export const updateAppointmentSchema = z.object({
   description: z.string().optional().nullable(),
   guestName: z.string().optional().nullable(),
   guestPhone: z.string().optional().nullable(),
+  billingType: z.string().optional(),
 });
 
 export const listAppointmentsQuerySchema = z.object({

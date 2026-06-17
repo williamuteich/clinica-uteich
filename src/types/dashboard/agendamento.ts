@@ -22,6 +22,7 @@ export interface Appointment {
     description?: string;
     guestPhone?: string | null;
     phone?: string | null;
+    billingType?: string;
 }
 
 export interface CalendarGridProps {

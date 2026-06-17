@@ -105,6 +105,7 @@ export interface ProcedureSelectProps {
     onChange: (val: string) => void;
     customValue?: string;
     onCustomChange?: (val: string) => void;
+    onSelectTreatment?: (treatment: TreatmentOption | null) => void;
 }
 
 export interface TreatmentOption {

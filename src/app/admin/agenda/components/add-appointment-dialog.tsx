@@ -13,6 +13,7 @@ import {
 import { maskCPF, rawCPF } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
 import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
+import { TreatmentOption } from "@/src/types/dashboard/components";
 import Link from "next/link";
 
 export function AddAppointmentDialog({
@@ -32,6 +33,11 @@ export function AddAppointmentDialog({
     const [time, setTime] = useState("09:00");
     const [submitting, setSubmitting] = useState(false);
 
+    const [billingType, setBillingType] = useState<string>("Particular");
+    const [selectedTreatment, setSelectedTreatment] = useState<TreatmentOption | null>(null);
+    const [estimatedValue, setEstimatedValue] = useState<number>(0);
+    const [isPriceManual, setIsPriceManual] = useState(false);
+
     const bookedTimes = appointments
         .filter((apt) => apt.date === selectedDateStr && apt.status !== "Cancelado")
         .map((apt) => apt.time)
@@ -50,6 +56,23 @@ export function AddAppointmentDialog({
             }
         }
     }, [selectedDateStr, appointments]);
+
+    useEffect(() => {
+        setIsPriceManual(false);
+    }, [procedure]);
+
+    useEffect(() => {
+        if (!isPriceManual) {
+            if (selectedTreatment) {
+                const val = billingType === "Particular"
+                    ? selectedTreatment.valuePrivate ?? 0
+                    : selectedTreatment.valuePlan ?? 0;
+                setEstimatedValue(val);
+            } else {
+                setEstimatedValue(0);
+            }
+        }
+    }, [billingType, selectedTreatment, isPriceManual]);
 
     const handleCPFSearch = async () => {
         const raw = rawCPF(cpfInput);
@@ -98,10 +121,11 @@ export function AddAppointmentDialog({
             date: selectedDateStr,
             time,
             procedure: finalProcedure,
-            estimatedValue: 0,
+            estimatedValue,
             status: "Pendente",
             isNew: true,
             isGuest,
+            billingType,
             ...(mode === "registered" && patientFound ? { patientId: patientFound.id } : {}),
         } as Omit<Appointment, "id">);
         setSubmitting(false);
@@ -243,14 +267,68 @@ export function AddAppointmentDialog({
                         onChange={setProcedure}
                         customValue={customProcedure}
                         onCustomChange={setCustomProcedure}
+                        onSelectTreatment={setSelectedTreatment}
                     />
 
-                    <Link
-                        href="/admin/planos-tratamento"
-                        className="text-xs text-blue-600 hover:text-blue-700 font-semibold hover:underline cursor-pointer"
-                    >
-                        Editar procedimentos
-                    </Link>
+                    <div className="mt-1 flex items-center justify-between">
+                        <Link
+                            href="/admin/planos-tratamento"
+                            className="text-[10px] text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
+                        >
+                            Editar procedimentos
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                            Tipo de Cobrança
+                        </label>
+                        <div className="grid grid-cols-2 gap-1 bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+                            <button
+                                type="button"
+                                onClick={() => setBillingType("Particular")}
+                                className={cn(
+                                    "flex items-center justify-center py-2 rounded-lg text-xs font-black transition-all cursor-pointer",
+                                    billingType === "Particular"
+                                        ? "bg-white text-emerald-600 shadow-2xs"
+                                        : "text-slate-500 hover:text-slate-800"
+                                )}
+                            >
+                                Particular
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setBillingType("Plano")}
+                                className={cn(
+                                    "flex items-center justify-center py-2 rounded-lg text-xs font-black transition-all cursor-pointer",
+                                    billingType === "Plano"
+                                        ? "bg-white text-blue-600 shadow-2xs"
+                                        : "text-slate-500 hover:text-slate-800"
+                                )}
+                            >
+                                Plano
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                            Valor Estimado (R$)
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            value={estimatedValue === 0 ? "" : estimatedValue}
+                            onChange={(e) => {
+                                setEstimatedValue(parseFloat(e.target.value) || 0);
+                                setIsPriceManual(true);
+                            }}
+                            placeholder="0.00"
+                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 bg-white"
+                            required
+                        />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

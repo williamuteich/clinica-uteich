@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { phoneToWhatsapp, maskPhone } from "@/src/lib/masks";
 import { Appointment } from "@/src/types/dashboard/agendamento";
-import { ProcedureSelect, PROCEDURES } from "./procedure-select";
+import { ProcedureSelect } from "./procedure-select";
+import { TreatmentOption } from "@/src/types/dashboard/components";
 import { CreatePatientLinkDialog } from "@/src/app/components/admin/create-dialog-link";
 
 const STATUS_THEMES = {
@@ -40,17 +41,34 @@ export function AppointmentDetailsDialog({
     appointment,
     onUpdate,
 }: AppointmentDetailsDialogProps) {
-    const isDefaultProc = PROCEDURES.includes(appointment.procedure as any);
     const [patientName, setPatientName] = useState(appointment.patientName);
-    const [procedure, setProcedure] = useState(isDefaultProc ? appointment.procedure : "Outro");
-    const [customProcedure, setCustomProcedure] = useState(isDefaultProc ? "" : appointment.procedure);
+    const [procedure, setProcedure] = useState(appointment.procedure);
+    const [customProcedure, setCustomProcedure] = useState("");
     const [date, setDate] = useState(appointment.date);
     const [time, setTime] = useState(appointment.time);
     const [status, setStatus] = useState<"Confirmado" | "Pendente" | "Cancelado" | "Finalizado">(appointment.status);
 
+    const [billingType, setBillingType] = useState<string>(appointment.billingType || "Particular");
+    const [selectedTreatment, setSelectedTreatment] = useState<TreatmentOption | null>(null);
+    const [estimatedValue, setEstimatedValue] = useState<number>(appointment.estimatedValue || 0);
+    const [isPriceManual, setIsPriceManual] = useState(false);
+
     const theme = STATUS_THEMES[status] || STATUS_THEMES.Pendente;
     const phone = appointment.phone;
     const cleanedObs = appointment.description;
+
+    useEffect(() => {
+        setIsPriceManual(false);
+    }, [procedure]);
+
+    useEffect(() => {
+        if (!isPriceManual && selectedTreatment) {
+            const val = billingType === "Particular"
+                ? selectedTreatment.valuePrivate ?? 0
+                : selectedTreatment.valuePlan ?? 0;
+            setEstimatedValue(val);
+        }
+    }, [billingType, selectedTreatment, isPriceManual]);
 
     const handleSave = () => {
         const finalProcedure = procedure === "Outro" ? customProcedure : procedure;
@@ -66,6 +84,8 @@ export function AppointmentDetailsDialog({
             status,
             isGuest: appointment.isGuest,
             patientName: appointment.isGuest ? patientName : appointment.patientName,
+            billingType,
+            estimatedValue,
         });
     };
 
@@ -151,13 +171,65 @@ export function AppointmentDetailsDialog({
                                 onChange={setProcedure}
                                 customValue={customProcedure}
                                 onCustomChange={setCustomProcedure}
+                                onSelectTreatment={setSelectedTreatment}
                             />
-                            <Link
-                                href="/admin/planos-tratamento"
-                                className="text-xs text-blue-600 hover:text-blue-700 font-semibold hover:underline cursor-pointer"
-                            >
-                                Editar procedimentos
-                            </Link>
+                            <div className="mt-1 flex items-center justify-between">
+                                <Link
+                                    href="/admin/planos-tratamento"
+                                    className="text-[10px] text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
+                                >
+                                    Editar procedimentos
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                Tipo de Cobrança
+                            </label>
+                            <div className="grid grid-cols-2 gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                                <button
+                                    type="button"
+                                    onClick={() => setBillingType("Particular")}
+                                    className={cn(
+                                        "flex items-center justify-center py-2 rounded-md text-[10px] font-black transition-all cursor-pointer",
+                                        billingType === "Particular"
+                                            ? "bg-white text-emerald-600 shadow-3xs"
+                                            : "text-slate-500 hover:text-slate-800"
+                                    )}
+                                >
+                                    Particular
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setBillingType("Plano")}
+                                    className={cn(
+                                        "flex items-center justify-center py-2 rounded-md text-[10px] font-black transition-all cursor-pointer",
+                                        billingType === "Plano"
+                                            ? "bg-white text-blue-600 shadow-3xs"
+                                            : "text-slate-500 hover:text-slate-800"
+                                    )}
+                                >
+                                    Plano
+                                </button>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                                Valor Estimado (R$)
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                value={estimatedValue === 0 ? "" : estimatedValue}
+                                onChange={(e) => {
+                                    setEstimatedValue(parseFloat(e.target.value) || 0);
+                                    setIsPriceManual(true);
+                                }}
+                                placeholder="0.00"
+                                className="w-full h-10 px-3 text-xs border border-slate-202 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 bg-white"
+                                required
+                            />
                         </div>
 
                         <div>
