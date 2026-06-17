@@ -5,9 +5,8 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, ChevronLeft, ChevronRight, FileText, User } from "lucide-react";
+import { Loader2, FileText, User } from "lucide-react";
 import { PacientesResponse, PacienteFilters } from "@/src/types/dashboard/pacientes";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -18,6 +17,8 @@ import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-ge
 import { maskCPF, maskPhone } from "@/src/lib/masks";
 import { getPacientes, deletePaciente } from "@/src/services/pacientes";
 import { useDebounce } from "@/src/hook/use-debounce";
+import { SearchInput } from "@/src/app/components/admin/search-input";
+import { Pagination } from "@/src/app/components/admin/pagination";
 
 const PacienteRow = memo(({
     paciente,
@@ -120,16 +121,14 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Buscar por nome ou CPF..."
-                            className="pl-9 w-[260px] h-10 bg-white"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        placeholder="Buscar por nome ou CPF..."
+                        className="w-[260px]"
+                    />
                     {isPending && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
+
                 </div>
                 <div className="flex items-center gap-2">
                     <CreatePatientLinkDialog />
@@ -174,39 +173,15 @@ export function PacientesManagement({ initialData }: { initialData: PacientesRes
                     </TableBody>
                 </Table>
 
-                {data.totalPages > 1 && (
-                    <div className="p-4 border-t bg-slate-50/50 flex items-center justify-between">
-                        <div className="text-sm text-slate-500 font-medium">
-                            Mostrando{" "}
-                            <span className="font-bold text-slate-700">{(data.page - 1) * data.limit + 1}</span>–
-                            <span className="font-bold text-slate-700">
-                                {Math.min(data.page * data.limit, data.total)}
-                            </span>{" "}
-                            de <span className="font-bold text-slate-700">{data.total}</span> pacientes
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fetchPacientes({ ...filters, page: data.page - 1 })}
-                                disabled={data.page === 1 || isPending}
-                            >
-                                <ChevronLeft className="h-4 w-4" /> Anterior
-                            </Button>
-                            <span className="text-sm font-bold text-slate-700">
-                                {data.page} / {data.totalPages}
-                            </span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fetchPacientes({ ...filters, page: data.page + 1 })}
-                                disabled={data.page === data.totalPages || isPending}
-                            >
-                                Próximo <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <Pagination
+                    page={data.page}
+                    totalPages={data.totalPages}
+                    total={data.total}
+                    limit={data.limit}
+                    itemName="pacientes"
+                    onPageChange={(page) => fetchPacientes({ ...filters, page })}
+                    disabled={isPending}
+                />
             </div>
         </div>
     );

@@ -28,13 +28,8 @@ import {
     Loader2,
     Mail,
     ShieldCheck,
-    Trash2,
     Pencil,
     Clock,
-    AlertTriangle,
-    Search,
-    ChevronLeft,
-    ChevronRight,
     User
 } from "lucide-react";
 import { Admin, Role, AdminsResponse, AdminFilters } from "@/src/types/dashboard/admins";
@@ -42,6 +37,9 @@ import { createAdmin, updateAdmin, deleteAdmin, getAdmins } from "@/src/services
 import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { toast, ToastContainer } from "react-toastify";
 import { useDebounce } from "@/src/hook/use-debounce";
+import { SearchInput } from "@/src/app/components/admin/search-input";
+import { Pagination } from "@/src/app/components/admin/pagination";
+
 
 export function AdminManagement({
     initialData,
@@ -115,16 +113,14 @@ export function AdminManagement({
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Buscar administrador..."
-                            className="pl-9 w-[260px] h-10 bg-white"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        placeholder="Buscar administrador..."
+                        className="w-[260px]"
+                    />
                     {isPending && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
+
                 </div>
 
                 <Dialog open={open} onOpenChange={(val) => { if (!val) { setEditingAdmin(null); setError(""); } setOpen(val); }}>
@@ -254,38 +250,15 @@ export function AdminManagement({
                     </TableBody>
                 </Table>
 
-                {data.totalPages > 1 && (
-                    <div className="p-4 border-t bg-muted/20 flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                            Mostrando <span className="font-medium">{(data.page - 1) * data.limit + 1}</span>-
-                            <span className="font-medium">{Math.min(data.page * data.limit, data.total)}</span> de
-                            <span className="font-medium"> {data.total}</span> administradores
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(data.page - 1)}
-                                disabled={data.page === 1 || isPending}
-                            >
-                                <ChevronLeft className="h-4 w-4" /> Anterior
-                            </Button>
-                            <div className="flex items-center gap-1 px-2">
-                                <span className="text-sm font-medium">{data.page}</span>
-                                <span className="text-sm text-muted-foreground">/</span>
-                                <span className="text-sm text-muted-foreground">{data.totalPages}</span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(data.page + 1)}
-                                disabled={data.page === data.totalPages || isPending}
-                            >
-                                Próximo <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <Pagination
+                    page={data.page}
+                    totalPages={data.totalPages}
+                    total={data.total}
+                    limit={data.limit}
+                    itemName="administradores"
+                    onPageChange={handlePageChange}
+                    disabled={isPending}
+                />
             </div>
         </div>
     );

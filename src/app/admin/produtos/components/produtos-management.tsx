@@ -12,6 +12,9 @@ import { GerenciarEstoqueModal } from "./gerenciar-estoque-modal";
 import { VisualizarAlertasModal } from "./visualizar-alertas-modal";
 import { ProdutosManagementProps, Product, StockMovement } from "@/src/types/dashboard/produtos";
 import { useDebounce } from "@/src/hook/use-debounce";
+import { SearchInput } from "@/src/app/components/admin/search-input";
+import { Pagination } from "@/src/app/components/admin/pagination";
+
 
 function formatExpiration(date?: string | null) {
     if (!date) return "—";
@@ -163,15 +166,11 @@ export function ProdutosManagement({ initialProducts, initialMovements }: Produt
                                 </div>
                             </div>
 
-                            <div className="relative">
-                                <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                <Input
-                                    placeholder="Pesquisar por produto"
-                                    value={prodSearch}
-                                    onChange={(e) => setProdSearch(e.target.value)}
-                                    className="pl-9 h-10 bg-white"
-                                />
-                            </div>
+                            <SearchInput
+                                value={prodSearch}
+                                onChange={setProdSearch}
+                                placeholder="Pesquisar por produto..."
+                            />
 
                             <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
                                 <Table>
@@ -241,22 +240,16 @@ export function ProdutosManagement({ initialProducts, initialMovements }: Produt
                                         })}
                                     </TableBody>
                                 </Table>
+                                <Pagination
+                                    page={prodPage}
+                                    totalPages={Math.ceil(prodTotal / LIMIT)}
+                                    total={prodTotal}
+                                    limit={LIMIT}
+                                    itemName="produtos"
+                                    onPageChange={(page) => fetchProducts(page, prodSearch)}
+                                    disabled={isPending}
+                                />
                             </div>
-                            {Math.ceil(prodTotal / LIMIT) > 1 && (
-                                <div className="flex items-center justify-between pt-2">
-                                    <p className="text-xs text-slate-400">
-                                        {prodTotal} produto(s) — página {prodPage} de {Math.ceil(prodTotal / LIMIT)}
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" disabled={prodPage === 1 || isPending} onClick={() => fetchProducts(prodPage - 1, prodSearch)}>
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="outline" size="sm" disabled={prodPage >= Math.ceil(prodTotal / LIMIT) || isPending} onClick={() => fetchProducts(prodPage + 1, prodSearch)}>
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
 
                             <div className="flex justify-end">
                                 <button
@@ -279,17 +272,11 @@ export function ProdutosManagement({ initialProducts, initialMovements }: Produt
 
                     {tab === "historico" && (
                         <>
-                            <div className="flex gap-3">
-                                <div className="relative flex-1">
-                                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-                                    <Input
-                                        placeholder="Pesquisar por produto"
-                                        value={movSearch}
-                                        onChange={(e) => setMovSearch(e.target.value)}
-                                        className="pl-9 h-10 bg-white"
-                                    />
-                                </div>
-                            </div>
+                            <SearchInput
+                                value={movSearch}
+                                onChange={setMovSearch}
+                                placeholder="Pesquisar por produto..."
+                            />
 
                             <Table>
                                 <TableHeader>
@@ -322,21 +309,15 @@ export function ProdutosManagement({ initialProducts, initialMovements }: Produt
                                 </TableBody>
                             </Table>
 
-                            {Math.ceil(movTotal / LIMIT) > 1 && (
-                                <div className="flex items-center justify-between pt-2">
-                                    <p className="text-xs text-slate-400">
-                                        {movTotal} movimentação(ões) — página {movPage} de {Math.ceil(movTotal / LIMIT)}
-                                    </p>
-                                    <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" disabled={movPage === 1 || isPending} onClick={() => fetchMovements(movPage - 1, movSearch)}>
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant="outline" size="sm" disabled={movPage >= Math.ceil(movTotal / LIMIT) || isPending} onClick={() => fetchMovements(movPage + 1, movSearch)}>
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            )}
+                            <Pagination
+                                page={movPage}
+                                totalPages={Math.ceil(movTotal / LIMIT)}
+                                total={movTotal}
+                                limit={LIMIT}
+                                itemName="movimentações"
+                                onPageChange={(page) => fetchMovements(page, movSearch)}
+                                disabled={isPending}
+                            />
 
                             <div className="flex justify-end">
                                 <button

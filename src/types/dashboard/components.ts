@@ -75,3 +75,36 @@ export interface PatientAppointmentsSectionProps {
     patientId: string;
     initialAppointments: Appointment[];
 }
+
+export interface SearchInputProps {
+    value: string;
+    onChange: (val: string) => void;
+    placeholder?: string;
+    className?: string;
+}
+
+export interface PaginationProps {
+    page: number;
+    totalPages: number;
+    total: number;
+    limit: number;
+    itemName?: string;
+    onPageChange: (page: number) => void;
+    disabled?: boolean;
+}
+
+export interface LoadMoreButtonProps {
+    visibleCount: number;
+    totalCount: number;
+    onLoadMore: () => void;
+    itemName?: string;
+}
+
+export interface ProcedureSelectProps {
+    value: string;
+    onChange: (val: string) => void;
+    customValue?: string;
+    onCustomChange?: (val: string) => void;
+}
+
+

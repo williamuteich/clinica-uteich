@@ -9,21 +9,19 @@ import {
     TableHeader,
     TableRow
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-    Search,
     User,
     Calendar as CalendarIcon,
     FileText,
-    ChevronLeft,
-    ChevronRight,
     Loader2,
 } from "lucide-react";
 import { AuditLogsResponse, AuditFilters } from "@/src/types/dashboard/audit";
 import { useDebounce } from "@/src/hook/use-debounce";
 import { getAuditLogs } from "@/src/services/audit";
+import { SearchInput } from "@/src/app/components/admin/search-input";
+import { Pagination } from "@/src/app/components/admin/pagination";
+
 
 export function AuditManagement({
     initialData
@@ -81,15 +79,13 @@ export function AuditManagement({
         <div className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center justify-end gap-4">
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Filtrar por usuário..."
-                            className="pl-9 w-[240px] h-10 bg-white"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        placeholder="Filtrar por usuário..."
+                        className="w-[240px]"
+                    />
+
 
                     <select
                         className="h-10 px-3 py-2 border rounded-md bg-white text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 min-w-auto"
@@ -168,38 +164,15 @@ export function AuditManagement({
                     </TableBody>
                 </Table>
 
-                {data.totalPages > 1 && (
-                    <div className="p-4 border-t bg-muted/20 flex items-center justify-between">
-                        <div className="text-sm text-muted-foreground">
-                            Mostrando <span className="font-medium">{(data.page - 1) * 20 + 1}</span>-
-                            <span className="font-medium">{Math.min(data.page * 20, data.total)}</span> de
-                            <span className="font-medium"> {data.total}</span> registros
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(data.page - 1)}
-                                disabled={data.page === 1 || isPending}
-                            >
-                                <ChevronLeft className="h-4 w-4" /> Anterior
-                            </Button>
-                            <div className="flex items-center gap-1 px-2">
-                                <span className="text-sm font-medium">{data.page}</span>
-                                <span className="text-sm text-muted-foreground">/</span>
-                                <span className="text-sm text-muted-foreground">{data.totalPages}</span>
-                            </div>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePageChange(data.page + 1)}
-                                disabled={data.page === data.totalPages || isPending}
-                            >
-                                Próximo <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <Pagination
+                    page={data.page}
+                    totalPages={data.totalPages}
+                    total={data.total}
+                    limit={20}
+                    itemName="registros"
+                    onPageChange={handlePageChange}
+                    disabled={isPending}
+                />
             </div>
         </div>
     );

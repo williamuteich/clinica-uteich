@@ -20,6 +20,9 @@ import { ProtheticWork, ProtheticWorksResponse, DashboardStats } from "@/src/typ
 import { TrabalhoFormDialog } from "./trabalho-form-dialog";
 
 import { useDebounce } from "@/src/hook/use-debounce";
+import { SearchInput } from "@/src/app/components/admin/search-input";
+import { Pagination } from "@/src/app/components/admin/pagination";
+
 
 const STATUS_CONFIG = {
     PENDING: {
@@ -140,18 +143,15 @@ export function TrabalhosManagement({
                 </div>
             </div>
 
-            {/* Filters + New */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 rounded-xl border">
                 <div className="flex flex-wrap items-center gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-                        <Input
-                            placeholder="Buscar paciente, lab ou trabalho..."
-                            className="pl-9 w-[260px] h-10 bg-white"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        placeholder="Buscar paciente, lab ou trabalho..."
+                        className="w-[260px]"
+                    />
+
 
                     <select
                         value={statusFilter}
@@ -256,34 +256,15 @@ export function TrabalhosManagement({
                     </TableBody>
                 </Table>
 
-                {data.totalPages > 1 && (
-                    <div className="p-4 border-t bg-slate-50/50 flex items-center justify-between">
-                        <div className="text-xs text-slate-400 font-medium">
-                            Mostrando <span className="font-bold">{(data.page - 1) * data.limit + 1}</span>–
-                            <span className="font-bold">{Math.min(data.page * data.limit, data.total)}</span> de{" "}
-                            <span className="font-bold">{data.total}</span> trabalhos
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fetchWorks({ ...filters, page: data.page - 1 })}
-                                disabled={data.page === 1 || isPending}
-                            >
-                                <ChevronLeft className="h-4 w-4" /> Anterior
-                            </Button>
-                            <span className="text-xs font-bold text-slate-600">{data.page} / {data.totalPages}</span>
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => fetchWorks({ ...filters, page: data.page + 1 })}
-                                disabled={data.page === data.totalPages || isPending}
-                            >
-                                Próximo <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                <Pagination
+                    page={data.page}
+                    totalPages={data.totalPages}
+                    total={data.total}
+                    limit={data.limit}
+                    itemName="trabalhos"
+                    onPageChange={(page) => fetchWorks({ ...filters, page })}
+                    disabled={isPending}
+                />
             </div>
         </div>
     );
