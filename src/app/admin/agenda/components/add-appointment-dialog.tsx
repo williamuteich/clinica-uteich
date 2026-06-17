@@ -13,6 +13,7 @@ import {
 import { maskCPF, rawCPF } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
 import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
+import Link from "next/link";
 
 export function AddAppointmentDialog({
     selectedDateStr,
@@ -108,225 +109,232 @@ export function AddAppointmentDialog({
 
     return (
         <DialogContent className="sm:max-w-xl border-none p-0 overflow-hidden shadow-2xl rounded-2xl">
-                <div className="bg-blue-600 px-6 py-6 text-white">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                            <Plus className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                            <DialogTitle className="text-base font-black text-white">Novo Agendamento</DialogTitle>
-                            <DialogDescription className="text-xs text-blue-100 font-semibold mt-0.5">
-                                Marcar consulta para {selectedDateStr?.split("-").reverse().join("/")}
-                            </DialogDescription>
-                        </div>
+            <div className="bg-blue-600 px-6 py-6 text-white">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                        <Plus className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                        <DialogTitle className="text-base font-black text-white">Novo Agendamento</DialogTitle>
+                        <DialogDescription className="text-xs text-blue-100 font-semibold mt-0.5">
+                            Marcar consulta para {selectedDateStr?.split("-").reverse().join("/")}
+                        </DialogDescription>
+                    </div>
+                </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+                        Identificação do Paciente
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            type="button"
+                            onClick={() => { setMode("registered"); setPatientFound(null); setCpfError(""); setCpfInput(""); }}
+                            className={cn(
+                                "flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 text-xs font-black transition-all cursor-pointer",
+                                mode === "registered"
+                                    ? "border-blue-500 bg-blue-50 text-blue-700"
+                                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-350"
+                            )}
+                        >
+                            <UserCheck className="h-4 w-4" />
+                            Paciente Cadastrado
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setMode("guest"); setPatientFound(null); setCpfError(""); setCpfInput(""); }}
+                            className={cn(
+                                "flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 text-xs font-black transition-all cursor-pointer",
+                                mode === "guest"
+                                    ? "border-violet-500 bg-violet-50 text-violet-700"
+                                    : "border-slate-200 bg-white text-slate-500 hover:border-slate-350"
+                            )}
+                        >
+                            <UserX className="h-4 w-4" />
+                            Sem Cadastro
+                        </button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-5">
-                    <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
-                            Identificação do Paciente
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                type="button"
-                                onClick={() => { setMode("registered"); setPatientFound(null); setCpfError(""); setCpfInput(""); }}
-                                className={cn(
-                                    "flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 text-xs font-black transition-all cursor-pointer",
-                                    mode === "registered"
-                                        ? "border-blue-500 bg-blue-50 text-blue-700"
-                                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-350"
-                                )}
-                            >
-                                <UserCheck className="h-4 w-4" />
-                                Paciente Cadastrado
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => { setMode("guest"); setPatientFound(null); setCpfError(""); setCpfInput(""); }}
-                                className={cn(
-                                    "flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border-2 text-xs font-black transition-all cursor-pointer",
-                                    mode === "guest"
-                                        ? "border-violet-500 bg-violet-50 text-violet-700"
-                                        : "border-slate-200 bg-white text-slate-500 hover:border-slate-350"
-                                )}
-                            >
-                                <UserX className="h-4 w-4" />
-                                Sem Cadastro
-                            </button>
-                        </div>
-                    </div>
-
-                    {mode === "registered" && (
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                                CPF do Paciente
-                            </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={cpfInput}
-                                    onChange={(e) => {
-                                        setCpfInput(maskCPF(e.target.value));
-                                        setCpfError("");
-                                        setPatientFound(null);
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") { e.preventDefault(); handleCPFSearch(); }
-                                    }}
-                                    placeholder="000.000.000-00"
-                                    maxLength={14}
-                                    className="flex-1 h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleCPFSearch}
-                                    disabled={cpfSearching}
-                                    className="h-10 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
-                                >
-                                    {cpfSearching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
-                                    Buscar
-                                </button>
-                            </div>
-
-                            {cpfError && (
-                                <p className="mt-1.5 text-xs text-rose-500 font-bold flex items-center gap-1">
-                                    <AlertCircle className="h-3.5 w-3.5" />
-                                    {cpfError}
-                                </p>
-                            )}
-
-                            {patientFound && (
-                                <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                                    <div className="flex items-center gap-1.5 mb-1.5">
-                                        <div className="w-5 h-5 rounded-md bg-emerald-500 flex items-center justify-center text-white">
-                                            <UserCheck className="h-3.5 w-3.5" />
-                                        </div>
-                                        <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">
-                                            Paciente Confirmado
-                                        </span>
-                                    </div>
-                                    <p className="text-xs font-black text-slate-800">{patientFound.name}</p>
-                                    <p className="text-[10px] font-mono text-slate-500 mt-0.5">CPF: {patientFound.cpf}</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {mode === "guest" && (
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                                Nome Completo <span className="text-rose-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={guestName}
-                                onChange={(e) => setGuestName(e.target.value)}
-                                placeholder="Nome completo do paciente"
-                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent font-medium"
-                                required
-                            />
-                            <p className="mt-1.5 text-[10px] text-violet-600 font-bold flex items-center gap-1">
-                                <Info className="h-3 w-3" />
-                                Agendamento rápido sem necessidade de cadastro prévio.
-                            </p>
-                        </div>
-                    )}
-
+                {mode === "registered" && (
                     <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                            Procedimento Clínico <span className="text-rose-500">*</span>
+                            CPF do Paciente
                         </label>
-                        <ProcedureSelect
-                            value={procedure}
-                            onChange={setProcedure}
-                            customValue={customProcedure}
-                            onCustomChange={setCustomProcedure}
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                                Data
-                            </label>
+                        <div className="flex gap-2">
                             <input
-                                type="date"
-                                value={selectedDateStr || ""}
-                                onChange={(e) => onDateChange(e.target.value)}
-                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                                required
+                                type="text"
+                                value={cpfInput}
+                                onChange={(e) => {
+                                    setCpfInput(maskCPF(e.target.value));
+                                    setCpfError("");
+                                    setPatientFound(null);
+                                }}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") { e.preventDefault(); handleCPFSearch(); }
+                                }}
+                                placeholder="000.000.000-00"
+                                maxLength={14}
+                                className="flex-1 h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
                             />
-                        </div>
-                        <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
-                                Horário
-                            </label>
-                            <input
-                                type="time"
-                                value={time}
-                                onChange={(e) => setTime(e.target.value)}
-                                className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                                required
-                            />
-                        </div>
-                    </div>
-
-                    {bookedTimes.length > 0 && (
-                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-1.5">
-                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
-                                Horários Agendados neste Dia:
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {bookedTimes.map((bt) => (
-                                    <span
-                                        key={bt}
-                                        className={cn(
-                                            "text-[9px] font-bold px-2 py-0.5 rounded border transition-colors",
-                                            time === bt
-                                                ? "bg-rose-50 border-rose-200 text-rose-700"
-                                                : "bg-slate-100 border-slate-200 text-slate-600"
-                                        )}
-                                    >
-                                        {bt}
-                                    </span>
-                                ))}
-                            </div>
-                            {isTimeBooked && (
-                                <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1 mt-1 animate-pulse">
-                                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                                    Aviso: Horário já reservado (permitido somente para emergência).
-                                </p>
-                            )}
-                        </div>
-                    )}
-
-                    <div className="pt-4 border-t border-slate-100 flex gap-3">
-                        <DialogClose asChild>
                             <button
                                 type="button"
-                                className="flex-1 h-10 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
+                                onClick={handleCPFSearch}
+                                disabled={cpfSearching}
+                                className="h-10 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-60 flex items-center gap-1.5"
                             >
-                                Cancelar
+                                {cpfSearching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Search className="h-3.5 w-3.5" />}
+                                Buscar
                             </button>
-                        </DialogClose>
-                        <DialogClose asChild>
-                            <button
-                                type="submit"
-                                disabled={
-                                    submitting ||
-                                    !procedure ||
-                                    (mode === "registered" && !patientFound) ||
-                                    (mode === "guest" && !guestName.trim())
-                                }
-                                className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 uppercase tracking-wider"
-                            >
-                                {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                                Confirmar Agendamento
-                            </button>
-                        </DialogClose>
+                        </div>
+
+                        {cpfError && (
+                            <p className="mt-1.5 text-xs text-rose-500 font-bold flex items-center gap-1">
+                                <AlertCircle className="h-3.5 w-3.5" />
+                                {cpfError}
+                            </p>
+                        )}
+
+                        {patientFound && (
+                            <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                                <div className="flex items-center gap-1.5 mb-1.5">
+                                    <div className="w-5 h-5 rounded-md bg-emerald-500 flex items-center justify-center text-white">
+                                        <UserCheck className="h-3.5 w-3.5" />
+                                    </div>
+                                    <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">
+                                        Paciente Confirmado
+                                    </span>
+                                </div>
+                                <p className="text-xs font-black text-slate-800">{patientFound.name}</p>
+                                <p className="text-[10px] font-mono text-slate-500 mt-0.5">CPF: {patientFound.cpf}</p>
+                            </div>
+                        )}
                     </div>
-                </form>
-            </DialogContent>
+                )}
+
+                {mode === "guest" && (
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                            Nome Completo <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={guestName}
+                            onChange={(e) => setGuestName(e.target.value)}
+                            placeholder="Nome completo do paciente"
+                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent font-medium"
+                            required
+                        />
+                        <p className="mt-1.5 text-[10px] text-violet-600 font-bold flex items-center gap-1">
+                            <Info className="h-3 w-3" />
+                            Agendamento rápido sem necessidade de cadastro prévio.
+                        </p>
+                    </div>
+                )}
+
+                <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                        Procedimento Clínico <span className="text-rose-500">*</span>
+                    </label>
+                    <ProcedureSelect
+                        value={procedure}
+                        onChange={setProcedure}
+                        customValue={customProcedure}
+                        onCustomChange={setCustomProcedure}
+                    />
+
+                    <Link
+                        href="/admin/planos-tratamento"
+                        className="text-xs text-blue-600 hover:text-blue-700 font-semibold hover:underline cursor-pointer"
+                    >
+                        Editar procedimentos
+                    </Link>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                            Data
+                        </label>
+                        <input
+                            type="date"
+                            value={selectedDateStr || ""}
+                            onChange={(e) => onDateChange(e.target.value)}
+                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                            Horário
+                        </label>
+                        <input
+                            type="time"
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            required
+                        />
+                    </div>
+                </div>
+
+                {bookedTimes.length > 0 && (
+                    <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-1.5">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">
+                            Horários Agendados neste Dia:
+                        </p>
+                        <div className="flex flex-wrap gap-1.5">
+                            {bookedTimes.map((bt) => (
+                                <span
+                                    key={bt}
+                                    className={cn(
+                                        "text-[9px] font-bold px-2 py-0.5 rounded border transition-colors",
+                                        time === bt
+                                            ? "bg-rose-50 border-rose-200 text-rose-700"
+                                            : "bg-slate-100 border-slate-200 text-slate-600"
+                                    )}
+                                >
+                                    {bt}
+                                </span>
+                            ))}
+                        </div>
+                        {isTimeBooked && (
+                            <p className="text-[10px] text-amber-600 font-bold flex items-center gap-1 mt-1 animate-pulse">
+                                <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                                Aviso: Horário já reservado (permitido somente para emergência).
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                <div className="pt-4 border-t border-slate-100 flex gap-3">
+                    <DialogClose asChild>
+                        <button
+                            type="button"
+                            className="flex-1 h-10 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-50 transition-all cursor-pointer uppercase tracking-wider"
+                        >
+                            Cancelar
+                        </button>
+                    </DialogClose>
+                    <DialogClose asChild>
+                        <button
+                            type="submit"
+                            disabled={
+                                submitting ||
+                                !procedure ||
+                                (mode === "registered" && !patientFound) ||
+                                (mode === "guest" && !guestName.trim())
+                            }
+                            className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 uppercase tracking-wider"
+                        >
+                            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                            Confirmar Agendamento
+                        </button>
+                    </DialogClose>
+                </div>
+            </form>
+        </DialogContent>
     );
 }

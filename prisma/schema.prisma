@@ -328,3 +328,16 @@ model GeneratedLink {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 }
+
+model Treatment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  category      String
+  valuePrivate  Float    @map("valor_particular")
+  valuePlan     Float    @map("valor_plano")
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("tratamentos")
+}
