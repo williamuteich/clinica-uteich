@@ -1,0 +1,37 @@
+import React from "react";
+
+export interface BookingHeroProps {
+  year: number;
+}
+
+export interface StepIndicatorProps {
+  step: number;
+}
+
+export interface ErrorMessageAlertProps {
+  message: string;
+  showEmergency: boolean;
+}
+
+export interface StepOneProps {
+  name: string;
+  setName: (v: string) => void;
+  phone: string;
+  onChangePhone: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  observation: string;
+  setObservation: (v: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+export interface StepTwoProps {
+  minDate: string;
+  selectedDate: string;
+  onDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  loadingSlots: boolean;
+  availableTimeSlots: string[];
+  selectedTime: string;
+  setSelectedTime: (t: string) => void;
+  onBack: () => void;
+  submitting: boolean;
+  onSubmit: () => void;
+}

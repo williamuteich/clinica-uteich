@@ -319,13 +319,11 @@ export function AddAppointmentDialog({
                         <input
                             type="number"
                             step="0.01"
-                            value={estimatedValue === 0 ? "" : estimatedValue}
-                            onChange={(e) => {
-                                setEstimatedValue(parseFloat(e.target.value) || 0);
-                                setIsPriceManual(true);
-                            }}
+                            value={estimatedValue}
+                            readOnly
+                            disabled
                             placeholder="0.00"
-                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 bg-white"
+                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none font-bold text-slate-500 bg-slate-50 cursor-not-allowed"
                             required
                         />
                     </div>

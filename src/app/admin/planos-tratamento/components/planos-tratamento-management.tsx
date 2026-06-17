@@ -18,6 +18,7 @@ import { createTreatment, deleteTreatment } from "@/src/services/plano-tratament
 import { TreatmentRow } from "./treatment-row";
 import { SearchInput } from "@/src/app/components/admin/search-input";
 import { LoadMoreButton } from "@/src/app/components/admin/load-more-button";
+import { maskCurrency } from "@/src/lib/masks";
 
 const CATEGORIES = [
     "Odontopediatria",
@@ -58,17 +59,6 @@ export function PlanosTratamentoManagement({ initialTreatments }: PlanosTratamen
     const [isCreating, setIsCreating] = useState(false);
 
     const closeDialogRef = useRef<HTMLButtonElement>(null);
-
-    const handleNewValuePrivateChange = (val: string) => {
-        setNewValuePrivate(val);
-        const num = parseFloat(val.replace(",", "."));
-        if (!isNaN(num)) {
-            const planVal = Math.round(num * 0.8 * 100) / 100;
-            setNewValuePlan(planVal.toFixed(2).replace(".", ","));
-        } else {
-            setNewValuePlan("");
-        }
-    };
 
     const categoryCounts = useMemo(() => {
         const counts: Record<string, number> = { Todos: treatments.length };
@@ -273,9 +263,9 @@ export function PlanosTratamentoManagement({ initialTreatments }: PlanosTratamen
                                     <input
                                         type="text"
                                         value={newValuePrivate}
-                                        onChange={e => handleNewValuePrivateChange(e.target.value)}
-                                        placeholder="0,00"
-                                        className="w-full h-10 px-3 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800 bg-white"
+                                        onChange={(e) =>
+                                            setNewValuePrivate(maskCurrency(e.target.value))
+                                        }
                                     />
                                 </div>
 
@@ -286,7 +276,7 @@ export function PlanosTratamentoManagement({ initialTreatments }: PlanosTratamen
                                     <input
                                         type="text"
                                         value={newValuePlan}
-                                        onChange={e => setNewValuePlan(e.target.value)}
+                                        onChange={(e) => { setNewValuePlan(maskCurrency(e.target.value)); }}
                                         placeholder="0,00"
                                         className="w-full h-10 px-3 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800 bg-white"
                                     />

@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { name, phone, serviceType, observation, date, time } = body;
 
-    if (!name || !phone || !serviceType || !date || !time) {
+    if (!name || !phone || !date || !time) {
       return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
     }
 
@@ -137,7 +137,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const encryptedServiceType = await encrypt(serviceType);
+    const encryptedServiceType = await encrypt(serviceType || "");
     const encryptedDescription = observation ? (await encrypt(observation)) : null;
     const encryptedGuestName = matchedPatient ? null : (await encrypt(name));
     const encryptedGuestPhone = matchedPatient ? null : (await encrypt(phone));

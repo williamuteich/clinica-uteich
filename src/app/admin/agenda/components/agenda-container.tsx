@@ -68,7 +68,7 @@ export default function AgendaContainer() {
                         patientName: apt.patientName || apt.guestName || "Paciente",
                         date: getLocalDateString(apt.scheduledAt),
                         time: getLocalTimeString(apt.scheduledAt),
-                        procedure: apt.serviceType || "Consulta",
+                        procedure: apt.serviceType || "",
                         estimatedValue: Number(apt.estimatedValue || 0),
                         status: mappedStatus,
                         isGuest: !apt.patientId || apt.patientId === "",

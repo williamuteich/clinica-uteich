@@ -221,6 +221,8 @@ export function AppointmentDetailsDialog({
                             <input
                                 type="number"
                                 step="0.01"
+                                readOnly
+                                disabled
                                 value={estimatedValue === 0 ? "" : estimatedValue}
                                 onChange={(e) => {
                                     setEstimatedValue(parseFloat(e.target.value) || 0);
