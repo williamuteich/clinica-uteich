@@ -5,39 +5,8 @@ import { CalendarDays, Search, X, UserCheck, UserX, Loader2, Plus, ChevronDown, 
 import { cn } from "@/lib/utils";
 import { PatientFound } from "@/src/types/dashboard/components";
 
-function formatCPF(value: string) {
-    const digits = value.replace(/\D/g, "").slice(0, 11);
-    return digits
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-}
-
-function formatPhone(value: string) {
-    let clean = value.replace(/\D/g, "");
-    if (clean.startsWith("55") && (clean.length === 12 || clean.length === 13)) {
-        clean = clean.slice(2);
-    }
-    return clean
-        .replace(/(\d{2})(\d)/, "($1) $2")
-        .replace(/(\d{4,5})(\d{4})$/, "$1-$2");
-}
-
-const PROCEDURES = [
-    "Consulta de Avaliação",
-    "Profilaxia e Limpeza",
-    "Implante Dentário",
-    "Tratamento de Canal",
-    "Extração Simples",
-    "Extração de Siso",
-    "Restauração",
-    "Clareamento Dental",
-    "Ortodontia",
-    "Prótese Dentária",
-    "Periodontia",
-    "Cirurgia Oral",
-    "Outro",
-];
+import { maskCPF, maskPhone } from "@/src/lib/masks";
+import { ProcedureSelect } from "../agenda/components/procedure-select";
 
 export function SidebarQuickSchedule() {
     const [open, setOpen] = useState(false);
@@ -48,24 +17,11 @@ export function SidebarQuickSchedule() {
     const [cpfError, setCpfError] = useState("");
     const [guestName, setGuestName] = useState("");
     const [procedure, setProcedure] = useState("");
-    const [procedureOpen, setProcedureOpen] = useState(false);
     const [customProcedure, setCustomProcedure] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [time, setTime] = useState("09:00");
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
-
-    const procedureRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        function handleClick(e: MouseEvent) {
-            if (procedureRef.current && !procedureRef.current.contains(e.target as Node)) {
-                setProcedureOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClick);
-        return () => document.removeEventListener("mousedown", handleClick);
-    }, []);
 
     const handleReset = () => {
         setMode("registered");
@@ -138,7 +94,6 @@ export function SidebarQuickSchedule() {
                 setOpen(false);
             }, 1800);
         } catch {
-            // silently handle
         } finally {
             setSubmitting(false);
         }
@@ -146,7 +101,6 @@ export function SidebarQuickSchedule() {
 
     return (
         <div className="mx-2 mb-1">
-            {/* Trigger */}
             <button
                 onClick={() => { setOpen((o) => !o); if (open) handleReset(); }}
                 className={cn(
@@ -169,10 +123,8 @@ export function SidebarQuickSchedule() {
                 )} />
             </button>
 
-            {/* Painel expansível */}
             {open && (
                 <div className="mt-1 mx-1 bg-white border border-slate-200 rounded-2xl shadow-lg overflow-hidden animate-in slide-in-from-top-2 duration-200">
-                    {/* Header */}
                     <div className="flex items-center justify-between px-4 py-3 bg-linear-to-r from-blue-600 to-blue-700">
                         <div className="flex items-center gap-2">
                             <CalendarDays className="h-4 w-4 text-white" />
@@ -196,7 +148,6 @@ export function SidebarQuickSchedule() {
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-                            {/* Tipo Paciente */}
                             <div className="grid grid-cols-2 gap-1.5">
                                 <button
                                     type="button"
@@ -226,7 +177,6 @@ export function SidebarQuickSchedule() {
                                 </button>
                             </div>
 
-                            {/* Busca CPF */}
                             {mode === "registered" && (
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -237,7 +187,7 @@ export function SidebarQuickSchedule() {
                                             type="text"
                                             value={cpfInput}
                                             onChange={(e) => {
-                                                setCpfInput(formatCPF(e.target.value));
+                                                setCpfInput(maskCPF(e.target.value));
                                                 setCpfError("");
                                                 setPatientFound(null);
                                             }}
@@ -270,14 +220,13 @@ export function SidebarQuickSchedule() {
                                             <p className="text-xs font-bold text-slate-800">{patientFound.name}</p>
                                             <p className="text-[10px] font-mono text-slate-500 mt-0.5">{patientFound.cpf}</p>
                                             {patientFound.phone && (
-                                                <p className="text-[10px] text-slate-500 mt-0.5">{formatPhone(patientFound.phone)}</p>
+                                                <p className="text-[10px] text-slate-500 mt-0.5">{maskPhone(patientFound.phone)}</p>
                                             )}
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* Nome Guest */}
                             {mode === "guest" && (
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -293,53 +242,18 @@ export function SidebarQuickSchedule() {
                                 </div>
                             )}
 
-                            {/* Procedimento */}
-                            <div ref={procedureRef}>
+                            <div>
                                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                                     Procedimento
                                 </label>
-                                <div className="relative">
-                                    <button
-                                        type="button"
-                                        onClick={() => setProcedureOpen((o) => !o)}
-                                        className={cn(
-                                            "w-full h-8 px-2.5 flex items-center justify-between text-xs border rounded-lg transition-all cursor-pointer",
-                                            procedure ? "text-slate-800 border-slate-300" : "text-slate-400 border-slate-200"
-                                        )}
-                                    >
-                                        <span className="truncate">{procedure || "Selecione..."}</span>
-                                        <ChevronDown className={cn("h-3 w-3 text-slate-400 shrink-0 transition-transform", procedureOpen && "rotate-180")} />
-                                    </button>
-                                    {procedureOpen && (
-                                        <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden max-h-40 overflow-y-auto">
-                                            {PROCEDURES.map((p) => (
-                                                <button
-                                                    key={p}
-                                                    type="button"
-                                                    onClick={() => { setProcedure(p); setProcedureOpen(false); }}
-                                                    className={cn(
-                                                        "w-full text-left px-3 py-2 text-xs hover:bg-blue-50 hover:text-blue-700 transition-colors cursor-pointer",
-                                                        procedure === p ? "bg-blue-50 text-blue-700 font-bold" : "text-slate-700 font-medium"
-                                                    )}
-                                                >
-                                                    {p}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                                {procedure === "Outro" && (
-                                    <input
-                                        type="text"
-                                        value={customProcedure}
-                                        onChange={(e) => setCustomProcedure(e.target.value)}
-                                        placeholder="Descreva o procedimento"
-                                        className="mt-1.5 w-full h-8 px-2.5 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                )}
+                                <ProcedureSelect
+                                    value={procedure}
+                                    onChange={setProcedure}
+                                    customValue={customProcedure}
+                                    onCustomChange={setCustomProcedure}
+                                />
                             </div>
 
-                            {/* Data e Hora */}
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Data</label>
@@ -363,7 +277,6 @@ export function SidebarQuickSchedule() {
                                 </div>
                             </div>
 
-                            {/* Submit */}
                             <button
                                 type="submit"
                                 disabled={!canSubmit || submitting}

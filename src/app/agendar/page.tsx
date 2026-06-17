@@ -11,7 +11,6 @@ import {
   User,
   Phone,
   MessageSquare,
-  CheckCircle2,
   AlertCircle,
   ChevronRight,
   ChevronLeft,
@@ -20,70 +19,7 @@ import {
   Smile,
   ShieldCheck,
   CalendarCheck,
-  Sparkles
 } from "lucide-react";
-
-const PROCEDURES = [
-  "Consulta de Avaliação",
-  "Limpeza e Profilaxia",
-  "Clareamento Dental",
-  "Implante Dentário",
-  "Prótese Dentária",
-  "Extração",
-  "Restauração",
-  "Outros / Falar com atendente",
-];
-
-const PROCEDURES_INFO = [
-  {
-    name: "Consulta de Avaliação",
-    label: "Consulta de Avaliação / Diagnóstico",
-    description: "Primeira consulta para avaliar sua saúde bucal, tirar dúvidas e planejar tratamentos.",
-    icon: Stethoscope,
-  },
-  {
-    name: "Limpeza e Profilaxia",
-    label: "Limpeza Profissional (Profilaxia)",
-    description: "Remoção de tártaro e placas bacterianas, polimento e prevenção de cáries/gengivite.",
-    icon: Smile,
-  },
-  {
-    name: "Clareamento Dental",
-    label: "Clareamento Dental",
-    description: "Clareamento dos dentes para remover manchas e deixar o sorriso mais branco.",
-    icon: Sparkles,
-  },
-  {
-    name: "Implante Dentário",
-    label: "Implante Dentário",
-    description: "Substituição de dentes perdidos por pinos de titânio e dentes fixos definitivos.",
-    icon: User,
-  },
-  {
-    name: "Prótese Dentária",
-    label: "Prótese Dentária",
-    description: "Restauração de dentes faltantes com próteses parciais ou totais (removíveis ou fixas).",
-    icon: Smile,
-  },
-  {
-    name: "Extração",
-    label: "Extração de Dente",
-    description: "Remoção cirúrgica e segura de dentes comprometidos ou dentes do siso.",
-    icon: AlertCircle,
-  },
-  {
-    name: "Restauração",
-    label: "Restauração (Obturação)",
-    description: "Tratamento de cáries ou fraturas com materiais estéticos da cor do dente.",
-    icon: ShieldCheck,
-  },
-  {
-    name: "Outros / Falar com atendente",
-    label: "Outros Procedimentos",
-    description: "Dúvidas ou outros tratamentos? Escolha esta opção para conversar diretamente conosco.",
-    icon: MessageSquare,
-  },
-];
 
 const generateTimeSlots = () => {
   const slots = [];
@@ -107,15 +43,7 @@ function SchedulingForm() {
   const initialService = searchParams.get("servico") || "";
 
   const getMappedService = (srv: string) => {
-    if (!srv) return "Consulta de Avaliação";
-    if (srv === "Avaliação Gratuita") return "Consulta de Avaliação";
-    if (srv === "Aparelho Ortodôntico") return "Outros / Falar com atendente";
-    if (srv === "Prótese e Implante") return "Prótese Dentária";
-    if (srv === "Estética e Clareamento") return "Clareamento Dental";
-    if (srv === "Extração e Restauração") return "Extração";
-    if (srv === "Clínico Geral") return "Consulta de Avaliação";
-    if (PROCEDURES.includes(srv)) return srv;
-    return "Outros / Falar com atendente";
+    return "Selecionar tipo de consulta";
   };
 
   const getDefaultDate = () => {
