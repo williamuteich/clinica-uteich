@@ -60,15 +60,9 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
 
     const allOptions = useMemo(() => {
         const map = new Map<string, TreatmentOption>();
-        PROCEDURES.forEach((p) => {
-            if (p !== "Outro" && p !== "Outros / Falar com atendente") {
-                map.set(p, { name: p });
-            }
-        });
         dbProcedures.forEach((p) => {
             map.set(p.name, p);
         });
-        map.set("Outros / Falar com atendente", { name: "Outros / Falar com atendente" });
         map.set("Outro", { name: "Outro" });
         return Array.from(map.values());
     }, [dbProcedures]);
@@ -175,11 +169,16 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
                                 )}
                             >
                                 <div className="flex flex-col text-left py-0.5">
-                                    <span className="truncate pr-2">{opt.name}</span>
+                                    <span className="truncate pr-2 text-slate-800 font-bold">{opt.name}</span>
                                     {opt.valuePrivate !== undefined && opt.valuePlan !== undefined && (
-                                        <span className="text-[10px] text-slate-450 font-semibold mt-0.5">
-                                            Particular: R$ {opt.valuePrivate.toFixed(2)} | Plano: R$ {opt.valuePlan.toFixed(2)}
-                                        </span>
+                                        <div className="flex items-center gap-1.5 mt-1">
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-100/50">
+                                                Part: R$ {opt.valuePrivate.toFixed(2)}
+                                            </span>
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-100/50">
+                                                Plano: R$ {opt.valuePlan.toFixed(2)}
+                                            </span>
+                                        </div>
                                     )}
                                 </div>
                                 {isSelected && <Check className="h-3.5 w-3.5 text-blue-650 shrink-0" />}
@@ -201,10 +200,15 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
             )}
 
             {selectedTreatment && selectedTreatment.valuePrivate !== undefined && selectedTreatment.valuePlan !== undefined && (
-                <div className="mt-2 flex flex-wrap items-center gap-3 px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-xl text-xs font-bold text-blue-700 animate-in fade-in duration-200">
-                    <span>Particular: R$ {selectedTreatment.valuePrivate.toFixed(2)}</span>
-                    <span className="text-blue-200">|</span>
-                    <span>Plano: R$ {selectedTreatment.valuePlan.toFixed(2)}</span>
+                <div className="mt-2.5 p-2.5 bg-slate-50 border border-slate-200/60 rounded-xl flex items-center justify-between gap-4 animate-in fade-in duration-200">
+                    <div className="flex-1 flex items-center justify-center gap-2 py-1.5 bg-white border border-slate-100 rounded-lg shadow-3xs">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Particular</span>
+                        <span className="text-xs font-black text-emerald-600">R$ {selectedTreatment.valuePrivate.toFixed(2)}</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center gap-2 py-1.5 bg-white border border-slate-100 rounded-lg shadow-3xs">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Convênio / Plano</span>
+                        <span className="text-xs font-black text-blue-600">R$ {selectedTreatment.valuePlan.toFixed(2)}</span>
+                    </div>
                 </div>
             )}
         </div>

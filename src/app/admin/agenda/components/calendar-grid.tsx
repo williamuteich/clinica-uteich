@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { AgendaStatsCards } from "./agenda-stats-cards";
 import { CalendarNavBar } from "./calendar-nav-bar";
 import { AppointmentDetailsDialog } from "./appointment-details-dialog";
 import { AddAppointmentDialog } from "./add-appointment-dialog";
-import { Appointment, CalendarGridProps } from "@/src/types/dashboard/agendamento";
+import { CalendarGridProps } from "@/src/types/dashboard/agendamento";
 
 const STATUS_THEMES = {
     Confirmado: {
@@ -111,7 +111,7 @@ export default function CalendarGrid({
                         </DialogTrigger>
                         <AddAppointmentDialog
                             selectedDateStr={new Date().toISOString().split("T")[0]}
-                            onDateChange={() => {}}
+                            onDateChange={() => { }}
                             onAdd={onAdd}
                             appointments={appointments}
                         />
@@ -137,39 +137,62 @@ export default function CalendarGrid({
                             ? appointments.filter((apt) => apt.date === cell.dateStr)
                             : [];
 
-                        const cellContent = (
+                        if (!cell.isCurrentMonth) {
+                            return (
+                                <div
+                                    key={`${cell.dateStr}-${idx}`}
+                                    className="min-h-24 sm:min-h-28 p-2 flex flex-col justify-between select-none bg-slate-50/30 text-slate-300 opacity-45 cursor-default border-r border-b border-slate-150"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full text-slate-400">
+                                            {cell.dayNum}
+                                        </span>
+                                    </div>
+                                    <div className="flex-1" />
+                                </div>
+                            );
+                        }
+
+                        return (
                             <div
+                                key={`${cell.dateStr}-${idx}`}
                                 className={cn(
-                                    "min-h-24 sm:min-h-28 p-2 flex flex-col justify-between select-none group transition-all duration-200 cursor-pointer",
-                                    !cell.isCurrentMonth
-                                        ? "bg-slate-50/30 text-slate-300 opacity-45 cursor-default"
-                                        : "hover:bg-slate-50 transition-colors cursor-pointer",
+                                    "relative min-h-24 sm:min-h-28 p-2 flex flex-col justify-between select-none group border-r border-b border-slate-150",
                                     cell.isToday && "bg-blue-50/20"
                                 )}
                             >
-                                <div className="flex items-center justify-between">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <button className="absolute inset-0 w-full h-full cursor-pointer bg-transparent hover:bg-slate-50/50 focus:outline-none z-0" />
+                                    </DialogTrigger>
+                                    <AddAppointmentDialog
+                                        selectedDateStr={cell.dateStr}
+                                        onDateChange={() => { }}
+                                        onAdd={onAdd}
+                                        appointments={appointments}
+                                    />
+                                </Dialog>
+
+                                <div className="relative z-10 flex items-center justify-between pointer-events-none">
                                     <span
                                         className={cn(
                                             "text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full",
                                             cell.isToday
                                                 ? "bg-blue-600 text-white"
-                                                : cell.isCurrentMonth
-                                                    ? "text-slate-700"
-                                                    : "text-slate-400"
+                                                : "text-slate-700"
                                         )}
                                     >
                                         {cell.dayNum}
                                     </span>
                                 </div>
 
-                                <div className="mt-1 space-y-1.5 flex-1 overflow-y-auto overflow-x-hidden max-h-20 scrollbar-none">
+                                <div className="relative z-20 mt-1 space-y-1.5 flex-1 overflow-y-auto overflow-x-hidden max-h-20 scrollbar-none">
                                     {cellApts.map((apt) => {
                                         const theme = STATUS_THEMES[apt.status] || STATUS_THEMES.Pendente;
                                         return (
                                             <Dialog key={apt.id}>
                                                 <DialogTrigger asChild>
                                                     <div
-                                                        onClick={(e) => e.stopPropagation()}
                                                         role="button"
                                                         tabIndex={0}
                                                         className={cn(
@@ -192,42 +215,24 @@ export default function CalendarGrid({
                                                         )}
                                                     </div>
                                                 </DialogTrigger>
-                                                    <AppointmentDetailsDialog
-                                                        appointment={apt}
-                                                        onStatusChange={onStatusChange}
-                                                        onUpdate={onUpdate}
-                                                    />
-                                                </Dialog>
+                                                <AppointmentDetailsDialog
+                                                    appointment={apt}
+                                                    onStatusChange={onStatusChange}
+                                                    onUpdate={onUpdate}
+                                                />
+                                            </Dialog>
                                         );
                                     })}
                                 </div>
 
                                 {cellApts.length > 0 && (
-                                    <div className="mt-1 flex items-center justify-between text-[7.5px] font-bold uppercase tracking-wider text-slate-400">
+                                    <div className="relative z-10 mt-1 flex items-center justify-between text-[7.5px] font-bold uppercase tracking-wider text-slate-400 pointer-events-none">
                                         <span>
                                             {cellApts.length} {cellApts.length === 1 ? "Consulta" : "Consultas"}
                                         </span>
                                     </div>
                                 )}
                             </div>
-                        );
-
-                        if (!cell.isCurrentMonth) {
-                            return <div key={`${cell.dateStr}-${idx}`}>{cellContent}</div>;
-                        }
-
-                        return (
-                            <Dialog key={`${cell.dateStr}-${idx}`}>
-                                <DialogTrigger asChild>
-                                    {cellContent}
-                                </DialogTrigger>
-                                    <AddAppointmentDialog
-                                        selectedDateStr={cell.dateStr}
-                                        onDateChange={() => {}}
-                                        onAdd={onAdd}
-                                        appointments={appointments}
-                                    />
-                                </Dialog>
                         );
                     })}
                 </div>
