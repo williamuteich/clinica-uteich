@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ProcedureSelectProps } from "@/src/types/dashboard/components";
+import { ProcedureSelectProps, TreatmentOption } from "@/src/types/dashboard/components";
 
 export const PROCEDURES = [
     "Consulta de Avaliação",
@@ -23,7 +23,7 @@ export const PROCEDURES = [
 
 export function ProcedureSelect({ value, onChange, customValue = "", onCustomChange }: ProcedureSelectProps) {
     const [open, setOpen] = useState(false);
-    const [dbProcedures, setDbProcedures] = useState<string[]>([]);
+    const [dbProcedures, setDbProcedures] = useState<TreatmentOption[]>([]);
     const [focusedIndex, setFocusedIndex] = useState(-1);
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -37,15 +37,19 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data && Array.isArray(data.treatments)) {
-                    const names = data.treatments
+                    const activeTreatments = data.treatments
                         .filter((t: any) => t.active)
-                        .map((t: any) => t.name);
+                        .map((t: any) => ({
+                            name: t.name,
+                            valuePrivate: t.valuePrivate,
+                            valuePlan: t.valuePlan,
+                        }));
                     if (active) {
-                        setDbProcedures(names);
+                        setDbProcedures(activeTreatments);
                     }
                 }
             } catch (err) {
-                console.error("Erro ao carregar planos de tratamento para o autocomplete:", err);
+                console.error(err);
             }
         }
         fetchDbProcedures();
@@ -55,21 +59,24 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
     }, []);
 
     const allOptions = useMemo(() => {
-        const set = new Set<string>();
+        const map = new Map<string, TreatmentOption>();
         PROCEDURES.forEach((p) => {
             if (p !== "Outro" && p !== "Outros / Falar com atendente") {
-                set.add(p);
+                map.set(p, { name: p });
             }
         });
-        dbProcedures.forEach((p) => set.add(p));
-        set.add("Outros / Falar com atendente");
-        set.add("Outro");
-        return Array.from(set);
+        dbProcedures.forEach((p) => {
+            map.set(p.name, p);
+        });
+        map.set("Outros / Falar com atendente", { name: "Outros / Falar com atendente" });
+        map.set("Outro", { name: "Outro" });
+        return Array.from(map.values());
     }, [dbProcedures]);
+
     const filteredOptions = useMemo(() => {
-        if (!value.trim()) return allOptions;
+        if (!value.trim() || value === "Outro") return allOptions;
         const query = value.toLowerCase();
-        return allOptions.filter((opt) => opt.toLowerCase().includes(query));
+        return allOptions.filter((opt) => opt.name.toLowerCase().includes(query));
     }, [allOptions, value]);
 
     useEffect(() => {
@@ -99,7 +106,7 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
         } else if (e.key === "Enter") {
             e.preventDefault();
             if (focusedIndex >= 0 && focusedIndex < filteredOptions.length) {
-                onChange(filteredOptions[focusedIndex]);
+                onChange(filteredOptions[focusedIndex].name);
                 setOpen(false);
                 inputRef.current?.blur();
             }
@@ -112,6 +119,11 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
     useEffect(() => {
         setFocusedIndex(-1);
     }, [value]);
+
+    const selectedTreatment = useMemo(() => {
+        const lookup = value === "Outro" ? customValue : value;
+        return allOptions.find((opt) => opt.name === lookup);
+    }, [allOptions, value, customValue]);
 
     return (
         <div ref={containerRef} className="relative w-full">
@@ -135,7 +147,7 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
                         setOpen((o) => !o);
                         if (!open) inputRef.current?.focus();
                     }}
-                    className="absolute right-3 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 text-slate-400 hover:text-slate-650 transition-colors"
                 >
                     <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", open && "rotate-180")} />
                 </button>
@@ -144,14 +156,14 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
             {open && filteredOptions.length > 0 && (
                 <div className="absolute z-50 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden max-h-56 overflow-y-auto scrollbar-thin">
                     {filteredOptions.map((opt, index) => {
-                        const isSelected = value === opt;
+                        const isSelected = value === opt.name;
                         const isFocused = index === focusedIndex;
                         return (
                             <button
-                                key={opt}
+                                key={opt.name}
                                 type="button"
                                 onClick={() => {
-                                    onChange(opt);
+                                    onChange(opt.name);
                                     setOpen(false);
                                 }}
                                 onMouseEnter={() => setFocusedIndex(index)}
@@ -162,8 +174,15 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
                                     !isSelected && !isFocused && "text-slate-700 hover:bg-slate-50 hover:text-slate-800"
                                 )}
                             >
-                                <span className="truncate pr-2">{opt}</span>
-                                {isSelected && <Check className="h-3.5 w-3.5 text-blue-600 shrink-0" />}
+                                <div className="flex flex-col text-left py-0.5">
+                                    <span className="truncate pr-2">{opt.name}</span>
+                                    {opt.valuePrivate !== undefined && opt.valuePlan !== undefined && (
+                                        <span className="text-[10px] text-slate-450 font-semibold mt-0.5">
+                                            Particular: R$ {opt.valuePrivate.toFixed(2)} | Plano: R$ {opt.valuePlan.toFixed(2)}
+                                        </span>
+                                    )}
+                                </div>
+                                {isSelected && <Check className="h-3.5 w-3.5 text-blue-650 shrink-0" />}
                             </button>
                         );
                     })}
@@ -179,6 +198,14 @@ export function ProcedureSelect({ value, onChange, customValue = "", onCustomCha
                     className="mt-2 w-full h-10 px-3 text-xs border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 font-bold text-slate-800 bg-white"
                     required
                 />
+            )}
+
+            {selectedTreatment && selectedTreatment.valuePrivate !== undefined && selectedTreatment.valuePlan !== undefined && (
+                <div className="mt-2 flex flex-wrap items-center gap-3 px-3 py-2 bg-blue-50/50 border border-blue-100 rounded-xl text-xs font-bold text-blue-700 animate-in fade-in duration-200">
+                    <span>Particular: R$ {selectedTreatment.valuePrivate.toFixed(2)}</span>
+                    <span className="text-blue-200">|</span>
+                    <span>Plano: R$ {selectedTreatment.valuePlan.toFixed(2)}</span>
+                </div>
             )}
         </div>
     );

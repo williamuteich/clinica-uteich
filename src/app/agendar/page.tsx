@@ -495,27 +495,10 @@ function SchedulingForm() {
                   >
                     <div>
                       <h2 className="text-xl font-bold text-primary-deep">Quando deseja ser atendido(a)?</h2>
-                      <p className="text-xs text-muted-foreground mt-1">Selecione o procedimento e escolha um dia e horário de segunda a sábado.</p>
+                      <p className="text-xs text-muted-foreground mt-1">Escolha um dia e horário de segunda a sábado.</p>
                     </div>
 
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-                          O que você precisa? <span className="text-rose-500">*</span>
-                        </label>
-                        <select
-                          value={serviceType}
-                          onChange={(e) => setServiceType(e.target.value)}
-                          className="w-full h-11 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-semibold text-slate-800 bg-white cursor-pointer"
-                        >
-                          {PROCEDURES_INFO.map((p) => (
-                            <option key={p.name} value={p.name}>
-                              {p.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
                       <div>
                         <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                           Escolha a Data <span className="text-rose-500">*</span>

@@ -107,4 +107,11 @@ export interface ProcedureSelectProps {
     onCustomChange?: (val: string) => void;
 }
 
+export interface TreatmentOption {
+    name: string;
+    valuePrivate?: number;
+    valuePlan?: number;
+}
+
+
 
