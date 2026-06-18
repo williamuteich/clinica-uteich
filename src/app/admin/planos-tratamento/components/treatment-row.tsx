@@ -5,6 +5,7 @@ import { Loader2, Check, AlertCircle, Save, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { Treatment } from "@/src/types/dashboard/plano-tratamento";
 import { updateTreatment } from "@/src/services/plano-tratamento";
+import { maskCurrency, rawCurrency, formatCurrency } from "@/src/lib/masks";
 
 const CATEGORIES = [
     "Odontopediatria",
@@ -31,8 +32,8 @@ interface TreatmentRowProps {
 export function TreatmentRow({ treatment, onDelete, onUpdate }: TreatmentRowProps) {
     const [name, setName] = useState(treatment.name);
     const [category, setCategory] = useState(treatment.category);
-    const [valuePrivate, setValuePrivate] = useState(treatment.valuePrivate.toFixed(2).replace(".", ","));
-    const [valuePlan, setValuePlan] = useState(treatment.valuePlan.toFixed(2).replace(".", ","));
+    const [valuePrivate, setValuePrivate] = useState(formatCurrency(treatment.valuePrivate));
+    const [valuePlan, setValuePlan] = useState(formatCurrency(treatment.valuePlan));
     const [active, setActive] = useState(treatment.active);
 
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -40,8 +41,8 @@ export function TreatmentRow({ treatment, onDelete, onUpdate }: TreatmentRowProp
     const prevValuesRef = useRef({
         name: treatment.name,
         category: treatment.category,
-        valuePrivate: treatment.valuePrivate.toFixed(2).replace(".", ","),
-        valuePlan: treatment.valuePlan.toFixed(2).replace(".", ","),
+        valuePrivate: formatCurrency(treatment.valuePrivate),
+        valuePlan: formatCurrency(treatment.valuePlan),
         active: treatment.active,
     });
 
@@ -63,8 +64,8 @@ export function TreatmentRow({ treatment, onDelete, onUpdate }: TreatmentRowProp
         }
 
         setSaveStatus("saving");
-        const valPrivate = parseFloat(valPrivateStr.replace(/\./g, "").replace(",", ".")) || 0;
-        const valPlan = parseFloat(valPlanStr.replace(/\./g, "").replace(",", ".")) || 0;
+        const valPrivate = rawCurrency(valPrivateStr);
+        const valPlan = rawCurrency(valPlanStr);
 
         try {
             const res = await updateTreatment(treatment.id, {
@@ -98,10 +99,10 @@ export function TreatmentRow({ treatment, onDelete, onUpdate }: TreatmentRowProp
 
     const handlePrivateBlur = () => {
         if (valuePrivate !== prevValuesRef.current.valuePrivate) {
-            const num = parseFloat(valuePrivate.replace(/\./g, "").replace(",", "."));
-            if (!isNaN(num)) {
+            const num = rawCurrency(valuePrivate);
+            if (!isNaN(num) && num > 0) {
                 const planVal = Math.round(num * 0.8 * 100) / 100;
-                setValuePlan(planVal.toFixed(2).replace(".", ","));
+                setValuePlan(formatCurrency(planVal));
             }
         }
         triggerSave();
@@ -152,7 +153,7 @@ export function TreatmentRow({ treatment, onDelete, onUpdate }: TreatmentRowProp
                         <input
                             type="text"
                             value={valuePrivate}
-                            onChange={e => setValuePrivate(e.target.value)}
+                            onChange={e => setValuePrivate(maskCurrency(e.target.value))}
                             onBlur={handlePrivateBlur}
                             className="w-full h-10 px-2.5 text-xs border border-slate-200 focus:border-blue-500 rounded-lg outline-none font-mono text-slate-800 bg-white"
                             placeholder="0,00"
@@ -168,7 +169,7 @@ export function TreatmentRow({ treatment, onDelete, onUpdate }: TreatmentRowProp
                         <input
                             type="text"
                             value={valuePlan}
-                            onChange={e => setValuePlan(e.target.value)}
+                            onChange={e => setValuePlan(maskCurrency(e.target.value))}
                             onBlur={() => triggerSave()}
                             className="w-full h-10 px-2.5 text-xs border border-slate-200 focus:border-blue-500 rounded-lg outline-none font-mono text-slate-800 bg-white"
                             placeholder="0,00"

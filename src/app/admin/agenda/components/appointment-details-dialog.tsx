@@ -10,7 +10,7 @@ import {
     DialogTitle,
     DialogClose,
 } from "@/components/ui/dialog";
-import { phoneToWhatsapp, maskPhone } from "@/src/lib/masks";
+import { phoneToWhatsapp, maskPhone, maskCurrency, formatCurrency, rawCurrency } from "@/src/lib/masks";
 import { Appointment } from "@/src/types/dashboard/agendamento";
 import { ProcedureSelect } from "./procedure-select";
 import { TreatmentOption } from "@/src/types/dashboard/components";
@@ -50,7 +50,11 @@ export function AppointmentDetailsDialog({
 
     const [billingType, setBillingType] = useState<string>(appointment.billingType || "Particular");
     const [selectedTreatment, setSelectedTreatment] = useState<TreatmentOption | null>(null);
-    const [estimatedValue, setEstimatedValue] = useState<number>(appointment.estimatedValue || 0);
+    const [estimatedValue, setEstimatedValue] = useState<string>(
+        appointment.estimatedValue && appointment.estimatedValue > 0
+            ? formatCurrency(appointment.estimatedValue)
+            : ""
+    );
     const [isPriceManual, setIsPriceManual] = useState(false);
 
     const theme = STATUS_THEMES[status] || STATUS_THEMES.Pendente;
@@ -66,7 +70,7 @@ export function AppointmentDetailsDialog({
             const val = billingType === "Particular"
                 ? selectedTreatment.valuePrivate ?? 0
                 : selectedTreatment.valuePlan ?? 0;
-            setEstimatedValue(val);
+            setEstimatedValue(val > 0 ? formatCurrency(val) : "");
         }
     }, [billingType, selectedTreatment, isPriceManual]);
 
@@ -77,6 +81,8 @@ export function AppointmentDetailsDialog({
             return;
         }
 
+        const rawValue = rawCurrency(estimatedValue);
+
         onUpdate(appointment.id, {
             procedure: finalProcedure,
             date,
@@ -85,7 +91,7 @@ export function AppointmentDetailsDialog({
             isGuest: appointment.isGuest,
             patientName: appointment.isGuest ? patientName : appointment.patientName,
             billingType,
-            estimatedValue,
+            estimatedValue: rawValue,
         });
     };
 
@@ -219,18 +225,15 @@ export function AppointmentDetailsDialog({
                                 Valor Estimado (R$)
                             </label>
                             <input
-                                type="number"
-                                step="0.01"
-                                readOnly
-                                disabled
-                                value={estimatedValue === 0 ? "" : estimatedValue}
+                                type="text"
+                                inputMode="numeric"
+                                value={estimatedValue}
                                 onChange={(e) => {
-                                    setEstimatedValue(parseFloat(e.target.value) || 0);
+                                    setEstimatedValue(maskCurrency(e.target.value));
                                     setIsPriceManual(true);
                                 }}
-                                placeholder="0.00"
-                                className="w-full h-10 px-3 text-xs border border-slate-202 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 bg-white"
-                                required
+                                placeholder="0,00"
+                                className="w-full h-10 px-3 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800 bg-white"
                             />
                         </div>
 

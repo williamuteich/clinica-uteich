@@ -10,7 +10,7 @@ import {
     DialogTitle,
     DialogClose,
 } from "@/components/ui/dialog";
-import { maskCPF, rawCPF } from "@/src/lib/masks";
+import { maskCPF, rawCPF, maskCurrency, formatCurrency, rawCurrency } from "@/src/lib/masks";
 import { ProcedureSelect } from "./procedure-select";
 import { AddAppointmentDialogProps, Appointment, PatientFound } from "@/src/types/dashboard/agendamento";
 import { TreatmentOption } from "@/src/types/dashboard/components";
@@ -35,7 +35,7 @@ export function AddAppointmentDialog({
 
     const [billingType, setBillingType] = useState<string>("Particular");
     const [selectedTreatment, setSelectedTreatment] = useState<TreatmentOption | null>(null);
-    const [estimatedValue, setEstimatedValue] = useState<number>(0);
+    const [estimatedValue, setEstimatedValue] = useState<string>("");
     const [isPriceManual, setIsPriceManual] = useState(false);
 
     const bookedTimes = appointments
@@ -67,9 +67,9 @@ export function AddAppointmentDialog({
                 const val = billingType === "Particular"
                     ? selectedTreatment.valuePrivate ?? 0
                     : selectedTreatment.valuePlan ?? 0;
-                setEstimatedValue(val);
+                setEstimatedValue(val > 0 ? formatCurrency(val) : "");
             } else {
-                setEstimatedValue(0);
+                setEstimatedValue("");
             }
         }
     }, [billingType, selectedTreatment, isPriceManual]);
@@ -115,13 +115,15 @@ export function AddAppointmentDialog({
         const name = isGuest ? guestName : patientFound?.name;
         if (!name) return;
 
+        const rawValue = rawCurrency(estimatedValue);
+
         setSubmitting(true);
         onAdd({
             patientName: name,
             date: selectedDateStr,
             time,
             procedure: finalProcedure,
-            estimatedValue,
+            estimatedValue: rawValue,
             status: "Pendente",
             isNew: true,
             isGuest,
@@ -317,14 +319,15 @@ export function AddAppointmentDialog({
                             Valor Estimado (R$)
                         </label>
                         <input
-                            type="number"
-                            step="0.01"
+                            type="text"
+                            inputMode="numeric"
                             value={estimatedValue}
-                            readOnly
-                            disabled
-                            placeholder="0.00"
-                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none font-bold text-slate-500 bg-slate-50 cursor-not-allowed"
-                            required
+                            onChange={(e) => {
+                                setEstimatedValue(maskCurrency(e.target.value));
+                                setIsPriceManual(true);
+                            }}
+                            placeholder="0,00"
+                            className="w-full h-10 px-3 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800 bg-white"
                         />
                     </div>
                 </div>

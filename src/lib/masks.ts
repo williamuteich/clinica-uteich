@@ -54,7 +54,7 @@ export function phoneToWhatsapp(phoneStr: string): string {
     return "55" + clean;
 }
 
-/** Máscara para input de moeda */
+/** Máscara para input de moeda — retorna "R$ 1.234,56" */
 export function maskCurrency(value: string): string {
     const digits = value.replace(/\D/g, "");
 
@@ -62,26 +62,28 @@ export function maskCurrency(value: string): string {
 
     const number = Number(digits) / 100;
 
-    return number.toLocaleString("pt-BR", {
+    return "R$ " + number.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
 }
 
-/** Converte "1.234,56" -> 1234.56 */
+/** Converte "R$ 1.234,56" ou "1.234,56" -> 1234.56 */
 export function rawCurrency(value: string): number {
     if (!value) return 0;
 
     return Number(
         value
+            .replace("R$", "")
+            .replace(/\s/g, "")
             .replace(/\./g, "")
             .replace(",", ".")
     );
 }
 
-/** Formata valor vindo do banco */
+/** Formata valor vindo do banco — retorna "R$ 1.234,56" */
 export function formatCurrency(value: number): string {
-    return value.toLocaleString("pt-BR", {
+    return "R$ " + value.toLocaleString("pt-BR", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });

@@ -18,7 +18,7 @@ import { createTreatment, deleteTreatment } from "@/src/services/plano-tratament
 import { TreatmentRow } from "./treatment-row";
 import { SearchInput } from "@/src/app/components/admin/search-input";
 import { LoadMoreButton } from "@/src/app/components/admin/load-more-button";
-import { maskCurrency } from "@/src/lib/masks";
+import { maskCurrency, rawCurrency } from "@/src/lib/masks";
 
 const CATEGORIES = [
     "Odontopediatria",
@@ -99,8 +99,8 @@ export function PlanosTratamentoManagement({ initialTreatments }: PlanosTratamen
         }
 
         setIsCreating(true);
-        const valPrivate = parseFloat(newValuePrivate.replace(/\./g, "").replace(",", ".")) || 0;
-        const valPlan = parseFloat(newValuePlan.replace(/\./g, "").replace(",", ".")) || 0;
+        const valPrivate = rawCurrency(newValuePrivate);
+        const valPlan = rawCurrency(newValuePlan);
 
         try {
             const res = await createTreatment({
@@ -263,9 +263,9 @@ export function PlanosTratamentoManagement({ initialTreatments }: PlanosTratamen
                                     <input
                                         type="text"
                                         value={newValuePrivate}
-                                        onChange={(e) =>
-                                            setNewValuePrivate(maskCurrency(e.target.value))
-                                        }
+                                        onChange={(e) => setNewValuePrivate(maskCurrency(e.target.value))}
+                                        placeholder="0,00"
+                                        className="w-full h-10 px-3 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 font-mono text-slate-800 bg-white"
                                     />
                                 </div>
 
