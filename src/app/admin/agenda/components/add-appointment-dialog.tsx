@@ -321,6 +321,7 @@ export function AddAppointmentDialog({
                         <input
                             type="text"
                             inputMode="numeric"
+                            readOnly
                             value={estimatedValue}
                             onChange={(e) => {
                                 setEstimatedValue(maskCurrency(e.target.value));
