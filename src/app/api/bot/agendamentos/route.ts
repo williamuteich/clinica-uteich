@@ -45,6 +45,11 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
+    let rawDateStr = body.data_hora;
+    if (typeof rawDateStr === "string" && !rawDateStr.endsWith("Z") && !rawDateStr.includes("+") && !/-\d{2}:\d{2}$/.test(rawDateStr)) {
+      body.data_hora = `${rawDateStr}-03:00`;
+    }
+
     const parsed = createBotAppointmentSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -122,10 +127,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Data inválida" }, { status: 400 });
   }
 
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999);
+  const start = new Date(`${dataStr}T00:00:00-03:00`);
+  const end = new Date(`${dataStr}T23:59:59-03:00`);
 
   const agendados = await prisma.appointment.findMany({
     where: {
@@ -135,7 +138,6 @@ export async function GET(request: Request) {
     select: { scheduledAt: true },
   });
 
-  // Slots padrão da clínica
   const ALL_SLOTS = [
     "08:00", "08:30", "09:00", "09:30", "10:00", "10:30",
     "11:00", "11:30", "13:30", "14:00", "14:30",
@@ -143,9 +145,12 @@ export async function GET(request: Request) {
   ];
 
   const ocupados = agendados.map((a) => {
-    const h = a.scheduledAt.getHours().toString().padStart(2, "0");
-    const m = a.scheduledAt.getMinutes().toString().padStart(2, "0");
-    return `${h}:${m}`;
+    const timeStr = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(a.scheduledAt);
+    return timeStr;
   });
 
   const disponiveis = ALL_SLOTS.filter((s) => !ocupados.includes(s));
