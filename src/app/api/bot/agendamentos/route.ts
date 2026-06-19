@@ -56,6 +56,21 @@ export async function POST(request: Request) {
 
     const { nome_paciente, numero_whatsapp, data_hora, tipo_consulta, observacoes } = parsed.data;
 
+    // Verificar se já existe agendamento ativo no mesmo horário
+    const existing = await prisma.appointment.findFirst({
+      where: {
+        scheduledAt: data_hora,
+        status: { not: "CANCELLED" },
+      },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Horário indisponível. Já existe uma consulta agendada para este horário." },
+        { status: 409 }
+      );
+    }
+
     const created = await prisma.appointment.create({
       data: {
         guestName: nome_paciente,
