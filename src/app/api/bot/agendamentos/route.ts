@@ -1,19 +1,6 @@
-/**
- * /api/bot/agendamentos
- * Rota dedicada para o assistente virtual (n8n + WhatsApp).
- * Autenticada via API Key (header x-bot-api-key), sem necessidade de sessão NextAuth.
- *
- * POST  — cria agendamento (guest, pelo WhatsApp)
- * GET   — lista agendamentos / horários disponíveis
- */
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { z } from "zod";
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function checkBotKey(request: Request): boolean {
   const key = request.headers.get("x-bot-api-key");
@@ -24,10 +11,6 @@ function unauthorized() {
   return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 }
 
-// ---------------------------------------------------------------------------
-// Schemas
-// ---------------------------------------------------------------------------
-
 const createBotAppointmentSchema = z.object({
   nome_paciente: z.string().min(2, "Nome obrigatório"),
   numero_whatsapp: z.string().min(8, "Número obrigatório"),
@@ -35,10 +18,6 @@ const createBotAppointmentSchema = z.object({
   tipo_consulta: z.string().optional().default("Avaliação"),
   observacoes: z.string().optional().default(""),
 });
-
-// ---------------------------------------------------------------------------
-// POST — criar agendamento
-// ---------------------------------------------------------------------------
 
 export async function POST(request: Request) {
   if (!checkBotKey(request)) return unauthorized();
@@ -61,7 +40,6 @@ export async function POST(request: Request) {
 
     const { nome_paciente, numero_whatsapp, data_hora, tipo_consulta, observacoes } = parsed.data;
 
-    // Verificar se já existe agendamento ativo no mesmo horário
     const existing = await prisma.appointment.findFirst({
       where: {
         scheduledAt: data_hora,
@@ -108,15 +86,11 @@ export async function POST(request: Request) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// GET — horários disponíveis em uma data
-// ---------------------------------------------------------------------------
-
 export async function GET(request: Request) {
   if (!checkBotKey(request)) return unauthorized();
 
   const { searchParams } = new URL(request.url);
-  const dataStr = searchParams.get("data"); // ex: 2025-07-10
+  const dataStr = searchParams.get("data");
 
   if (!dataStr) {
     return NextResponse.json({ error: "Parâmetro 'data' obrigatório (YYYY-MM-DD)" }, { status: 400 });

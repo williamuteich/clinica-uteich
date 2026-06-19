@@ -1,9 +1,3 @@
-/**
- * /api/bot/pacientes
- * Rota para o bot verificar se o paciente já é cadastrado e se já consultou.
- * Busca por 'phone' (número do WhatsApp) ou 'cpf'.
- */
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 
@@ -34,10 +28,8 @@ export async function GET(request: Request) {
     let patient = null;
 
     if (phone) {
-      // Limpa caracteres especiais do telefone para fazer a busca flexível
       const cleanPhone = phone.replace(/\D/g, "");
 
-      // Tenta buscar o paciente
       patient = await prisma.patient.findFirst({
         where: {
           OR: [

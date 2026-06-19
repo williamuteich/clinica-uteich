@@ -1,14 +1,3 @@
-/**
- * /api/bot/agendamentos/[id]
- * PATCH — remarcar ou cancelar um agendamento existente
- * GET   — buscar agendamento por ID
- *
- * SEGURANÇA:
- * - Autenticado por x-bot-api-key (só o n8n conhece)
- * - PATCH exige numero_whatsapp no body que deve coincidir com o dono do agendamento
- *   → evita que um paciente cancele/remarque o agendamento de outro
- */
-
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { z } from "zod";
@@ -20,7 +9,6 @@ function checkBotKey(request: Request): boolean {
   return key === process.env.BOT_API_KEY && !!process.env.BOT_API_KEY;
 }
 
-/** Normaliza número: mantém só dígitos */
 function normalizePhone(phone: string): string {
   return phone.replace(/\D/g, "");
 }
@@ -58,13 +46,10 @@ export async function PATCH(request: Request, ctx: Ctx) {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
     }
 
-    // ✅ VERIFICAÇÃO DE PROPRIEDADE
-    // Compara o número de quem está pedindo com o dono do agendamento
     const ownerPhone = normalizePhone(existing.guestPhone ?? "");
     const requesterPhone = normalizePhone(numero_whatsapp);
 
     if (!ownerPhone || ownerPhone !== requesterPhone) {
-      // Retorna 404 propositalmente — não revelamos que o agendamento existe
       return NextResponse.json(
         { error: "Agendamento não encontrado" },
         { status: 404 }
@@ -139,7 +124,6 @@ export async function GET(request: Request, ctx: Ctx) {
     return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
   }
 
-  // Se número foi passado, verifica propriedade
   if (numero) {
     const ownerPhone = normalizePhone(apt.guestPhone ?? "");
     const requesterPhone = normalizePhone(numero);
