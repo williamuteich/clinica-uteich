@@ -32,7 +32,7 @@ const createBotAppointmentSchema = z.object({
   nome_paciente: z.string().min(2, "Nome obrigatório"),
   numero_whatsapp: z.string().min(8, "Número obrigatório"),
   data_hora: z.coerce.date({ message: "data_hora inválida — use ISO 8601 (ex: 2025-07-10T14:00:00)" }),
-  tipo_consulta: z.string().min(2, "Tipo de consulta obrigatório"),
+  tipo_consulta: z.string().optional().default("Avaliação"),
   observacoes: z.string().optional().default(""),
 });
 
@@ -68,6 +68,7 @@ export async function POST(request: Request) {
         billingType: "Particular",
       },
     });
+
 
     return NextResponse.json(
       {
