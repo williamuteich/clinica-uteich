@@ -28,10 +28,27 @@ export async function PATCH(request: Request, ctx: Ctx) {
   const { id } = await ctx.params;
 
   try {
-    const body = await request.json();
-    const parsed = patchSchema.safeParse(body);
+    let body: any;
+    try {
+      body = await request.json();
+      console.log("[PATCH-ID] Body recebido:", JSON.stringify(body));
+    } catch (jsonErr) {
+      console.error("[PATCH-ID] Falha ao ler JSON:", jsonErr);
+      return NextResponse.json({ error: "Corpo da requisição inválido ou vazio" }, { status: 400 });
+    }
+    
+    if (body.nova_data_hora === "" || body.nova_data_hora === "{nova_data_hora}" || !body.nova_data_hora) {
+      delete body.nova_data_hora;
+    }
+    if (body.motivo === "" || body.motivo === "{motivo}" || !body.motivo) {
+      delete body.motivo;
+    }
 
+    console.log("[PATCH-ID] Body pós-limpeza:", JSON.stringify(body));
+
+    const parsed = patchSchema.safeParse(body);
     if (!parsed.success) {
+      console.warn("[PATCH-ID] Falha validação Zod:", parsed.error.format());
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
         { status: 400 }
@@ -39,8 +56,10 @@ export async function PATCH(request: Request, ctx: Ctx) {
     }
 
     const { acao, numero_whatsapp, nova_data_hora, motivo } = parsed.data;
+    console.log("[PATCH-ID] Dados validados:", { acao, numero_whatsapp, nova_data_hora, motivo });
 
     const existing = await prisma.appointment.findUnique({ where: { id } });
+    console.log("[PATCH-ID] Agendamento existente no banco:", existing);
 
     if (!existing) {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });

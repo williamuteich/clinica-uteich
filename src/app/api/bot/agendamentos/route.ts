@@ -29,9 +29,12 @@ export async function POST(request: Request) {
       body.data_hora = `${rawDateStr}-03:00`;
     }
 
+    console.log("[POST-AGENDA] Body recebido:", JSON.stringify(body));
+
     const parsed = createBotAppointmentSchema.safeParse(body);
 
     if (!parsed.success) {
+      console.warn("[POST-AGENDA] Falha validação Zod:", parsed.error.format());
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
         { status: 400 }
@@ -39,6 +42,7 @@ export async function POST(request: Request) {
     }
 
     const { nome_paciente, numero_whatsapp, data_hora, tipo_consulta, observacoes } = parsed.data;
+    console.log("[POST-AGENDA] Dados validados:", { nome_paciente, numero_whatsapp, data_hora, tipo_consulta, observacoes });
 
     const existing = await prisma.appointment.findFirst({
       where: {
@@ -46,6 +50,8 @@ export async function POST(request: Request) {
         status: { not: "CANCELLED" },
       },
     });
+
+    console.log("[POST-AGENDA] Conflito de horário encontrado:", existing);
 
     if (existing) {
       return NextResponse.json(
@@ -92,14 +98,12 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dataStr = searchParams.get("data");
 
-  console.log("[DEBUG] URL completa:", request.url);
-  console.log("[DEBUG] dataStr:", JSON.stringify(dataStr));
-
   if (!dataStr) {
     return NextResponse.json({ error: "Parâmetro 'data' obrigatório (YYYY-MM-DD)" }, { status: 400 });
   }
 
-  const cleanDataStr = dataStr.substring(0, 10);
+  const sanitized = dataStr.replace(/['"]/g, "").trim();
+  const cleanDataStr = sanitized.substring(0, 10);
 
   const date = new Date(cleanDataStr);
   if (isNaN(date.getTime())) {
