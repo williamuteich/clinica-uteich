@@ -33,7 +33,7 @@ export async function GET(request: Request) {
       if (cleanPhone.startsWith("55") && cleanPhone.length >= 10) {
         cleanPhone = cleanPhone.substring(2);
       }
-      
+      console.log(`[BOT-LOG] Iniciando busca para telefone: ${phone} (cleanPhone: ${cleanPhone})`);
       const { decrypt } = await import("@/src/lib/encrypted-fields");
       const searchNumber = cleanPhone;
 
@@ -45,6 +45,8 @@ export async function GET(request: Request) {
           }
         }
       });
+      
+      console.log(`[BOT-LOG] Total de pacientes carregados do BD: ${allPatients.length}`);
 
       for (const p of allPatients) {
         try {
@@ -55,14 +57,20 @@ export async function GET(request: Request) {
           const cleanDb = dbNumber.startsWith("55") ? dbNumber.substring(2) : dbNumber;
           const cleanSearch = searchNumber.startsWith("55") ? searchNumber.substring(2) : searchNumber;
 
+          console.log(`[BOT-LOG] Comparando Paciente ID ${p.id}: Banco (original: ${decryptedPhone}, cleanDb: ${cleanDb}) vs Busca (cleanSearch: ${cleanSearch})`);
+
           // Se bater o telefone com ou sem o nono dígito (ou DDD)
           if (cleanDb === cleanSearch || cleanDb.endsWith(cleanSearch) || cleanSearch.endsWith(cleanDb)) {
+            console.log(`[BOT-LOG] Encontrou correspondência! Paciente ID: ${p.id}`);
             patient = p;
             break;
           }
-        } catch (e) {
-          console.error(`[BOT] Erro ao descriptografar telefone do paciente ${p.id}:`, e);
+        } catch (e: any) {
+          console.error(`[BOT] Erro ao descriptografar telefone do paciente ${p.id}:`, e.message);
         }
+      }
+      if (!patient) {
+        console.log(`[BOT-LOG] Nenhum paciente atendeu aos critérios de busca.`);
       }
     }
 
