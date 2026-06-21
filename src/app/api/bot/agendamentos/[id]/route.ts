@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
+import { encrypt } from "@/src/lib/encrypted-fields";
 import {
   checkBotKey,
   unauthorized,
-  comparePhones,
   cleanInputVal,
   parseLocalTimezone,
+  verifyAppointmentOwnership,
+  formatAppointmentForBot,
 } from "@/src/lib/bot";
 import { botPatchAppointmentSchema } from "@/src/schemas/bot";
 
 type Ctx = { params: Promise<{ id: string }> };
-
-// ─── PATCH — Cancelar ou remarcar por ID ──────────────────────────────────
 
 export async function PATCH(request: Request, ctx: Ctx) {
   if (!checkBotKey(request)) return unauthorized();
@@ -48,16 +48,19 @@ export async function PATCH(request: Request, ctx: Ctx) {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
     }
 
-    if (!comparePhones(existing.guestPhone ?? "", numero_whatsapp)) {
+    const isOwner = await verifyAppointmentOwnership(existing, numero_whatsapp);
+    if (!isOwner) {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
     }
 
     if (acao === "cancelar") {
+      const encDesc = motivo ? await encrypt(`Cancelado via WhatsApp: ${motivo}`) : await encrypt("Cancelado via WhatsApp");
+
       const updated = await prisma.appointment.update({
         where: { id },
         data: {
           status: "CANCELLED",
-          description: motivo ? `Cancelado via WhatsApp: ${motivo}` : "Cancelado via WhatsApp",
+          description: encDesc,
         },
       });
       return NextResponse.json({
@@ -74,12 +77,15 @@ export async function PATCH(request: Request, ctx: Ctx) {
           { status: 400 }
         );
       }
+
+      const encDesc = motivo ? await encrypt(`Remarcado via WhatsApp: ${motivo}`) : await encrypt("Remarcado via WhatsApp");
+
       const updated = await prisma.appointment.update({
         where: { id },
         data: {
           scheduledAt: nova_data_hora,
           status: "PENDING",
-          description: motivo ? `Remarcado via WhatsApp: ${motivo}` : "Remarcado via WhatsApp",
+          description: encDesc,
         },
       });
       return NextResponse.json({
@@ -93,6 +99,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
     if (typeof error === "object" && error !== null && "code" in error && error.code === "P2025") {
       return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
     }
+    console.error("[PATCH-AGENDAMENTO-ID] Erro:", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
@@ -111,20 +118,29 @@ export async function GET(request: Request, ctx: Ctx) {
     );
   }
 
-  const apt = await prisma.appointment.findUnique({ where: { id } });
+  const apt = await prisma.appointment.findUnique({
+    where: { id },
+    include: {
+      patient: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+        }
+      }
+    }
+  });
+
   if (!apt) {
     return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
   }
 
-  if (!comparePhones(apt.guestPhone ?? "", numero)) {
+  const isOwner = await verifyAppointmentOwnership(apt, numero);
+  if (!isOwner) {
     return NextResponse.json({ error: "Agendamento não encontrado" }, { status: 404 });
   }
 
-  return NextResponse.json({
-    id: apt.id,
-    data_hora: apt.scheduledAt.toISOString(),
-    tipo_consulta: apt.serviceType,
-    status: apt.status,
-    nome_paciente: apt.guestName,
-  });
+  const formatted = await formatAppointmentForBot(apt);
+
+  return NextResponse.json(formatted);
 }

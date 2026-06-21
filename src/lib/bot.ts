@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { prisma } from "./prisma";
+import { decrypt, isEncrypted } from "./encrypted-fields";
 
 export function checkBotKey(request: Request): boolean {
   if (!process.env.BOT_API_KEY) return false;
@@ -54,4 +56,123 @@ export function cleanInputVal(value: unknown): unknown {
     return trimmed;
   }
   return value;
+}
+
+export async function findActiveAppointmentsForPhone(phone: string) {
+  const startOfToday = startOfTodayLocal();
+
+  const allPatients = await prisma.patient.findMany({
+    select: { id: true, phone: true }
+  });
+
+  const matchingPatientIds: string[] = [];
+  for (const p of allPatients) {
+    try {
+      const decryptedPhone = isEncrypted(p.phone) ? await decrypt(p.phone) : p.phone;
+      if (comparePhones(decryptedPhone, phone)) {
+        matchingPatientIds.push(p.id);
+      }
+    } catch (error) {
+      console.error(`[findActiveAppointmentsForPhone] Erro ao descriptografar telefone do paciente ${p.id}:`, error);
+    }
+  }
+
+  const appointments = await prisma.appointment.findMany({
+    where: {
+      scheduledAt: { gte: startOfToday },
+      status: { not: "CANCELLED" }
+    },
+    include: {
+      patient: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+        }
+      }
+    },
+    orderBy: { scheduledAt: "asc" }
+  });
+
+  const matched = [];
+  for (const apt of appointments) {
+    let isMatch = false;
+
+    if (apt.patientId && matchingPatientIds.includes(apt.patientId)) {
+      isMatch = true;
+    } else if (apt.guestPhone) {
+      try {
+        const decryptedGuestPhone = isEncrypted(apt.guestPhone)
+          ? await decrypt(apt.guestPhone)
+          : apt.guestPhone;
+        if (comparePhones(decryptedGuestPhone, phone)) {
+          isMatch = true;
+        }
+      } catch (error) {
+        console.error(`[findActiveAppointmentsForPhone] Erro ao descriptografar guestPhone do agendamento ${apt.id}:`, error);
+      }
+    }
+
+    if (isMatch) {
+      matched.push(apt);
+    }
+  }
+
+  return matched;
+}
+
+export async function formatAppointmentForBot(apt: any) {
+  let tipoConsulta = "Consulta";
+  if (apt.serviceType) {
+    try {
+      tipoConsulta = isEncrypted(apt.serviceType) ? await decrypt(apt.serviceType) : apt.serviceType;
+    } catch (error) {
+      console.error(`[formatAppointmentForBot] Erro ao descriptografar serviceType do agendamento ${apt.id}:`, error);
+    }
+  }
+
+  let nomePaciente = apt.patient?.name || "";
+  if (!nomePaciente && apt.guestName) {
+    try {
+      nomePaciente = isEncrypted(apt.guestName) ? await decrypt(apt.guestName) : apt.guestName;
+    } catch (error) {
+      console.error(`[formatAppointmentForBot] Erro ao descriptografar guestName do agendamento ${apt.id}:`, error);
+    }
+  }
+
+  return {
+    id: apt.id,
+    data_hora: apt.scheduledAt.toISOString(),
+    tipo_consulta: tipoConsulta,
+    status: apt.status,
+    nome_paciente: nomePaciente || "Paciente",
+  };
+}
+
+export async function verifyAppointmentOwnership(apt: any, phone: string): Promise<boolean> {
+  if (apt.guestPhone) {
+    try {
+      const decrypted = isEncrypted(apt.guestPhone) ? await decrypt(apt.guestPhone) : apt.guestPhone;
+      if (comparePhones(decrypted, phone)) return true;
+    } catch (error) {
+      console.error(`[verifyAppointmentOwnership] Erro ao descriptografar guestPhone do agendamento ${apt.id}:`, error);
+    }
+  }
+
+  if (apt.patientId) {
+    const patient = await prisma.patient.findUnique({
+      where: { id: apt.patientId },
+      select: { phone: true }
+    });
+    if (patient) {
+      try {
+        const decrypted = isEncrypted(patient.phone) ? await decrypt(patient.phone) : patient.phone;
+        if (comparePhones(decrypted, phone)) return true;
+      } catch (error) {
+        console.error(`[verifyAppointmentOwnership] Erro ao descriptografar phone do paciente ${patient.id}:`, error);
+      }
+    }
+  }
+
+  return false;
 }

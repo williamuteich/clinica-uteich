@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
+import { encrypt } from "@/src/lib/encrypted-fields";
 import {
   checkBotKey,
   unauthorized,
-  comparePhones,
   cleanInputVal,
   parseLocalTimezone,
+  findActiveAppointmentsForPhone,
+  formatAppointmentForBot,
 } from "@/src/lib/bot";
 import {
   botCreateAppointmentSchema,
@@ -40,15 +42,20 @@ export async function POST(request: Request) {
       );
     }
 
+    const encName = await encrypt(nome_paciente);
+    const encPhone = await encrypt(numero_whatsapp);
+    const encService = await encrypt(tipo_consulta);
+    const encDesc = observacoes ? await encrypt(observacoes) : null;
+
     const created = await prisma.appointment.create({
       data: {
-        guestName: nome_paciente,
-        guestPhone: numero_whatsapp,
+        guestName: encName,
+        guestPhone: encPhone,
         scheduledAt: data_hora,
-        serviceType: tipo_consulta,
+        serviceType: encService,
         estimatedValue: 0,
         status: "PENDING",
-        description: observacoes || null,
+        description: encDesc,
         billingType: "Particular",
       },
     });
@@ -65,12 +72,11 @@ export async function POST(request: Request) {
       },
       { status: 201 }
     );
-  } catch {
+  } catch (error) {
+    console.error("[POST-AGENDAMENTO] Erro:", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }
-
-// ─── GET — Horários disponíveis por data ──────────────────────────────────
 
 const ALL_SLOTS = [
   "08:00", "08:15", "08:30", "08:45",
@@ -129,8 +135,6 @@ export async function GET(request: Request) {
   });
 }
 
-// ─── PATCH — Cancelar ou remarcar ─────────────────────────────────────────
-
 export async function PATCH(request: Request) {
   if (!checkBotKey(request)) return unauthorized();
 
@@ -159,14 +163,13 @@ export async function PATCH(request: Request) {
 
     const { acao, numero_whatsapp, nova_data_hora, motivo } = parsed.data;
 
-    const appointments = await prisma.appointment.findMany({
-      where: { status: { in: ["PENDING", "CONFIRMED"] } },
-      orderBy: { scheduledAt: "desc" },
-    });
+    const appointments = await findActiveAppointmentsForPhone(numero_whatsapp);
 
-    const existing = appointments.find((apt) =>
-      comparePhones(apt.guestPhone ?? "", numero_whatsapp)
+    const sorted = [...appointments].sort(
+      (a, b) => b.scheduledAt.getTime() - a.scheduledAt.getTime()
     );
+
+    const existing = sorted[0];
 
     if (!existing) {
       return NextResponse.json(
@@ -178,13 +181,16 @@ export async function PATCH(request: Request) {
     const { id } = existing;
 
     if (acao === "cancelar") {
+      const encDesc = motivo ? await encrypt(`Cancelado via WhatsApp: ${motivo}`) : await encrypt("Cancelado via WhatsApp");
+
       const updated = await prisma.appointment.update({
         where: { id },
         data: {
           status: "CANCELLED",
-          description: motivo ? `Cancelado via WhatsApp: ${motivo}` : "Cancelado via WhatsApp",
+          description: encDesc,
         },
       });
+
       return NextResponse.json({
         id,
         status: updated.status,
@@ -199,14 +205,18 @@ export async function PATCH(request: Request) {
           { status: 400 }
         );
       }
+
+      const encDesc = motivo ? await encrypt(`Remarcado via WhatsApp: ${motivo}`) : await encrypt("Remarcado via WhatsApp");
+
       const updated = await prisma.appointment.update({
         where: { id },
         data: {
           scheduledAt: nova_data_hora,
           status: "PENDING",
-          description: motivo ? `Remarcado via WhatsApp: ${motivo}` : "Remarcado via WhatsApp",
+          description: encDesc,
         },
       });
+
       return NextResponse.json({
         id,
         data_hora: updated.scheduledAt.toISOString(),
@@ -214,7 +224,8 @@ export async function PATCH(request: Request) {
         message: "Agendamento remarcado com sucesso",
       });
     }
-  } catch {
+  } catch (error) {
+    console.error("[PATCH-AGENDAMENTO] Erro:", error);
     return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

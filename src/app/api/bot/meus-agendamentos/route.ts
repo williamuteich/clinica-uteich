@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/src/lib/prisma";
-import { checkBotKey, unauthorized, getComparablePhone, startOfTodayLocal } from "@/src/lib/bot";
+import {
+  checkBotKey,
+  unauthorized,
+  findActiveAppointmentsForPhone,
+  formatAppointmentForBot,
+} from "@/src/lib/bot";
 import { botMyAppointmentsQuerySchema } from "@/src/schemas/bot";
 
 export async function GET(request: Request) {
@@ -21,32 +25,21 @@ export async function GET(request: Request) {
 
   const { numero_whatsapp } = parsed.data;
 
-  const comparablePhone = getComparablePhone(numero_whatsapp);
+  try {
+    const matched = await findActiveAppointmentsForPhone(numero_whatsapp);
 
-  const agendamentos = await prisma.appointment.findMany({
-    where: {
-      scheduledAt: { gte: startOfTodayLocal() },
-      status: { not: "CANCELLED" },
-      guestPhone: { contains: comparablePhone },
-    },
-    orderBy: { scheduledAt: "asc" },
-    take: 20,
-    select: {
-      id: true,
-      scheduledAt: true,
-      serviceType: true,
-      status: true,
-      guestName: true,
-    },
-  });
+    const formatted = await Promise.all(
+      matched.map((apt) => formatAppointmentForBot(apt))
+    );
 
-  return NextResponse.json({
-    agendamentos: agendamentos.map((apt) => ({
-      id: apt.id,
-      data_hora: apt.scheduledAt.toISOString(),
-      tipo_consulta: apt.serviceType,
-      status: apt.status,
-      nome_paciente: apt.guestName,
-    })),
-  });
+    return NextResponse.json({
+      agendamentos: formatted,
+    });
+  } catch (error) {
+    console.error("[GET-MEUS-AGENDAMENTOS] Erro:", error);
+    return NextResponse.json(
+      { error: "Erro interno do servidor ao buscar agendamentos" },
+      { status: 500 }
+    );
+  }
 }
