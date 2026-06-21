@@ -33,14 +33,11 @@ export async function GET(request: Request) {
       if (cleanPhone.startsWith("55") && cleanPhone.length >= 10) {
         cleanPhone = cleanPhone.substring(2);
       }
+      
+      const { decrypt } = await import("@/src/lib/encrypted-fields");
+      const searchNumber = cleanPhone;
 
-      patient = await prisma.patient.findFirst({
-        where: {
-          OR: [
-            { phone: { contains: cleanPhone } },
-            { phone: { contains: phone } }
-          ]
-        },
+      const allPatients = await prisma.patient.findMany({
         include: {
           appointments: {
             where: { status: "COMPLETED" },
@@ -48,6 +45,25 @@ export async function GET(request: Request) {
           }
         }
       });
+
+      for (const p of allPatients) {
+        try {
+          const decryptedPhone = await decrypt(p.phone);
+          const dbNumber = decryptedPhone.replace(/\D/g, "");
+          
+          // Remove 55 do início de ambos para comparar
+          const cleanDb = dbNumber.startsWith("55") ? dbNumber.substring(2) : dbNumber;
+          const cleanSearch = searchNumber.startsWith("55") ? searchNumber.substring(2) : searchNumber;
+
+          // Se bater o telefone com ou sem o nono dígito (ou DDD)
+          if (cleanDb === cleanSearch || cleanDb.endsWith(cleanSearch) || cleanSearch.endsWith(cleanDb)) {
+            patient = p;
+            break;
+          }
+        } catch (e) {
+          console.error(`[BOT] Erro ao descriptografar telefone do paciente ${p.id}:`, e);
+        }
+      }
     }
 
     if (!patient && cpf) {
