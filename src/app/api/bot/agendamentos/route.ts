@@ -11,6 +11,39 @@ function unauthorized() {
   return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 }
 
+function getComparablePhone(phone: string): string {
+  const clean = phone.replace(/\D/g, "");
+  const noCountry = clean.startsWith("55") ? clean.slice(2) : clean;
+  if (noCountry.length === 11 && noCountry[2] === "9") {
+    return noCountry.slice(0, 2) + noCountry.slice(3);
+  }
+  return noCountry;
+}
+
+function comparePhones(phone1: string, phone2: string): boolean {
+  const p1 = getComparablePhone(phone1);
+  const p2 = getComparablePhone(phone2);
+  return !!p1 && p1 === p2;
+}
+
+function cleanInputVal(value: any): any {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed === "" || (trimmed.startsWith("{") && trimmed.endsWith("}"))) {
+      return undefined;
+    }
+    return trimmed;
+  }
+  return value;
+}
+
+function parseLocalTimezone(dateStr: string): string {
+  if (typeof dateStr === "string" && !dateStr.endsWith("Z") && !dateStr.includes("+") && !/-\d{2}:\d{2}$/.test(dateStr)) {
+    return `${dateStr}-03:00`;
+  }
+  return dateStr;
+}
+
 const createBotAppointmentSchema = z.object({
   nome_paciente: z.string().min(2, "Nome obrigatório"),
   numero_whatsapp: z.string().min(8, "Número obrigatório"),
@@ -24,17 +57,11 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    let rawDateStr = body.data_hora;
-    if (typeof rawDateStr === "string" && !rawDateStr.endsWith("Z") && !rawDateStr.includes("+") && !/-\d{2}:\d{2}$/.test(rawDateStr)) {
-      body.data_hora = `${rawDateStr}-03:00`;
-    }
-
-    console.log("[POST-AGENDA] Body recebido:", JSON.stringify(body));
+    body.data_hora = parseLocalTimezone(body.data_hora);
 
     const parsed = createBotAppointmentSchema.safeParse(body);
 
     if (!parsed.success) {
-      console.warn("[POST-AGENDA] Falha validação Zod:", parsed.error.format());
       return NextResponse.json(
         { error: parsed.error.issues[0].message },
         { status: 400 }
@@ -42,7 +69,6 @@ export async function POST(request: Request) {
     }
 
     const { nome_paciente, numero_whatsapp, data_hora, tipo_consulta, observacoes } = parsed.data;
-    console.log("[POST-AGENDA] Dados validados:", { nome_paciente, numero_whatsapp, data_hora, tipo_consulta, observacoes });
 
     const existing = await prisma.appointment.findFirst({
       where: {
@@ -50,8 +76,6 @@ export async function POST(request: Request) {
         status: { not: "CANCELLED" },
       },
     });
-
-    console.log("[POST-AGENDA] Conflito de horário encontrado:", existing);
 
     if (existing) {
       return NextResponse.json(
@@ -154,10 +178,6 @@ export async function GET(request: Request) {
   });
 }
 
-function normalizePhone(phone: string): string {
-  return phone.replace(/\D/g, "");
-}
-
 const patchSchema = z.object({
   acao: z.enum(["cancelar", "remarcar"]),
   numero_whatsapp: z.string().min(8, "numero_whatsapp do solicitante é obrigatório"),
@@ -172,17 +192,16 @@ export async function PATCH(request: Request) {
     let body: any;
     try {
       body = await request.json();
-      console.log("[PATCH-AGENDA] Body recebido:", JSON.stringify(body));
     } catch (jsonErr) {
       console.error("[PATCH-AGENDA] Falha ao ler JSON:", jsonErr);
       return NextResponse.json({ error: "Corpo da requisição inválido ou vazio" }, { status: 400 });
     }
 
-    if (body.nova_data_hora === "" || body.nova_data_hora === "{nova_data_hora}" || !body.nova_data_hora) {
-      delete body.nova_data_hora;
-    }
-    if (body.motivo === "" || body.motivo === "{motivo}" || !body.motivo) {
-      delete body.motivo;
+    body.nova_data_hora = cleanInputVal(body.nova_data_hora);
+    body.motivo = cleanInputVal(body.motivo);
+
+    if (body.nova_data_hora) {
+      body.nova_data_hora = parseLocalTimezone(body.nova_data_hora);
     }
 
     const parsed = patchSchema.safeParse(body);
@@ -196,8 +215,6 @@ export async function PATCH(request: Request) {
 
     const { acao, numero_whatsapp, nova_data_hora, motivo } = parsed.data;
 
-    const cleanPhone = normalizePhone(numero_whatsapp);
-
     const appointments = await prisma.appointment.findMany({
       where: {
         status: { in: ["PENDING", "CONFIRMED"] }
@@ -207,20 +224,9 @@ export async function PATCH(request: Request) {
       }
     });
 
-    const existing = appointments.find(apt => {
-      const dbPhone = normalizePhone(apt.guestPhone ?? "");
-      if (!dbPhone) return false;
-
-      const dbClean = dbPhone.startsWith("55") ? dbPhone.slice(2) : dbPhone;
-      const searchClean = cleanPhone.startsWith("55") ? cleanPhone.slice(2) : cleanPhone;
-
-      const dbCleanNo9 = dbClean.length === 11 && dbClean[2] === "9" ? dbClean.slice(0, 2) + dbClean.slice(3) : dbClean;
-      const searchCleanNo9 = searchClean.length === 11 && searchClean[2] === "9" ? searchClean.slice(0, 2) + searchClean.slice(3) : searchClean;
-
-      return dbCleanNo9 === searchCleanNo9;
-    });
-
-    console.log("[PATCH-AGENDA] Agendamento ativo encontrado:", existing);
+    const existing = appointments.find(apt =>
+      comparePhones(apt.guestPhone ?? "", numero_whatsapp)
+    );
 
     if (!existing) {
       return NextResponse.json({ error: "Nenhum agendamento ativo encontrado para este número." }, { status: 404 });
@@ -238,8 +244,6 @@ export async function PATCH(request: Request) {
             : "Cancelado via WhatsApp",
         },
       });
-
-      console.log("[PATCH-AGENDA] Agendamento cancelado com sucesso:", updated.id);
 
       return NextResponse.json({
         id,
@@ -266,8 +270,6 @@ export async function PATCH(request: Request) {
             : "Remarcado via WhatsApp",
         },
       });
-
-      console.log("[PATCH-AGENDA] Agendamento remarcado com sucesso:", updated.id);
 
       return NextResponse.json({
         id,
