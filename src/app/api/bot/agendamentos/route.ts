@@ -92,6 +92,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const dataStr = searchParams.get("data");
 
+  console.log("[DEBUG] URL completa:", request.url);
+  console.log("[DEBUG] dataStr:", JSON.stringify(dataStr));
+
   if (!dataStr) {
     return NextResponse.json({ error: "Parâmetro 'data' obrigatório (YYYY-MM-DD)" }, { status: 400 });
   }
