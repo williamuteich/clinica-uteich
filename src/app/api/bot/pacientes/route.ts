@@ -45,21 +45,19 @@ export async function GET(request: Request) {
           }
         }
       });
-      
+
       console.log(`[BOT-LOG] Total de pacientes carregados do BD: ${allPatients.length}`);
 
       for (const p of allPatients) {
         try {
           const decryptedPhone = await decrypt(p.phone);
           const dbNumber = decryptedPhone.replace(/\D/g, "");
-          
-          // Remove 55 do início de ambos para comparar
+
           const cleanDb = dbNumber.startsWith("55") ? dbNumber.substring(2) : dbNumber;
           const cleanSearch = searchNumber.startsWith("55") ? searchNumber.substring(2) : searchNumber;
 
           console.log(`[BOT-LOG] Comparando Paciente ID ${p.id}: Banco (original: ${decryptedPhone}, cleanDb: ${cleanDb}) vs Busca (cleanSearch: ${cleanSearch})`);
 
-          // Se bater o telefone com ou sem o nono dígito (ou DDD)
           if (cleanDb === cleanSearch || cleanDb.endsWith(cleanSearch) || cleanSearch.endsWith(cleanDb)) {
             console.log(`[BOT-LOG] Encontrou correspondência! Paciente ID: ${p.id}`);
             patient = p;
