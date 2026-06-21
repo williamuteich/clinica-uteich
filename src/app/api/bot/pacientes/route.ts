@@ -28,13 +28,17 @@ export async function GET(request: Request) {
     let patient = null;
 
     if (phone) {
-      const cleanPhone = phone.replace(/\D/g, "");
+      let cleanPhone = phone.replace(/\D/g, "");
+
+      if (cleanPhone.startsWith("55") && cleanPhone.length >= 10) {
+        cleanPhone = cleanPhone.substring(2);
+      }
 
       patient = await prisma.patient.findFirst({
         where: {
           OR: [
-            { phone: phone },
-            { phone: { contains: cleanPhone } }
+            { phone: { contains: cleanPhone } },
+            { phone: { contains: phone } }
           ]
         },
         include: {
