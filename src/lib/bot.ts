@@ -169,7 +169,7 @@ export async function verifyAppointmentOwnership(apt: any, phone: string): Promi
         const decrypted = isEncrypted(patient.phone) ? await decrypt(patient.phone) : patient.phone;
         if (comparePhones(decrypted, phone)) return true;
       } catch (error) {
-        console.error(`[verifyAppointmentOwnership] Erro ao descriptografar phone do paciente ${patient.id}:`, error);
+        console.error(`[verifyAppointmentOwnership] Erro ao descriptografar phone do paciente ${patient}:`, error);
       }
     }
   }
