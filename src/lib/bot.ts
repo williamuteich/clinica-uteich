@@ -162,14 +162,14 @@ export async function verifyAppointmentOwnership(apt: any, phone: string): Promi
   if (apt.patientId) {
     const patient = await prisma.patient.findUnique({
       where: { id: apt.patientId },
-      select: { phone: true }
+      select: { id: true, phone: true }
     });
     if (patient) {
       try {
         const decrypted = isEncrypted(patient.phone) ? await decrypt(patient.phone) : patient.phone;
         if (comparePhones(decrypted, phone)) return true;
       } catch (error) {
-        console.error(`[verifyAppointmentOwnership] Erro ao descriptografar phone do paciente ${patient}:`, error);
+        console.error(`[verifyAppointmentOwnership] Erro ao descriptografar phone do paciente ${patient.id}:`, error);
       }
     }
   }
