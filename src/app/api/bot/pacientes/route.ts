@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
-
-function checkBotKey(request: Request): boolean {
-  const key = request.headers.get("x-bot-api-key");
-  return key === process.env.BOT_API_KEY && !!process.env.BOT_API_KEY;
-}
-
-function unauthorized() {
-  return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-}
+import { checkBotKey, unauthorized } from "@/src/lib/bot";
 
 export async function GET(request: Request) {
   if (!checkBotKey(request)) return unauthorized();
@@ -74,12 +66,7 @@ export async function GET(request: Request) {
     if (!patient && cpf) {
       const cleanCpf = cpf.replace(/\D/g, "");
       patient = await prisma.patient.findFirst({
-        where: {
-          OR: [
-            { cpf: cpf },
-            { cpf: { contains: cleanCpf } }
-          ]
-        },
+        where: { cpf: cleanCpf },
         include: {
           appointments: {
             where: { status: "COMPLETED" },
@@ -105,8 +92,6 @@ export async function GET(request: Request) {
       paciente: {
         id: patient.id,
         nome: patient.name,
-        telefone: patient.phone,
-        cpf: patient.cpf,
       },
       message: jaConsultou
         ? "Paciente cadastrado e já realizou consultas anteriormente."
