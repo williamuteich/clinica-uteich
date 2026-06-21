@@ -96,20 +96,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Parâmetro 'data' obrigatório (YYYY-MM-DD)" }, { status: 400 });
   }
 
-  const date = new Date(dataStr);
+  const cleanDataStr = dataStr.substring(0, 10);
+
+  const date = new Date(cleanDataStr);
   if (isNaN(date.getTime())) {
     return NextResponse.json({ error: "Data inválida" }, { status: 400 });
   }
 
-  const start = new Date(`${dataStr}T00:00:00-03:00`);
-  const end = new Date(`${dataStr}T23:59:59-03:00`);
+  const start = new Date(`${cleanDataStr}T00:00:00-03:00`);
+  const end = new Date(`${cleanDataStr}T23:59:59-03:00`);
 
   const agendados = await prisma.appointment.findMany({
     where: {
       scheduledAt: { gte: start, lte: end },
       status: { not: "CANCELLED" },
     },
-    select: { scheduledAt: true },
+    select: { scheduledAt: true, guestName: true, status: true },
   });
 
   const ALL_SLOTS = [

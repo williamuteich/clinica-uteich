@@ -49,16 +49,14 @@ export async function GET(request: Request) {
         try {
           const decryptedPhone = await decrypt(p.phone);
           const dbNumber = decryptedPhone.replace(/\D/g, "");
-          
+
           let cleanDb = dbNumber.startsWith("55") ? dbNumber.substring(2) : dbNumber;
           let cleanSearch = searchNumber.startsWith("55") ? searchNumber.substring(2) : searchNumber;
 
-          // Se a busca tem 10 dígitos, adiciona o "9" no meio para comparar com o banco
           if (cleanSearch.length === 10) {
             cleanSearch = cleanSearch.substring(0, 2) + "9" + cleanSearch.substring(2);
           }
 
-          // Se o banco tem 10 dígitos, adiciona o "9" no meio também
           if (cleanDb.length === 10) {
             cleanDb = cleanDb.substring(0, 2) + "9" + cleanDb.substring(2);
           }
