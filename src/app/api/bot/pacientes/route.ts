@@ -33,7 +33,6 @@ export async function GET(request: Request) {
       if (cleanPhone.startsWith("55") && cleanPhone.length >= 10) {
         cleanPhone = cleanPhone.substring(2);
       }
-      console.log(`[BOT-LOG] Iniciando busca para telefone: ${phone} (cleanPhone: ${cleanPhone})`);
       const { decrypt } = await import("@/src/lib/encrypted-fields");
       const searchNumber = cleanPhone;
 
@@ -46,29 +45,31 @@ export async function GET(request: Request) {
         }
       });
 
-      console.log(`[BOT-LOG] Total de pacientes carregados do BD: ${allPatients.length}`);
-
       for (const p of allPatients) {
         try {
           const decryptedPhone = await decrypt(p.phone);
           const dbNumber = decryptedPhone.replace(/\D/g, "");
+          
+          let cleanDb = dbNumber.startsWith("55") ? dbNumber.substring(2) : dbNumber;
+          let cleanSearch = searchNumber.startsWith("55") ? searchNumber.substring(2) : searchNumber;
 
-          const cleanDb = dbNumber.startsWith("55") ? dbNumber.substring(2) : dbNumber;
-          const cleanSearch = searchNumber.startsWith("55") ? searchNumber.substring(2) : searchNumber;
+          // Se a busca tem 10 dígitos, adiciona o "9" no meio para comparar com o banco
+          if (cleanSearch.length === 10) {
+            cleanSearch = cleanSearch.substring(0, 2) + "9" + cleanSearch.substring(2);
+          }
 
-          console.log(`[BOT-LOG] Comparando Paciente ID ${p.id}: Banco (original: ${decryptedPhone}, cleanDb: ${cleanDb}) vs Busca (cleanSearch: ${cleanSearch})`);
+          // Se o banco tem 10 dígitos, adiciona o "9" no meio também
+          if (cleanDb.length === 10) {
+            cleanDb = cleanDb.substring(0, 2) + "9" + cleanDb.substring(2);
+          }
 
-          if (cleanDb === cleanSearch || cleanDb.endsWith(cleanSearch) || cleanSearch.endsWith(cleanDb)) {
-            console.log(`[BOT-LOG] Encontrou correspondência! Paciente ID: ${p.id}`);
+          if (cleanDb === cleanSearch) {
             patient = p;
             break;
           }
         } catch (e: any) {
           console.error(`[BOT] Erro ao descriptografar telefone do paciente ${p.id}:`, e.message);
         }
-      }
-      if (!patient) {
-        console.log(`[BOT-LOG] Nenhum paciente atendeu aos critérios de busca.`);
       }
     }
 
