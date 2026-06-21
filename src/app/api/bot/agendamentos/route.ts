@@ -153,3 +153,131 @@ export async function GET(request: Request) {
     total_disponivel: disponiveis.length,
   });
 }
+
+function normalizePhone(phone: string): string {
+  return phone.replace(/\D/g, "");
+}
+
+const patchSchema = z.object({
+  acao: z.enum(["cancelar", "remarcar"]),
+  numero_whatsapp: z.string().min(8, "numero_whatsapp do solicitante é obrigatório"),
+  nova_data_hora: z.coerce.date().optional(),
+  motivo: z.string().optional(),
+});
+
+export async function PATCH(request: Request) {
+  if (!checkBotKey(request)) return unauthorized();
+
+  try {
+    let body: any;
+    try {
+      body = await request.json();
+      console.log("[PATCH-AGENDA] Body recebido:", JSON.stringify(body));
+    } catch (jsonErr) {
+      console.error("[PATCH-AGENDA] Falha ao ler JSON:", jsonErr);
+      return NextResponse.json({ error: "Corpo da requisição inválido ou vazio" }, { status: 400 });
+    }
+
+    if (body.nova_data_hora === "" || body.nova_data_hora === "{nova_data_hora}" || !body.nova_data_hora) {
+      delete body.nova_data_hora;
+    }
+    if (body.motivo === "" || body.motivo === "{motivo}" || !body.motivo) {
+      delete body.motivo;
+    }
+
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) {
+      console.warn("[PATCH-AGENDA] Falha validação Zod:", parsed.error.format());
+      return NextResponse.json(
+        { error: parsed.error.issues[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { acao, numero_whatsapp, nova_data_hora, motivo } = parsed.data;
+
+    const cleanPhone = normalizePhone(numero_whatsapp);
+
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        status: { in: ["PENDING", "CONFIRMED"] }
+      },
+      orderBy: {
+        scheduledAt: "desc"
+      }
+    });
+
+    const existing = appointments.find(apt => {
+      const dbPhone = normalizePhone(apt.guestPhone ?? "");
+      if (!dbPhone) return false;
+
+      const dbClean = dbPhone.startsWith("55") ? dbPhone.slice(2) : dbPhone;
+      const searchClean = cleanPhone.startsWith("55") ? cleanPhone.slice(2) : cleanPhone;
+
+      const dbCleanNo9 = dbClean.length === 11 && dbClean[2] === "9" ? dbClean.slice(0, 2) + dbClean.slice(3) : dbClean;
+      const searchCleanNo9 = searchClean.length === 11 && searchClean[2] === "9" ? searchClean.slice(0, 2) + searchClean.slice(3) : searchClean;
+
+      return dbCleanNo9 === searchCleanNo9;
+    });
+
+    console.log("[PATCH-AGENDA] Agendamento ativo encontrado:", existing);
+
+    if (!existing) {
+      return NextResponse.json({ error: "Nenhum agendamento ativo encontrado para este número." }, { status: 404 });
+    }
+
+    const id = existing.id;
+
+    if (acao === "cancelar") {
+      const updated = await prisma.appointment.update({
+        where: { id },
+        data: {
+          status: "CANCELLED",
+          description: motivo
+            ? `Cancelado via WhatsApp: ${motivo}`
+            : "Cancelado via WhatsApp",
+        },
+      });
+
+      console.log("[PATCH-AGENDA] Agendamento cancelado com sucesso:", updated.id);
+
+      return NextResponse.json({
+        id,
+        status: updated.status,
+        message: "Agendamento cancelado com sucesso",
+      });
+    }
+
+    if (acao === "remarcar") {
+      if (!nova_data_hora) {
+        return NextResponse.json(
+          { error: "nova_data_hora é obrigatória para remarcar" },
+          { status: 400 }
+        );
+      }
+
+      const updated = await prisma.appointment.update({
+        where: { id },
+        data: {
+          scheduledAt: nova_data_hora,
+          status: "PENDING",
+          description: motivo
+            ? `Remarcado via WhatsApp: ${motivo}`
+            : "Remarcado via WhatsApp",
+        },
+      });
+
+      console.log("[PATCH-AGENDA] Agendamento remarcado com sucesso:", updated.id);
+
+      return NextResponse.json({
+        id,
+        data_hora: updated.scheduledAt.toISOString(),
+        status: updated.status,
+        message: "Agendamento remarcado com sucesso",
+      });
+    }
+  } catch (error: any) {
+    console.error("[PATCH-AGENDA] Erro ao processar atualização:", error);
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
+  }
+}
