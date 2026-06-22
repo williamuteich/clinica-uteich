@@ -8,11 +8,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-    { href: "#inicio", label: "Início" },
-    { href: "#servicos", label: "Serviços" },
-    { href: "#sobre", label: "Sobre" },
-    { href: "#depoimentos", label: "Depoimentos" },
-    { href: "#contato", label: "Contato" },
+    { href: "/#inicio", label: "Início" },
+    { href: "/#servicos", label: "Serviços" },
+    { href: "/#sobre", label: "Sobre" },
+    { href: "/#depoimentos", label: "Depoimentos" },
+    { href: "/#contato", label: "Contato" },
 ];
 
 export function HeaderHome() {
@@ -20,9 +20,11 @@ export function HeaderHome() {
     const pathname = usePathname();
 
     const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-        if (href.startsWith("#") && pathname === "/") {
+        const hashIndex = href.indexOf("#");
+        if (hashIndex !== -1 && pathname === "/") {
+            const hash = href.substring(hashIndex);
             e.preventDefault();
-            const element = document.querySelector(href);
+            const element = document.querySelector(hash);
             if (element) {
                 const offset = 80;
                 const bodyRect = document.body.getBoundingClientRect().top;
