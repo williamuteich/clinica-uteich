@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, CheckCircle, Stethoscope, ShieldCheck } from "lucide-react";
+import { Phone, CheckCircle, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 const heroImage = "/banner/hero-dental.jpg";
@@ -30,7 +30,7 @@ export default function BannerHome() {
                         <span className="text-primary-soft">melhor cuidado.</span>
                     </h1>
                     <p className="mt-5 text-base md:text-base text-white/85 max-w-md">
-                        Tecnologia avançada and cuidado especializado para transformar seu sorriso. Agende sua avaliação gratuita e sem compromisso.
+                        Tecnologia avançada e cuidado especializado para transformar seu sorriso. Agende sua avaliação gratuita e sem compromisso.
                     </p>
                     <div className="mt-7 flex flex-col sm:flex-row gap-3">
                         <Link
@@ -48,29 +48,6 @@ export default function BannerHome() {
                             Emergência 24h
                         </a>
                     </div>
-                    <ul className="mt-4 grid gap-3 max-w-md border-t border-white/15 pt-6">
-                        {[
-                            { icon: CheckCircle, title: "Avaliação gratuita", desc: "Diagnóstico completo sem compromisso" },
-                            { icon: Stethoscope, title: "Tecnologia digital", desc: "Scanner intraoral e raio-x de baixa radiação" },
-                            { icon: ShieldCheck, title: "Condições facilitadas", desc: "Opções de parcelamento em todos os tratamentos" }
-                        ].map((item, i) => (
-                            <motion.li
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4, delay: 0.5 + (i * 0.1) }}
-                                key={i}
-                                className="flex items-start gap-3"
-                            >
-                                <span className="mt-0.5 grid place-items-center h-8 w-8 shrink-0 bg-white/10 border border-white/20 rounded-none">
-                                    <item.icon className="h-4 w-4 text-[#7ecde8]" />
-                                </span>
-                                <div>
-                                    <p className="text-sm font-semibold text-white leading-tight">{item.title}</p>
-                                    <p className="text-xs text-white/70 mt-0.5">{item.desc}</p>
-                                </div>
-                            </motion.li>
-                        ))}
-                    </ul>
                 </motion.div>
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95, x: 20 }}

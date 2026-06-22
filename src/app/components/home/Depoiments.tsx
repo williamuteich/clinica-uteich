@@ -140,7 +140,7 @@ export default function DepoimentsHome() {
                             Depoimentos
                         </span>
                         <h2 className="mt-2 text-3xl md:text-4xl font-bold tracking-tight text-primary-deep">
-                            Quem confia, sorri mais
+                            Quem confia, sorri mais!
                         </h2>
                         <p className="mt-3 text-muted-foreground text-sm">
                             Confira o que nossos pacientes dizem sobre sua experiência na Uteich Odontologia. Estas são algumas de nossas avaliações recentes no Google.
