@@ -56,6 +56,7 @@ function SchedulingForm() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     if (initialService) {
@@ -113,6 +114,10 @@ function SchedulingForm() {
       setErrorMessage("Informe um número de telefone com DDD válido");
       return;
     }
+    if (!acceptedTerms) {
+      setErrorMessage("Você precisa aceitar a Política de Privacidade e os Termos de Uso");
+      return;
+    }
     setErrorMessage("");
     setStep(2);
   };
@@ -141,6 +146,7 @@ function SchedulingForm() {
           observation,
           date: selectedDate,
           time: selectedTime,
+          acceptedTerms,
         }),
       });
       const data = await res.json();
@@ -237,6 +243,8 @@ function SchedulingForm() {
                     onChangePhone={handlePhoneChange}
                     observation={observation}
                     setObservation={setObservation}
+                    acceptedTerms={acceptedTerms}
+                    setAcceptedTerms={setAcceptedTerms}
                     onSubmit={handleNextStep}
                   />
                 )}

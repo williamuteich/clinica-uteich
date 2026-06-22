@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, serviceType, observation, date, time } = body;
+    const { name, phone, serviceType, observation, date, time, acceptedTerms } = body;
 
     if (!name || !phone || !date || !time) {
       return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
@@ -152,6 +152,9 @@ export async function POST(request: Request) {
         estimatedValue: 0,
         description: encryptedDescription,
         status: "PENDING",
+        acceptedTerms: !!acceptedTerms,
+        termsAcceptedAt: acceptedTerms ? new Date() : null,
+        termsVersion: acceptedTerms ? "v1.0-2026-06" : null,
       },
     });
 

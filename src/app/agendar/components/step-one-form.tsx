@@ -9,6 +9,8 @@ export function StepOneForm({
   onChangePhone,
   observation,
   setObservation,
+  acceptedTerms,
+  setAcceptedTerms,
   onSubmit,
 }: StepOneProps) {
   return (
@@ -74,6 +76,38 @@ export function StepOneForm({
               className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium text-slate-800 resize-none"
             />
           </div>
+        </div>
+        
+        <div className="flex items-start gap-2.5 pt-1">
+          <input
+            type="checkbox"
+            id="accept-terms"
+            required
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-0.5 h-4 w-4 rounded border-slate-200 text-primary focus:ring-primary accent-primary cursor-pointer shrink-0"
+          />
+          <label htmlFor="accept-terms" className="text-xs text-muted-foreground leading-normal cursor-pointer select-none">
+            Li e aceito a{" "}
+            <a
+              href="/politica-de-privacidade"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-deep font-semibold hover:underline hover:text-primary transition-colors"
+            >
+              Política de Privacidade
+            </a>{" "}
+            e os{" "}
+            <a
+              href="/termos-de-uso"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary-deep font-semibold hover:underline hover:text-primary transition-colors"
+            >
+              Termos de Uso
+            </a>{" "}
+            da clínica. <span className="text-rose-500">*</span>
+          </label>
         </div>
       </div>
       <button

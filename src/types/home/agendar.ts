@@ -20,6 +20,8 @@ export interface StepOneProps {
   onChangePhone: (e: React.ChangeEvent<HTMLInputElement>) => void;
   observation: string;
   setObservation: (v: string) => void;
+  acceptedTerms: boolean;
+  setAcceptedTerms: (v: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
