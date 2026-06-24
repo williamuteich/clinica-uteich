@@ -70,6 +70,7 @@ function SchedulingForm() {
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [leadId, setLeadId] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   useEffect(() => {
     const saved = sessionStorage.getItem("leadId");
@@ -142,6 +143,10 @@ function SchedulingForm() {
       setErrorMessage("Você precisa aceitar a Política de Privacidade e os Termos de Uso");
       return;
     }
+    if (!leadId && !turnstileToken) {
+      setErrorMessage("Por favor, aguarde a verificação de segurança do Google/Cloudflare.");
+      return;
+    }
     setErrorMessage("");
 
     try {
@@ -168,6 +173,7 @@ function SchedulingForm() {
           utmContent: utmContent || undefined,
           utmTerm: utmTerm || undefined,
           conversionUrl: typeof window !== "undefined" ? window.location.href : undefined,
+          turnstileToken: turnstileToken || undefined,
         }),
       });
 
@@ -223,6 +229,7 @@ function SchedulingForm() {
           utmContent: utmContent || undefined,
           utmTerm: utmTerm || undefined,
           conversionUrl: typeof window !== "undefined" ? window.location.href : undefined,
+          turnstileToken: turnstileToken || undefined,
         }),
       });
       const data = await res.json();
@@ -328,6 +335,8 @@ function SchedulingForm() {
                     acceptedTerms={acceptedTerms}
                     setAcceptedTerms={setAcceptedTerms}
                     onSubmit={handleNextStep}
+                    turnstileToken={turnstileToken}
+                    setTurnstileToken={setTurnstileToken}
                   />
                 )}
                 {step === 2 && (

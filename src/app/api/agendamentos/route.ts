@@ -3,6 +3,27 @@ import { prisma } from "@/src/lib/prisma";
 import { encrypt, decrypt } from "@/src/lib/encrypted-fields";
 import { LeadInput } from "@/src/types/dashboard/leads";
 
+async function verifyTurnstile(token: string, ip?: string): Promise<boolean> {
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        secret: process.env.TURNSTILE_SECRET || "",
+        response: token,
+        ...(ip ? { remoteip: ip } : {}),
+      }),
+    });
+    const data = await response.json();
+    return !!data.success;
+  } catch (error) {
+    console.error("Erro ao verificar token do Turnstile:", error);
+    return false;
+  }
+}
+
 async function saveLeadStepOne(input: LeadInput) {
   const encryptedName = await encrypt(input.name);
   const encryptedPhone = await encrypt(input.phone);
@@ -23,9 +44,29 @@ async function saveLeadStepOne(input: LeadInput) {
     conversionUrl: input.conversionUrl || null,
   };
 
-  if (input.leadId) {
+  let targetLeadId = input.leadId;
+  if (targetLeadId) {
+    try {
+      const existing = await prisma.lead.findUnique({
+        where: { id: targetLeadId },
+        select: { phone: true }
+      });
+      if (existing) {
+        const decryptedPhone = await decrypt(existing.phone);
+        if (decryptedPhone.replace(/\D/g, "") !== input.phone.replace(/\D/g, "")) {
+          targetLeadId = null;
+        }
+      } else {
+        targetLeadId = null;
+      }
+    } catch {
+      targetLeadId = null;
+    }
+  }
+
+  if (targetLeadId) {
     return prisma.lead.update({
-      where: { id: input.leadId },
+      where: { id: targetLeadId },
       data,
     });
   }
@@ -56,7 +97,30 @@ async function findExistingLeadByPhone(cleanPhoneInput: string): Promise<string 
 
 async function syncLeadStepTwo(appointmentId: string, input: LeadInput) {
   const cleanPhone = input.phone.replace(/\D/g, "");
-  const targetLeadId = input.leadId || await findExistingLeadByPhone(cleanPhone);
+  let targetLeadId = input.leadId;
+
+  if (targetLeadId) {
+    try {
+      const existing = await prisma.lead.findUnique({
+        where: { id: targetLeadId },
+        select: { phone: true }
+      });
+      if (existing) {
+        const decryptedPhone = await decrypt(existing.phone);
+        if (decryptedPhone.replace(/\D/g, "") !== cleanPhone) {
+          targetLeadId = null;
+        }
+      } else {
+        targetLeadId = null;
+      }
+    } catch {
+      targetLeadId = null;
+    }
+  }
+
+  if (!targetLeadId) {
+    targetLeadId = await findExistingLeadByPhone(cleanPhone);
+  }
 
   if (targetLeadId) {
     return prisma.lead.update({
@@ -155,11 +219,41 @@ export async function POST(request: Request) {
       utmCampaign,
       utmContent,
       utmTerm,
-      conversionUrl
+      conversionUrl,
+      turnstileToken
     } = body;
 
     if (!name || !phone) {
       return NextResponse.json({ error: "Nome e telefone são obrigatórios" }, { status: 400 });
+    }
+
+    let isLeadVerified = false;
+    if (leadId) {
+      try {
+        const existing = await prisma.lead.findUnique({
+          where: { id: leadId },
+          select: { phone: true }
+        });
+        if (existing) {
+          const decryptedPhone = await decrypt(existing.phone);
+          if (decryptedPhone.replace(/\D/g, "") === phone.replace(/\D/g, "")) {
+            isLeadVerified = true;
+          }
+        }
+      } catch {
+        isLeadVerified = false;
+      }
+    }
+
+    if (!isLeadVerified) {
+      if (!turnstileToken) {
+        return NextResponse.json({ error: "Verificação de segurança obrigatória" }, { status: 400 });
+      }
+      const ip = request.headers.get("x-forwarded-for") || undefined;
+      const isValid = await verifyTurnstile(turnstileToken, ip);
+      if (!isValid) {
+        return NextResponse.json({ error: "Falha na verificação de segurança (Turnstile)" }, { status: 400 });
+      }
     }
 
     const leadInput: LeadInput = {

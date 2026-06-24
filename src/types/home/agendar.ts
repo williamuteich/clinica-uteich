@@ -25,6 +25,8 @@ export interface StepOneProps {
   acceptedTerms: boolean;
   setAcceptedTerms: (v: boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
+  turnstileToken?: string;
+  setTurnstileToken?: (token: string) => void;
 }
 
 export interface StepTwoProps {

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { User, Phone, MessageSquare, ChevronRight } from "lucide-react";
 import { StepOneProps } from "@/src/types/home/agendar";
+import { Turnstile } from "@/src/app/components/Turnstile";
 
 export function StepOneForm({
   name,
@@ -14,6 +15,8 @@ export function StepOneForm({
   acceptedTerms,
   setAcceptedTerms,
   onSubmit,
+  turnstileToken,
+  setTurnstileToken,
 }: StepOneProps) {
   return (
     <motion.form
@@ -134,6 +137,12 @@ export function StepOneForm({
             da clínica. <span className="text-rose-500">*</span>
           </label>
         </div>
+        {setTurnstileToken && (
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ""}
+            onVerify={setTurnstileToken}
+          />
+        )}
       </div>
       <button
         type="submit"
