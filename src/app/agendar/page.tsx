@@ -167,6 +167,7 @@ function SchedulingForm() {
           utmCampaign: utmCampaign || undefined,
           utmContent: utmContent || undefined,
           utmTerm: utmTerm || undefined,
+          conversionUrl: typeof window !== "undefined" ? window.location.href : undefined,
         }),
       });
 
@@ -221,6 +222,7 @@ function SchedulingForm() {
           utmCampaign: utmCampaign || undefined,
           utmContent: utmContent || undefined,
           utmTerm: utmTerm || undefined,
+          conversionUrl: typeof window !== "undefined" ? window.location.href : undefined,
         }),
       });
       const data = await res.json();

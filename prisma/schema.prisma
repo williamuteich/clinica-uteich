@@ -361,6 +361,7 @@ model Lead {
   utmCampaign   String?
   utmContent    String?
   utmTerm       String?
+  conversionUrl String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

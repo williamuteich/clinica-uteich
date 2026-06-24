@@ -20,6 +20,7 @@ async function saveLeadStepOne(input: LeadInput) {
     utmCampaign: input.utmCampaign || null,
     utmContent: input.utmContent || null,
     utmTerm: input.utmTerm || null,
+    conversionUrl: input.conversionUrl || null,
   };
 
   if (input.leadId) {
@@ -64,6 +65,7 @@ async function syncLeadStepTwo(appointmentId: string, input: LeadInput) {
         status: "PENDING",
         step: 2,
         appointmentId,
+        conversionUrl: input.conversionUrl || undefined,
       },
     });
   }
@@ -88,6 +90,7 @@ async function syncLeadStepTwo(appointmentId: string, input: LeadInput) {
       utmCampaign: input.utmCampaign || null,
       utmContent: input.utmContent || null,
       utmTerm: input.utmTerm || null,
+      conversionUrl: input.conversionUrl || null,
     },
   });
 }
@@ -151,7 +154,8 @@ export async function POST(request: Request) {
       utmMedium,
       utmCampaign,
       utmContent,
-      utmTerm
+      utmTerm,
+      conversionUrl
     } = body;
 
     if (!name || !phone) {
@@ -169,7 +173,8 @@ export async function POST(request: Request) {
       utmMedium,
       utmCampaign,
       utmContent,
-      utmTerm
+      utmTerm,
+      conversionUrl
     };
 
     if (!date || !time) {

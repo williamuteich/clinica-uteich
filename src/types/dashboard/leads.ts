@@ -12,6 +12,7 @@ export interface Lead {
     utmCampaign: string | null;
     utmContent: string | null;
     utmTerm: string | null;
+    conversionUrl: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -44,4 +45,5 @@ export interface LeadInput {
     utmCampaign?: string | null;
     utmContent?: string | null;
     utmTerm?: string | null;
+    conversionUrl?: string | null;
 }
