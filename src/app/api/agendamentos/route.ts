@@ -47,7 +47,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, serviceType, observation, date, time, acceptedTerms } = body;
+    const { name, phone, serviceType, observation, date, time, acceptedTerms, leadId } = body;
 
     if (!name || !phone || !date || !time) {
       return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
@@ -157,6 +157,21 @@ export async function POST(request: Request) {
         termsVersion: acceptedTerms ? "v1.0-2026-06" : null,
       },
     });
+
+    if (leadId) {
+      try {
+        await prisma.lead.update({
+          where: { id: leadId },
+          data: {
+            status: "PENDING",
+            step: 2,
+            appointmentId: newAppointment.id,
+          },
+        });
+      } catch (e) {
+        console.error("Erro ao atualizar lead:", e);
+      }
+    }
 
     return NextResponse.json({
       success: true,

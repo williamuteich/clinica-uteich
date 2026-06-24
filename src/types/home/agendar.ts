@@ -18,6 +18,8 @@ export interface StepOneProps {
   setName: (v: string) => void;
   phone: string;
   onChangePhone: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  serviceType: string;
+  setServiceType: (v: string) => void;
   observation: string;
   setObservation: (v: string) => void;
   acceptedTerms: boolean;

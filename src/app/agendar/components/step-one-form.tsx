@@ -7,6 +7,8 @@ export function StepOneForm({
   setName,
   phone,
   onChangePhone,
+  serviceType,
+  setServiceType,
   observation,
   setObservation,
   acceptedTerms,
@@ -61,6 +63,29 @@ export function StepOneForm({
           <p className="mt-1.5 text-[10px] text-muted-foreground flex items-center gap-1.5">
             Usaremos este número para verificar se você já tem cadastro e confirmar o atendimento.
           </p>
+        </div>
+        <div className="relative">
+          <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+            Serviço Desejado <span className="text-rose-500">*</span>
+          </label>
+          <div className="relative">
+            <select
+              required
+              value={serviceType}
+              onChange={(e) => setServiceType(e.target.value)}
+              className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium text-slate-800 bg-white"
+            >
+              <option value="">Selecione o serviço...</option>
+              <option value="Avaliação Gratuita">Avaliação Gratuita</option>
+              <option value="Clínico Geral">Clínico Geral</option>
+              <option value="Prótese e Implante">Prótese e Implante</option>
+              <option value="Aparelho Ortodôntico">Aparelho Ortodôntico</option>
+              <option value="Tratamento de Canal">Tratamento de Canal</option>
+              <option value="Estética e Clareamento">Estética e Clareamento</option>
+              <option value="Extração e Restauração">Extração e Restauração</option>
+              <option value="Outros">Outros</option>
+            </select>
+          </div>
         </div>
         <div className="relative">
           <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">

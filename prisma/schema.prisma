@@ -345,3 +345,24 @@ model Treatment {
 
   @@map("tratamentos")
 }
+
+model Lead {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  phone         String
+  serviceType   String?
+  observation   String?
+  status        String   @default("INTERESTED")
+  step          Int      @default(1)
+  appointmentId String?  @db.ObjectId
+  gclid         String?
+  utmSource     String?
+  utmMedium     String?
+  utmCampaign   String?
+  utmContent    String?
+  utmTerm       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("leads")
+}

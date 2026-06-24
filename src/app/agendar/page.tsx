@@ -33,7 +33,19 @@ function SchedulingForm() {
   const initialService = searchParams.get("servico") || "";
 
   const getMappedService = (srv: string) => {
-    return "";
+    if (!srv) return "";
+    const decoded = decodeURIComponent(srv);
+    const validServices = [
+      "Avaliação Gratuita",
+      "Clínico Geral",
+      "Prótese e Implante",
+      "Aparelho Ortodôntico",
+      "Tratamento de Canal",
+      "Estética e Clareamento",
+      "Extração e Restauração"
+    ];
+    const matched = validServices.find(s => s.toLowerCase() === decoded.toLowerCase());
+    return matched || "Outros";
   };
 
   const getDefaultDate = () => {
@@ -57,6 +69,14 @@ function SchedulingForm() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmergencyContact, setShowEmergencyContact] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [leadId, setLeadId] = useState("");
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("leadId");
+    if (saved) {
+      setLeadId(saved);
+    }
+  }, []);
 
   useEffect(() => {
     if (initialService) {
@@ -103,7 +123,7 @@ function SchedulingForm() {
     setSelectedTime("");
   }, [selectedDate]);
 
-  const handleNextStep = (e: React.FormEvent) => {
+  const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       setErrorMessage("Nome completo é obrigatório");
@@ -114,11 +134,51 @@ function SchedulingForm() {
       setErrorMessage("Informe um número de telefone com DDD válido");
       return;
     }
+    if (!serviceType) {
+      setErrorMessage("Por favor, selecione o serviço desejado");
+      return;
+    }
     if (!acceptedTerms) {
       setErrorMessage("Você precisa aceitar a Política de Privacidade e os Termos de Uso");
       return;
     }
     setErrorMessage("");
+
+    try {
+      const gclid = searchParams.get("gclid") || "";
+      const utmSource = searchParams.get("utm_source") || "";
+      const utmMedium = searchParams.get("utm_medium") || "";
+      const utmCampaign = searchParams.get("utm_campaign") || "";
+      const utmContent = searchParams.get("utm_content") || "";
+      const utmTerm = searchParams.get("utm_term") || "";
+
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadId: leadId || undefined,
+          name,
+          phone,
+          serviceType,
+          observation: observation || undefined,
+          gclid: gclid || undefined,
+          utmSource: utmSource || undefined,
+          utmMedium: utmMedium || undefined,
+          utmCampaign: utmCampaign || undefined,
+          utmContent: utmContent || undefined,
+          utmTerm: utmTerm || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.leadId) {
+        setLeadId(data.leadId);
+        sessionStorage.setItem("leadId", data.leadId);
+      }
+    } catch (err) {
+      console.error("Erro ao salvar lead:", err);
+    }
+
     setStep(2);
   };
 
@@ -147,12 +207,17 @@ function SchedulingForm() {
           date: selectedDate,
           time: selectedTime,
           acceptedTerms,
+          leadId: leadId || undefined,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || "Erro ao agendar consulta");
       }
+      
+      sessionStorage.removeItem("leadId");
+      setLeadId("");
+
       const message = [
         "Olá, acabei de solicitar um agendamento no site!",
         `Nome: ${data.patientName || name}`,
@@ -241,6 +306,8 @@ function SchedulingForm() {
                     setName={setName}
                     phone={phone}
                     onChangePhone={handlePhoneChange}
+                    serviceType={serviceType}
+                    setServiceType={setServiceType}
                     observation={observation}
                     setObservation={setObservation}
                     acceptedTerms={acceptedTerms}
