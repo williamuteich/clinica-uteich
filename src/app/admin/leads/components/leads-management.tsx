@@ -4,13 +4,14 @@ import { useState, useCallback, useTransition, useEffect, useRef, memo } from "r
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, User, CheckCircle2, BarChart3, HelpCircle } from "lucide-react";
+import { Loader2, User, CheckCircle2, BarChart3, HelpCircle, Download } from "lucide-react";
 import { Lead, LeadStats } from "@/src/types/dashboard/leads";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
 import { maskPhone } from "@/src/lib/masks";
-import { getLeads, deleteLead } from "@/src/services/leads";
+import { getLeads, deleteLead, exportLeads } from "@/src/services/leads";
 import { useDebounce } from "@/src/hook/use-debounce";
 import { SearchInput } from "@/src/app/components/admin/search-input";
 import { Pagination } from "@/src/app/components/admin/pagination";
@@ -159,6 +160,56 @@ export function LeadsManagement({ initialData }: { initialData: { leads: Lead[];
         fetchLeads(filters);
     }, [fetchLeads, filters]);
 
+    const handleExport = async () => {
+        try {
+            const allLeads = await exportLeads();
+            if (!allLeads || allLeads.length === 0) {
+                toast.warning("Nenhum lead disponível para exportação.");
+                return;
+            }
+
+            const headers = [
+                "Nome",
+                "Telefone",
+                "Serviço",
+                "Observação",
+                "Status",
+                "Data de Captação",
+                "UTM Source",
+                "UTM Medium",
+                "UTM Campaign",
+                "GCLID"
+            ];
+            
+            const rows = allLeads.map(lead => [
+                `"${lead.name.replace(/"/g, '""')}"`,
+                `"${lead.phone.replace(/"/g, '""')}"`,
+                `"${(lead.serviceType || "").replace(/"/g, '""')}"`,
+                `"${(lead.observation || "").replace(/"/g, '""')}"`,
+                `"${lead.status}"`,
+                `"${new Date(lead.createdAt).toLocaleString("pt-BR")}"`,
+                `"${(lead.utmSource || "").replace(/"/g, '""')}"`,
+                `"${(lead.utmMedium || "").replace(/"/g, '""')}"`,
+                `"${(lead.utmCampaign || "").replace(/"/g, '""')}"`,
+                `"${(lead.gclid || "").replace(/"/g, '""')}"`
+            ]);
+
+            const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `leads_export_${new Date().toLocaleDateString("pt-BR").replace(/\//g, "-")}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            toast.success("Planilha de leads exportada com sucesso!");
+        } catch (err) {
+            console.error("Erro ao exportar planilha:", err);
+            toast.error("Erro ao exportar planilha.");
+        }
+    };
+
     return (
         <div className="space-y-6">
             <ToastContainer position="top-right" autoClose={3000} theme="colored" />
@@ -229,6 +280,15 @@ export function LeadsManagement({ initialData }: { initialData: { leads: Lead[];
 
                     {isPending && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
                 </div>
+
+                <Button
+                    onClick={handleExport}
+                    variant="outline"
+                    className="h-10 gap-2 border-slate-200 text-slate-700 hover:text-slate-900 bg-white md:self-auto self-start"
+                >
+                    <Download className="h-4 w-4 text-slate-500" />
+                    Exportar Planilha
+                </Button>
             </div>
 
             <div className="border rounded-xl bg-white shadow-xs overflow-hidden">

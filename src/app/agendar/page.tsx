@@ -152,7 +152,7 @@ function SchedulingForm() {
       const utmContent = searchParams.get("utm_content") || "";
       const utmTerm = searchParams.get("utm_term") || "";
 
-      const res = await fetch("/api/leads", {
+      const res = await fetch("/api/agendamentos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -196,6 +196,13 @@ function SchedulingForm() {
     setSubmitting(true);
     setErrorMessage("");
     try {
+      const gclid = searchParams.get("gclid") || "";
+      const utmSource = searchParams.get("utm_source") || "";
+      const utmMedium = searchParams.get("utm_medium") || "";
+      const utmCampaign = searchParams.get("utm_campaign") || "";
+      const utmContent = searchParams.get("utm_content") || "";
+      const utmTerm = searchParams.get("utm_term") || "";
+
       const res = await fetch("/api/agendamentos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -208,6 +215,12 @@ function SchedulingForm() {
           time: selectedTime,
           acceptedTerms,
           leadId: leadId || undefined,
+          gclid: gclid || undefined,
+          utmSource: utmSource || undefined,
+          utmMedium: utmMedium || undefined,
+          utmCampaign: utmCampaign || undefined,
+          utmContent: utmContent || undefined,
+          utmTerm: utmTerm || undefined,
         }),
       });
       const data = await res.json();

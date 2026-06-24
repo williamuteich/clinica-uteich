@@ -1,100 +1,65 @@
 "use server";
-import { prisma } from "@/src/lib/prisma";
-import { decrypt, isEncrypted } from "@/src/lib/encrypted-fields";
-import { Lead, LeadStats } from "@/src/types/dashboard/leads";
+import { GetLeadsResponse } from "@/src/types/dashboard/leads";
+import { headers } from "next/headers";
 
-async function tryDecrypt(val: string | null | undefined): Promise<string> {
-    if (!val) return "";
-    if (isEncrypted(val)) {
-        try {
-            return await decrypt(val);
-        } catch (e) {
-            return val;
-        }
-    }
-    return val;
-}
+const API_URL = process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-export async function getLeads(filters: { page?: number; limit?: number; search?: string; status?: string } = { page: 1, limit: 20 }) {
+export async function getLeads(filters: { page?: number; limit?: number; search?: string; status?: string } = { page: 1, limit: 20 }): Promise<GetLeadsResponse | null> {
     try {
-        const page = filters.page || 1;
-        const limit = filters.limit || 20;
+        const cookie = (await headers()).get("cookie") || "";
+        const params = new URLSearchParams();
+        if (filters.page) params.set("page", String(filters.page));
+        if (filters.limit) params.set("limit", String(filters.limit));
+        if (filters.search) params.set("search", filters.search);
+        if (filters.status) params.set("status", filters.status);
 
-        const rawLeads = await prisma.lead.findMany({
-            orderBy: { createdAt: "desc" }
-        });
+        const query = params.toString();
+        const res = await fetch(
+            `${API_URL}/api/admin/leads${query ? `?${query}` : ""}`,
+            {
+                headers: { Cookie: cookie },
+                next: { tags: ["leads-list"] }
+            }
+        );
 
-        const decryptedLeads: Lead[] = [];
-        for (const raw of rawLeads) {
-            decryptedLeads.push({
-                id: raw.id,
-                name: await tryDecrypt(raw.name),
-                phone: await tryDecrypt(raw.phone),
-                serviceType: await tryDecrypt(raw.serviceType),
-                observation: await tryDecrypt(raw.observation),
-                status: raw.status,
-                step: raw.step,
-                appointmentId: raw.appointmentId,
-                utmSource: raw.utmSource,
-                utmMedium: raw.utmMedium,
-                utmCampaign: raw.utmCampaign,
-                utmContent: raw.utmContent,
-                utmTerm: raw.utmTerm,
-                createdAt: raw.createdAt.toISOString(),
-                updatedAt: raw.updatedAt.toISOString(),
-            });
-        }
-
-        let filtered = decryptedLeads;
-        if (filters.status) {
-            filtered = filtered.filter(l => l.status === filters.status);
-        }
-        if (filters.search) {
-            const searchLower = filters.search.toLowerCase();
-            filtered = filtered.filter(l => 
-                l.name.toLowerCase().includes(searchLower) ||
-                l.phone.replace(/\D/g, "").includes(searchLower.replace(/\D/g, ""))
-            );
-        }
-
-        const total = rawLeads.length;
-        const interested = rawLeads.filter(l => l.status === "INTERESTED").length;
-        const converted = rawLeads.filter(l => l.status === "CONFIRMED" || l.status === "COMPLETED").length;
-        const conversionRate = total > 0 ? Math.round((converted / total) * 100) : 0;
-
-        const stats: LeadStats = {
-            total,
-            interested,
-            converted,
-            conversionRate
-        };
-
-        const totalItems = filtered.length;
-        const totalPages = Math.ceil(totalItems / limit);
-        const paginated = filtered.slice((page - 1) * limit, page * limit);
-
-        return {
-            leads: paginated,
-            stats,
-            total: totalItems,
-            page,
-            limit,
-            totalPages
-        };
+        if (res.status === 403 || res.status === 401) return null;
+        if (!res.ok) throw new Error("Erro ao buscar leads");
+        return res.json();
     } catch (error) {
-        console.error("Erro ao buscar leads:", error);
+        console.error("Erro no getLeads service:", error);
         return null;
     }
 }
 
 export async function deleteLead(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-        await prisma.lead.delete({
-            where: { id }
+        const cookie = (await headers()).get("cookie") || "";
+        const res = await fetch(`${API_URL}/api/admin/leads/${id}`, {
+            method: "DELETE",
+            headers: { Cookie: cookie },
         });
+
+        const result = await res.json();
+        if (!res.ok) return { success: false, error: result.error || "Erro ao deletar lead" };
         return { success: true };
     } catch (error) {
-        console.error("Erro ao deletar lead:", error);
+        console.error("Erro no deleteLead service:", error);
         return { success: false, error: "Erro ao deletar lead" };
+    }
+}
+
+export async function exportLeads(): Promise<any[] | null> {
+    try {
+        const cookie = (await headers()).get("cookie") || "";
+        const res = await fetch(`${API_URL}/api/admin/leads/export`, {
+            headers: { Cookie: cookie },
+        });
+
+        if (res.status === 403 || res.status === 401) return null;
+        if (!res.ok) throw new Error("Erro ao exportar leads");
+        return res.json();
+    } catch (error) {
+        console.error("Erro no exportLeads service:", error);
+        return null;
     }
 }

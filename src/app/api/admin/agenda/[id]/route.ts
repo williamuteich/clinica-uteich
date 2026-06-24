@@ -159,6 +159,18 @@ async function _PUT(request: Request, ctx: Ctx) {
     });
 
     const decryptedUpdated = await decryptData(updated);
+
+    if (encryptedBody.status) {
+      try {
+        await prisma.lead.updateMany({
+          where: { appointmentId: id },
+          data: { status: encryptedBody.status },
+        });
+      } catch (e) {
+        console.error("Erro ao atualizar status do lead:", e);
+      }
+    }
+
     if (decryptedUpdated.patient?.phone) {
       try {
         decryptedUpdated.patient.phone = await decrypt(decryptedUpdated.patient.phone);
@@ -213,6 +225,16 @@ async function _DELETE(_req: Request, ctx: Ctx) {
     });
 
     const decryptedDeleted = await decryptData(deleted);
+
+    try {
+      await prisma.lead.updateMany({
+        where: { appointmentId: id },
+        data: { status: "CANCELLED" },
+      });
+    } catch (e) {
+      console.error("Erro ao atualizar status do lead ao deletar agendamento:", e);
+    }
+
     if (decryptedDeleted.patient?.phone) {
       try {
         decryptedDeleted.patient.phone = await decrypt(decryptedDeleted.patient.phone);

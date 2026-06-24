@@ -1,6 +1,96 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 import { encrypt, decrypt } from "@/src/lib/encrypted-fields";
+import { LeadInput } from "@/src/types/dashboard/leads";
+
+async function saveLeadStepOne(input: LeadInput) {
+  const encryptedName = await encrypt(input.name);
+  const encryptedPhone = await encrypt(input.phone);
+  const encryptedServiceType = input.serviceType ? await encrypt(input.serviceType) : null;
+  const encryptedObservation = input.observation ? await encrypt(input.observation) : null;
+
+  const data = {
+    name: encryptedName,
+    phone: encryptedPhone,
+    serviceType: encryptedServiceType,
+    observation: encryptedObservation,
+    gclid: input.gclid || null,
+    utmSource: input.utmSource || null,
+    utmMedium: input.utmMedium || null,
+    utmCampaign: input.utmCampaign || null,
+    utmContent: input.utmContent || null,
+    utmTerm: input.utmTerm || null,
+  };
+
+  if (input.leadId) {
+    return prisma.lead.update({
+      where: { id: input.leadId },
+      data,
+    });
+  }
+
+  return prisma.lead.create({
+    data: {
+      ...data,
+      status: "INTERESTED",
+      step: 1,
+    },
+  });
+}
+
+async function findExistingLeadByPhone(cleanPhoneInput: string): Promise<string | null> {
+  try {
+    const leads = await prisma.lead.findMany({ select: { id: true, phone: true } });
+    for (const l of leads) {
+      const decryptedPhone = await decrypt(l.phone);
+      if (decryptedPhone.replace(/\D/g, "") === cleanPhoneInput) {
+        return l.id;
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao buscar lead por telefone:", err);
+  }
+  return null;
+}
+
+async function syncLeadStepTwo(appointmentId: string, input: LeadInput) {
+  const cleanPhone = input.phone.replace(/\D/g, "");
+  const targetLeadId = input.leadId || await findExistingLeadByPhone(cleanPhone);
+
+  if (targetLeadId) {
+    return prisma.lead.update({
+      where: { id: targetLeadId },
+      data: {
+        status: "PENDING",
+        step: 2,
+        appointmentId,
+      },
+    });
+  }
+
+  const encryptedName = await encrypt(input.name);
+  const encryptedPhone = await encrypt(input.phone);
+  const encryptedServiceType = input.serviceType ? await encrypt(input.serviceType) : null;
+  const encryptedObservation = input.observation ? await encrypt(input.observation) : null;
+
+  return prisma.lead.create({
+    data: {
+      name: encryptedName,
+      phone: encryptedPhone,
+      serviceType: encryptedServiceType,
+      observation: encryptedObservation,
+      status: "PENDING",
+      step: 2,
+      appointmentId,
+      gclid: input.gclid || null,
+      utmSource: input.utmSource || null,
+      utmMedium: input.utmMedium || null,
+      utmCampaign: input.utmCampaign || null,
+      utmContent: input.utmContent || null,
+      utmTerm: input.utmTerm || null,
+    },
+  });
+}
 
 export async function GET(request: Request) {
   try {
@@ -47,10 +137,44 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, serviceType, observation, date, time, acceptedTerms, leadId } = body;
+    const {
+      name,
+      phone,
+      serviceType,
+      observation,
+      date,
+      time,
+      acceptedTerms,
+      leadId,
+      gclid,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      utmContent,
+      utmTerm
+    } = body;
 
-    if (!name || !phone || !date || !time) {
-      return NextResponse.json({ error: "Todos os campos obrigatórios devem ser preenchidos" }, { status: 400 });
+    if (!name || !phone) {
+      return NextResponse.json({ error: "Nome e telefone são obrigatórios" }, { status: 400 });
+    }
+
+    const leadInput: LeadInput = {
+      name,
+      phone,
+      serviceType,
+      observation,
+      leadId,
+      gclid,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      utmContent,
+      utmTerm
+    };
+
+    if (!date || !time) {
+      const lead = await saveLeadStepOne(leadInput);
+      return NextResponse.json({ success: true, leadId: lead.id });
     }
 
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -158,19 +282,10 @@ export async function POST(request: Request) {
       },
     });
 
-    if (leadId) {
-      try {
-        await prisma.lead.update({
-          where: { id: leadId },
-          data: {
-            status: "PENDING",
-            step: 2,
-            appointmentId: newAppointment.id,
-          },
-        });
-      } catch (e) {
-        console.error("Erro ao atualizar lead:", e);
-      }
+    try {
+      await syncLeadStepTwo(newAppointment.id, leadInput);
+    } catch (e) {
+      console.error("Erro ao sincronizar lead na Etapa 2:", e);
     }
 
     return NextResponse.json({

@@ -63,6 +63,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
           description: encDesc,
         },
       });
+
+      try {
+        await prisma.lead.updateMany({
+          where: { appointmentId: id },
+          data: { status: "CANCELLED" },
+        });
+      } catch (e) {
+        console.error("Erro ao atualizar status do lead no bot:", e);
+      }
+
       return NextResponse.json({
         id,
         status: updated.status,
@@ -88,6 +98,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
           description: encDesc,
         },
       });
+
+      try {
+        await prisma.lead.updateMany({
+          where: { appointmentId: id },
+          data: { status: "PENDING" },
+        });
+      } catch (e) {
+        console.error("Erro ao atualizar status do lead no bot:", e);
+      }
+
       return NextResponse.json({
         id,
         data_hora: updated.scheduledAt.toISOString(),
