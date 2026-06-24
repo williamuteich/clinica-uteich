@@ -1,4 +1,4 @@
-import { ShieldCheck, Key, CalendarDays, History, Users, ClipboardList, ClipboardCheck, Package, Puzzle } from "lucide-react";
+import { ShieldCheck, Key, CalendarDays, History, Users, ClipboardList, ClipboardCheck, Package, Puzzle, TrendingUp } from "lucide-react";
 import { NavConfig } from "../types/dashboard/navigation";
 
 export type NavSection = "CLÍNICA" | "ADMINISTRAÇÃO" | "SISTEMA";
@@ -15,6 +15,13 @@ export const ADMIN_NAVIGATION: NavConfig[] = [
         title: "Pacientes",
         href: "/admin/pacientes",
         icon: Users,
+        resource: "pacientes",
+        section: "CLÍNICA"
+    },
+    {
+        title: "Leads",
+        href: "/admin/leads",
+        icon: TrendingUp,
         resource: "pacientes",
         section: "CLÍNICA"
     },
