@@ -14,6 +14,7 @@ import { getLeads, deleteLead } from "@/src/services/leads";
 import { useDebounce } from "@/src/hook/use-debounce";
 import { SearchInput } from "@/src/app/components/admin/search-input";
 import { Pagination } from "@/src/app/components/admin/pagination";
+import { SelectInput } from "@/src/app/components/admin/select-input";
 
 const LeadRow = memo(({
     lead,
@@ -213,18 +214,18 @@ export function LeadsManagement({ initialData }: { initialData: { leads: Lead[];
                         className="w-[280px]"
                     />
 
-                    <select
+                    <SelectInput
                         value={filters.status}
-                        onChange={(e) => handleStatusFilterChange(e.target.value)}
-                        className="h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="">Todos os Status</option>
-                        <option value="INTERESTED">Interessados</option>
-                        <option value="PENDING">Pendentes</option>
-                        <option value="CONFIRMED">Confirmados</option>
-                        <option value="CANCELLED">Cancelados</option>
-                        <option value="COMPLETED">Realizados</option>
-                    </select>
+                        onChange={handleStatusFilterChange}
+                        options={[
+                            { value: "INTERESTED", label: "Interessados" },
+                            { value: "PENDING", label: "Pendentes" },
+                            { value: "CONFIRMED", label: "Confirmados" },
+                            { value: "CANCELLED", label: "Cancelados" },
+                            { value: "COMPLETED", label: "Realizados" },
+                        ]}
+                        placeholder="Todos os Status"
+                    />
 
                     {isPending && <Loader2 className="h-5 w-5 animate-spin text-blue-500" />}
                 </div>

@@ -114,5 +114,18 @@ export interface TreatmentOption {
     valuePlan?: number;
 }
 
+export interface SelectInputOption {
+    value: string;
+    label: string;
+}
+
+export interface SelectInputProps {
+    value: string;
+    onChange: (val: string) => void;
+    options: SelectInputOption[];
+    placeholder?: string;
+    className?: string;
+}
+
 
 
