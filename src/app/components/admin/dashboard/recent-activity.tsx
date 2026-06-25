@@ -8,9 +8,9 @@ import {
     YAxis,
     Tooltip
 } from "recharts";
-import { Clock, CalendarDays } from "lucide-react";
+import { Clock, CalendarDays, MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { maskPhone } from "@/src/lib/masks";
+import { maskPhone, phoneToWhatsapp } from "@/src/lib/masks";
 import { RecentActivityProps } from "@/src/types/dashboard/dashboard";
 
 const COLORS = ["#0284c7", "#4f46e5", "#10b981", "#f59e0b", "#64748b"];
@@ -106,8 +106,21 @@ export function RecentActivity({
                             <div key={lead.id} className="flex items-start justify-between pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                                 <div className="min-w-0">
                                     <p className="text-sm font-bold text-slate-800 truncate">{lead.name}</p>
-                                    <p className="text-xs text-slate-500 font-medium mt-0.5">{maskPhone(lead.phone)}</p>
-                                    <div className="flex items-center gap-2 mt-1">
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-xs text-slate-500 font-medium">{maskPhone(lead.phone)}</p>
+                                        <a
+                                            href={`https://api.whatsapp.com/send/?phone=${phoneToWhatsapp(lead.phone)}&text=${encodeURIComponent(
+                                                `Olá ${lead.name}, tudo bem? Sou da Uteich Odontologia. Vi que você iniciou o agendamento de uma consulta conosco pelo site mas não chegou a escolher o horário. Gostaria que eu te ajudasse a encontrar o melhor dia/hora para você?`
+                                            )}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-[9px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200 font-bold transition-colors"
+                                        >
+                                            <MessageCircle className="w-2.5 h-2.5" />
+                                            WhatsApp
+                                        </a>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1.5">
                                         <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-semibold truncate max-w-[120px]" title={lead.serviceType || "Indefinido"}>
                                             {lead.serviceType || "Indefinido"}
                                         </span>

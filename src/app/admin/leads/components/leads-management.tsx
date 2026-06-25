@@ -6,11 +6,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, User, CheckCircle2, BarChart3, HelpCircle, Download } from "lucide-react";
+import { Loader2, User, CheckCircle2, BarChart3, HelpCircle, Download, MessageCircle } from "lucide-react";
 import { Lead, LeadStats } from "@/src/types/dashboard/leads";
 import { ToastContainer, toast } from "react-toastify";
 import { DeleteDialogGeneric } from "@/src/app/components/admin/delete-dialog-generic";
-import { maskPhone } from "@/src/lib/masks";
+import { maskPhone, phoneToWhatsapp } from "@/src/lib/masks";
 import { getLeads, deleteLead, exportLeads } from "@/src/services/leads";
 import { useDebounce } from "@/src/hook/use-debounce";
 import { SearchInput } from "@/src/app/components/admin/search-input";
@@ -42,7 +42,7 @@ const LeadRow = memo(({
                 );
             case "CONFIRMED":
                 return (
-                    <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-600 border-indigo-200/50">
+                    <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-200/50">
                         Confirmado
                     </Badge>
                 );
@@ -54,7 +54,7 @@ const LeadRow = memo(({
                 );
             case "COMPLETED":
                 return (
-                    <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-200/50">
+                    <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-600 border-indigo-200/50">
                         Realizado
                     </Badge>
                 );
@@ -79,7 +79,22 @@ const LeadRow = memo(({
                     <span className="font-bold text-slate-700">{lead.name}</span>
                 </div>
             </TableCell>
-            <TableCell className="text-sm py-4">{maskPhone(lead.phone)}</TableCell>
+            <TableCell className="text-sm py-4">
+                <div className="flex flex-col gap-1 items-start">
+                    <span className="font-medium text-slate-700">{maskPhone(lead.phone)}</span>
+                    <a
+                        href={`https://api.whatsapp.com/send/?phone=${phoneToWhatsapp(lead.phone)}&text=${encodeURIComponent(
+                            `Olá ${lead.name}, tudo bem? Sou da Uteich Odontologia. Vi que você iniciou o agendamento de uma consulta conosco pelo site mas não chegou a escolher o horário. Gostaria que eu te ajudasse a encontrar o melhor dia/hora para você?`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[9px] text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200 font-bold transition-colors"
+                    >
+                        <MessageCircle className="w-2.5 h-2.5" />
+                        WhatsApp
+                    </a>
+                </div>
+            </TableCell>
             <TableCell className="text-sm py-4">{lead.serviceType || "-"}</TableCell>
             <TableCell className="py-4">{getStatusBadge(lead.status)}</TableCell>
             <TableCell className="text-sm text-slate-500 py-4">
