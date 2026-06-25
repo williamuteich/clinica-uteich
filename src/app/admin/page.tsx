@@ -1,8 +1,8 @@
-import { requireAdminContext } from "@/src/lib/auth-helpers-server";
 import { getDashboardStats } from "@/src/services/dashboard";
 import { DashboardOverview } from "@/src/app/components/admin/dashboard/dashboard-overview";
 import { LayoutDashboard } from "lucide-react";
 import { Suspense } from "react";
+import { DashboardSkeleton } from "@/src/app/components/admin/dashboard/dashboard-skeleton";
 
 export const metadata = {
     title: "Dashboard | Uteich Odontologia",
@@ -23,9 +23,7 @@ async function DashboardContent() {
     return <DashboardOverview data={data} />;
 }
 
-export default async function AdminPage() {
-    await requireAdminContext();
-
+export default function AdminPage() {
     return (
         <div className="flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div>
@@ -38,7 +36,7 @@ export default async function AdminPage() {
                 </p>
             </div>
 
-            <Suspense fallback={<div className="h-96 flex items-center justify-center text-slate-400">Carregando dados do dashboard...</div>}>
+            <Suspense fallback={<DashboardSkeleton />}>
                 <DashboardContent />
             </Suspense>
         </div>
