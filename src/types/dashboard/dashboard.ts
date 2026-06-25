@@ -10,7 +10,10 @@ export interface DashboardStats {
 export interface DashboardDailyData {
     date: string;
     leads: number;
-    appointments: number;
+    confirmed: number;
+    completed: number;
+    pending: number;
+    cancelled: number;
 }
 
 export interface DashboardSourceData {

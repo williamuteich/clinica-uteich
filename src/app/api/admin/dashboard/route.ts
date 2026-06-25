@@ -23,10 +23,10 @@ export async function GET() {
 
     try {
         const now = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(now.getDate() - 30);
-        const sixtyDaysAgo = new Date();
-        sixtyDaysAgo.setDate(now.getDate() - 60);
+
+        const startOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
 
         const [
             currentLeads,
@@ -36,33 +36,33 @@ export async function GET() {
             totalPatients
         ] = await Promise.all([
             prisma.lead.findMany({
-                where: { createdAt: { gte: thirtyDaysAgo } },
+                where: { createdAt: { gte: startOfCurrentMonth } },
                 orderBy: { createdAt: "desc" }
             }),
             prisma.lead.count({
                 where: {
                     createdAt: {
-                        gte: sixtyDaysAgo,
-                        lt: thirtyDaysAgo
+                        gte: startOfPrevMonth,
+                        lte: endOfPrevMonth
                     }
                 }
             }),
             prisma.appointment.findMany({
                 where: {
-                    createdAt: { gte: thirtyDaysAgo }
+                    scheduledAt: { gte: startOfCurrentMonth }
                 },
                 include: {
                     patient: {
                         select: { name: true }
                     }
                 },
-                orderBy: { createdAt: "desc" }
+                orderBy: { scheduledAt: "asc" }
             }),
             prisma.appointment.count({
                 where: {
-                    createdAt: {
-                        gte: sixtyDaysAgo,
-                        lt: thirtyDaysAgo
+                    scheduledAt: {
+                        gte: startOfPrevMonth,
+                        lte: endOfPrevMonth
                     }
                 }
             }),
@@ -79,8 +79,7 @@ export async function GET() {
                 serviceType: await tryDecrypt(l.serviceType),
                 status: l.status,
                 utmSource: l.utmSource,
-                utmMedium: l.utmMedium,
-                utmCampaign: l.utmCampaign,
+                gclid: l.gclid,
                 createdAt: l.createdAt.toISOString()
             }))
         );
@@ -131,22 +130,37 @@ export async function GET() {
         );
 
         const currLeadsCount = decryptedLeads.length;
-        const leadsTrend = prevLeadsCount ? ((currLeadsCount - prevLeadsCount) / prevLeadsCount) * 100 : 0;
+        const leadsTrend = prevLeadsCount
+            ? ((currLeadsCount - prevLeadsCount) / prevLeadsCount) * 100
+            : 0;
 
         const currAppointmentsCount = decryptedAppointments.length;
-        const appointmentsTrend = prevAppointmentsCount ? ((currAppointmentsCount - prevAppointmentsCount) / prevAppointmentsCount) * 100 : 0;
+        const appointmentsTrend = prevAppointmentsCount
+            ? ((currAppointmentsCount - prevAppointmentsCount) / prevAppointmentsCount) * 100
+            : 0;
 
-        const convertedLeadsCount = decryptedLeads.filter(l => 
+        const convertedLeadsCount = decryptedLeads.filter(l =>
             ["PENDING", "CONFIRMED", "COMPLETED"].includes(l.status)
         ).length;
-        const conversionRate = currLeadsCount ? Math.round((convertedLeadsCount / currLeadsCount) * 100) : 0;
+        const conversionRate = currLeadsCount
+            ? Math.round((convertedLeadsCount / currLeadsCount) * 100)
+            : 0;
 
-        const dailyDataMap: { [dateStr: string]: { leads: number; appointments: number } } = {};
-        for (let i = 29; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(now.getDate() - i);
+        const daysInMonth = now.getDate();
+        const dailyDataMap: {
+            [dateStr: string]: {
+                leads: number;
+                confirmed: number;
+                completed: number;
+                pending: number;
+                cancelled: number;
+            }
+        } = {};
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const d = new Date(now.getFullYear(), now.getMonth(), day);
             const dateStr = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-            dailyDataMap[dateStr] = { leads: 0, appointments: 0 };
+            dailyDataMap[dateStr] = { leads: 0, confirmed: 0, completed: 0, pending: 0, cancelled: 0 };
         }
 
         decryptedLeads.forEach(l => {
@@ -157,10 +171,14 @@ export async function GET() {
         });
 
         decryptedAppointments.forEach(a => {
-            const dateStr = new Date(a.createdAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
-            if (dailyDataMap[dateStr]) {
-                dailyDataMap[dateStr].appointments++;
-            }
+            const dateStr = new Date(a.scheduledAt).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+            if (!dailyDataMap[dateStr]) return;
+
+            const status = a.status.toUpperCase();
+            if (status === "CONFIRMED") dailyDataMap[dateStr].confirmed++;
+            else if (status === "COMPLETED") dailyDataMap[dateStr].completed++;
+            else if (status === "PENDING") dailyDataMap[dateStr].pending++;
+            else if (status === "CANCELLED") dailyDataMap[dateStr].cancelled++;
         });
 
         const dailyData = Object.entries(dailyDataMap).map(([date, counts]) => ({

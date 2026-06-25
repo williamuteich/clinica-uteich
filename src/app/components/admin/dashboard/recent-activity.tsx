@@ -11,19 +11,9 @@ import {
 import { Clock, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { maskPhone } from "@/src/lib/masks";
-import {
-    DashboardSpecialtyData,
-    DashboardRecentLead,
-    DashboardRecentAppointment
-} from "@/src/types/dashboard/dashboard";
+import { RecentActivityProps } from "@/src/types/dashboard/dashboard";
 
 const COLORS = ["#0284c7", "#4f46e5", "#10b981", "#f59e0b", "#64748b"];
-
-interface RecentActivityProps {
-    specialtyData: DashboardSpecialtyData[];
-    recentLeads: DashboardRecentLead[];
-    recentAppointments: DashboardRecentAppointment[];
-}
 
 export function RecentActivity({
     specialtyData,
@@ -46,7 +36,7 @@ export function RecentActivity({
                 );
             case "CONFIRMED":
                 return (
-                    <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-600 border-indigo-200/50">
+                    <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-200/50">
                         Confirmado
                     </Badge>
                 );
@@ -58,7 +48,7 @@ export function RecentActivity({
                 );
             case "COMPLETED":
                 return (
-                    <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 border-emerald-200/50">
+                    <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-600 border-indigo-200/50">
                         Realizado
                     </Badge>
                 );
