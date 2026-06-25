@@ -130,6 +130,12 @@ async function syncLeadStepTwo(appointmentId: string, input: LeadInput) {
         step: 2,
         appointmentId,
         conversionUrl: input.conversionUrl || undefined,
+        gclid: input.gclid || undefined,
+        utmSource: input.utmSource || undefined,
+        utmMedium: input.utmMedium || undefined,
+        utmCampaign: input.utmCampaign || undefined,
+        utmContent: input.utmContent || undefined,
+        utmTerm: input.utmTerm || undefined,
       },
     });
   }

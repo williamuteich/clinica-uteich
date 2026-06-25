@@ -150,12 +150,16 @@ function SchedulingForm() {
     setErrorMessage("");
 
     try {
-      const gclid = searchParams.get("gclid") || "";
-      const utmSource = searchParams.get("utm_source") || "";
-      const utmMedium = searchParams.get("utm_medium") || "";
-      const utmCampaign = searchParams.get("utm_campaign") || "";
-      const utmContent = searchParams.get("utm_content") || "";
-      const utmTerm = searchParams.get("utm_term") || "";
+      const getParam = (pName: string) => {
+        if (typeof window === "undefined") return "";
+        return searchParams.get(pName) || sessionStorage.getItem(pName) || localStorage.getItem(pName) || "";
+      };
+      const gclid = getParam("gclid");
+      const utmSource = getParam("utm_source");
+      const utmMedium = getParam("utm_medium");
+      const utmCampaign = getParam("utm_campaign");
+      const utmContent = getParam("utm_content");
+      const utmTerm = getParam("utm_term");
 
       const res = await fetch("/api/agendamentos", {
         method: "POST",
@@ -203,12 +207,16 @@ function SchedulingForm() {
     setSubmitting(true);
     setErrorMessage("");
     try {
-      const gclid = searchParams.get("gclid") || "";
-      const utmSource = searchParams.get("utm_source") || "";
-      const utmMedium = searchParams.get("utm_medium") || "";
-      const utmCampaign = searchParams.get("utm_campaign") || "";
-      const utmContent = searchParams.get("utm_content") || "";
-      const utmTerm = searchParams.get("utm_term") || "";
+      const getParam = (pName: string) => {
+        if (typeof window === "undefined") return "";
+        return searchParams.get(pName) || sessionStorage.getItem(pName) || localStorage.getItem(pName) || "";
+      };
+      const gclid = getParam("gclid");
+      const utmSource = getParam("utm_source");
+      const utmMedium = getParam("utm_medium");
+      const utmCampaign = getParam("utm_campaign");
+      const utmContent = getParam("utm_content");
+      const utmTerm = getParam("utm_term");
 
       const res = await fetch("/api/agendamentos", {
         method: "POST",
