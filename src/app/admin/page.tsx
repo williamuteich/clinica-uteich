@@ -2,7 +2,7 @@ import { getDashboardStats } from "@/src/services/dashboard";
 import { DashboardOverview } from "@/src/app/components/admin/dashboard/dashboard-overview";
 import { LayoutDashboard } from "lucide-react";
 import { Suspense } from "react";
-import { DashboardSkeleton } from "@/src/app/components/admin/dashboard/dashboard-skeleton";
+import { DashboardSkeleton } from "../components/admin/dashboard/dashboard-skeleton";
 
 export const metadata = {
     title: "Dashboard | Uteich Odontologia",
