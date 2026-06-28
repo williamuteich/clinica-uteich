@@ -293,10 +293,14 @@ export function ServicesHome() {
                                     <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                                         {service.description}
                                     </p>
-                                    <div className={`mt-5 pt-4 border-t border-border/70 flex items-center justify-between text-sm font-semibold ${isEmergency ? 'text-red-600' : 'text-primary'}`}>
-                                        <span>{isEmergency ? 'Ligar agora' : 'Agendar consulta'}</span>
-                                        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
-                                    </div>
+                                    {isEmergency && (
+                                        <div className="mt-auto pt-5">
+                                            <div className="pt-4 border-t border-border/70 flex items-center justify-between text-sm font-semibold text-red-600">
+                                                <span>Ligar agora</span>
+                                                <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         );
@@ -324,12 +328,11 @@ export function ServicesHome() {
                                 key={service.id}
                                 className="h-full transform-gpu"
                             >
-                                <Link
-                                    href={`/agendar?servico=${encodeURIComponent(service.name)}`}
-                                    className={`group relative overflow-hidden bg-white h-full rounded-none shadow-md hover:shadow-xl transition-all duration-200 cursor-pointer block border border-border/70 ${accent.ring}`}
+                                <div
+                                    className="relative overflow-hidden bg-white h-full rounded-none shadow-sm border border-border/70"
                                 >
                                     {cardContent}
-                                </Link>
+                                </div>
                             </motion.li>
                         );
                     })}

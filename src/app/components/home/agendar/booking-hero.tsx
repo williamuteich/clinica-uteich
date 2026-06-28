@@ -15,8 +15,8 @@ export function BookingHero({ year }: BookingHeroProps) {
           <span className="text-accent-light">Poucos Passos.</span>
         </h1>
         <p className="mt-4 text-sm text-white/80 leading-relaxed">
-          Escolha o procedimento de sua preferência, data e horário ideal.
-          Nosso sistema verificará automaticamente a agenda da clínica e se você já possui cadastro.
+          Sua consulta inicial é uma <strong className="font-semibold text-accent-light">Avaliação Gratuita e Sem Compromisso</strong>. 
+          Escolha a data e horário ideais para darmos o primeiro passo rumo ao seu novo sorriso.
         </p>
         <div className="mt-8 space-y-4">
           <div className="flex items-start gap-3">

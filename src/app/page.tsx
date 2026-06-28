@@ -2,6 +2,7 @@ import { HeaderHome } from "./components/home/HeaderHome";
 import BannerHome from "./components/home/BannerHome";
 import { FooterHome } from "./components/home/FooterHome";
 import { ServicesHome } from "./components/home/Services";
+import { SchedulingCTA } from "./components/home/SchedulingCTA";
 import { AboutHome } from "./components/home/About";
 import DepoimentsHome from "./components/home/Depoiments";
 import { CardAgendaHome } from "./components/home/CardAgenda";
@@ -14,6 +15,7 @@ export default async function LoginPage() {
     <main className="flex min-h-screen w-full flex-col">
       <HeaderHome />
       <BannerHome />
+      <SchedulingCTA />
       <ServicesHome />
       <AboutHome />
       <DepoimentsHome />

@@ -55,8 +55,24 @@ export default function BannerHome() {
                     </p>
 
                     <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                        <Link
-                            href="/agendar"
+                        <a
+                            href="/#agendamento"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const element = document.querySelector("#agendamento");
+                                if (element) {
+                                    const offset = 80;
+                                    const bodyRect = document.body.getBoundingClientRect().top;
+                                    const elementRect = element.getBoundingClientRect().top;
+                                    const elementPosition = elementRect - bodyRect;
+                                    const offsetPosition = elementPosition - offset;
+
+                                    window.scrollTo({
+                                        top: offsetPosition,
+                                        behavior: "smooth"
+                                    });
+                                }
+                            }}
                             className="group relative inline-flex items-center justify-center gap-2 bg-linear-to-r from-dental-light to-dental-sky text-primary-deep px-6 py-4 text-xs font-bold uppercase tracking-wider rounded-none overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(110,211,243,0.35)]"
                         >
                             <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:translate-x-0 transition-transform duration-300 ease-out" />
@@ -64,7 +80,7 @@ export default function BannerHome() {
                                 Agendar consulta de avaliação
                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                             </span>
-                        </Link>
+                        </a>
 
                         <a
                             href="tel:5551991581059"

@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { HeaderHome } from "../components/home/HeaderHome";
-import { FooterHome } from "../components/home/FooterHome";
 import { AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
-import { BookingHero } from "./components/booking-hero";
-import { StepIndicator } from "./components/step-indicator";
-import { ErrorMessageAlert } from "./components/error-message-alert";
-import { StepOneForm } from "./components/step-one-form";
-import { StepTwoForm } from "./components/step-two-form";
+import { BookingHero } from "./agendar/booking-hero";
+import { StepIndicator } from "./agendar/step-indicator";
+import { ErrorMessageAlert } from "./agendar/error-message-alert";
+import { StepOneForm } from "./agendar/step-one-form";
+import { StepTwoForm } from "./agendar/step-two-form";
 
 const generateTimeSlots = () => {
   const slots = [];
@@ -28,25 +26,17 @@ const generateTimeSlots = () => {
 
 const TIME_SLOTS = generateTimeSlots();
 
-function SchedulingForm() {
-  const searchParams = useSearchParams();
-  const initialService = searchParams.get("servico") || "";
+const isSunday = (dateStr: string) => {
+  if (!dateStr || dateStr.length < 10) return false;
+  const dateObj = new Date(dateStr + "T00:00:00");
+  if (isNaN(dateObj.getTime())) return false;
+  const year = dateObj.getFullYear();
+  if (year < 2000) return false;
+  return dateObj.getDay() === 0;
+};
 
-  const getMappedService = (srv: string) => {
-    if (!srv) return "";
-    const decoded = decodeURIComponent(srv);
-    const validServices = [
-      "Avaliação Gratuita",
-      "Clínico Geral",
-      "Prótese e Implante",
-      "Aparelho Ortodôntico",
-      "Tratamento de Canal",
-      "Estética e Clareamento",
-      "Extração e Restauração"
-    ];
-    const matched = validServices.find(s => s.toLowerCase() === decoded.toLowerCase());
-    return matched || "Outros";
-  };
+function SchedulingWizardInner() {
+  const searchParams = useSearchParams();
 
   const getDefaultDate = () => {
     const d = new Date();
@@ -59,7 +49,7 @@ function SchedulingForm() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [serviceType, setServiceType] = useState(getMappedService(initialService));
+  const [serviceType, setServiceType] = useState("Avaliação Gratuita");
   const [observation, setObservation] = useState("");
   const [selectedDate, setSelectedDate] = useState(getDefaultDate);
   const [selectedTime, setSelectedTime] = useState("");
@@ -79,12 +69,6 @@ function SchedulingForm() {
     }
   }, []);
 
-  useEffect(() => {
-    if (initialService) {
-      setServiceType(getMappedService(initialService));
-    }
-  }, [initialService]);
-
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/\D/g, "");
     let formatted = raw;
@@ -99,6 +83,11 @@ function SchedulingForm() {
 
   useEffect(() => {
     if (!selectedDate) return;
+    if (isSunday(selectedDate)) {
+      setBookedTimes([]);
+      setSelectedTime("");
+      return;
+    }
     const fetchBookedTimes = async () => {
       setLoadingSlots(true);
       setErrorMessage("");
@@ -288,7 +277,9 @@ function SchedulingForm() {
     return false;
   };
 
-  const availableTimeSlots = TIME_SLOTS.filter((timeStr) => !isTimeSlotDisabled(timeStr));
+  const availableTimeSlots = isSunday(selectedDate)
+    ? []
+    : TIME_SLOTS.filter((timeStr) => !isTimeSlotDisabled(timeStr));
 
   const getMinDate = () => {
     return new Date().toLocaleDateString("en-CA");
@@ -297,90 +288,75 @@ function SchedulingForm() {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const dateStr = e.target.value;
     if (!dateStr) return;
-    const dateObj = new Date(dateStr + "T00:00:00");
-    if (dateObj.getDay() === 0) {
+    
+    setSelectedDate(dateStr);
+    
+    if (isSunday(dateStr)) {
       setErrorMessage("A clínica atende aos domingos somente em casos de emergência.");
       setShowEmergencyContact(true);
-      setSelectedDate("");
       setSelectedTime("");
     } else {
       setErrorMessage("");
       setShowEmergencyContact(false);
-      setSelectedDate(dateStr);
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <HeaderHome />
-      <main className="flex-1 py-12 md:py-20 relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: "radial-gradient(circle at 1px 1px, var(--color-primary) 1px, transparent 0)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="mx-auto max-w-[1050px] px-4 relative z-10">
-          <div className="grid md:grid-cols-[1.1fr_1.9fr] gap-8 bg-white shadow-xl rounded-2xl overflow-hidden border border-border">
-            <BookingHero year={new Date().getFullYear()} />
-            <div className="p-6 md:p-10 flex flex-col justify-center min-h-[500px]">
-              {step < 3 && <StepIndicator step={step} />}
-              {errorMessage && (
-                <ErrorMessageAlert message={errorMessage} showEmergency={showEmergencyContact} />
-              )}
-              <AnimatePresence mode="wait">
-                {step === 1 && (
-                  <StepOneForm
-                    name={name}
-                    setName={setName}
-                    phone={phone}
-                    onChangePhone={handlePhoneChange}
-                    serviceType={serviceType}
-                    setServiceType={setServiceType}
-                    observation={observation}
-                    setObservation={setObservation}
-                    acceptedTerms={acceptedTerms}
-                    setAcceptedTerms={setAcceptedTerms}
-                    onSubmit={handleNextStep}
-                    turnstileToken={turnstileToken}
-                    setTurnstileToken={setTurnstileToken}
-                  />
-                )}
-                {step === 2 && (
-                  <StepTwoForm
-                    minDate={getMinDate()}
-                    selectedDate={selectedDate}
-                    onDateChange={handleDateChange}
-                    loadingSlots={loadingSlots}
-                    availableTimeSlots={availableTimeSlots}
-                    selectedTime={selectedTime}
-                    setSelectedTime={setSelectedTime}
-                    onBack={() => setStep(1)}
-                    submitting={submitting}
-                    onSubmit={handleSubmit}
-                  />
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </main>
-      <FooterHome />
+    <div className="grid md:grid-cols-[1.1fr_1.9fr] gap-8 bg-white shadow-xl rounded-2xl overflow-hidden border border-border">
+      <BookingHero year={new Date().getFullYear()} />
+      <div className="p-6 md:p-10 flex flex-col justify-center min-h-[500px]">
+        {step < 3 && <StepIndicator step={step} />}
+        {errorMessage && (
+          <ErrorMessageAlert message={errorMessage} showEmergency={showEmergencyContact} />
+        )}
+        <AnimatePresence mode="wait">
+          {step === 1 && (
+            <StepOneForm
+              name={name}
+              setName={setName}
+              phone={phone}
+              onChangePhone={handlePhoneChange}
+              serviceType={serviceType}
+              setServiceType={setServiceType}
+              observation={observation}
+              setObservation={setObservation}
+              acceptedTerms={acceptedTerms}
+              setAcceptedTerms={setAcceptedTerms}
+              onSubmit={handleNextStep}
+              turnstileToken={turnstileToken}
+              setTurnstileToken={setTurnstileToken}
+            />
+          )}
+          {step === 2 && (
+            <StepTwoForm
+              minDate={getMinDate()}
+              selectedDate={selectedDate}
+              onDateChange={handleDateChange}
+              loadingSlots={loadingSlots}
+              availableTimeSlots={availableTimeSlots}
+              selectedTime={selectedTime}
+              setSelectedTime={setSelectedTime}
+              onBack={() => setStep(1)}
+              submitting={submitting}
+              onSubmit={handleSubmit}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
 
-export default function AgendarPage() {
+export function SchedulingWizard() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex items-center justify-center p-12 bg-white rounded-2xl border border-border shadow-sm min-h-[500px]">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
         </div>
       }
     >
-      <SchedulingForm />
+      <SchedulingWizardInner />
     </Suspense>
   );
 }

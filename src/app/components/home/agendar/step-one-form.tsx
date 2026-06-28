@@ -29,7 +29,7 @@ export function StepOneForm({
     >
       <div>
         <h2 className="text-xl font-bold text-primary-deep">Como podemos te chamar?</h2>
-        <p className="text-xs text-muted-foreground mt-1">Preencha seus dados de contato para iniciarmos o agendamento.</p>
+        <p className="text-xs text-muted-foreground mt-1">Preencha seus dados para agendar sua <strong className="font-semibold text-primary">Avaliação Gratuita e Sem Compromisso</strong>.</p>
       </div>
       <div className="space-y-4">
         <div className="relative">
@@ -67,29 +67,7 @@ export function StepOneForm({
             Usaremos este número para verificar se você já tem cadastro e confirmar o atendimento.
           </p>
         </div>
-        <div className="relative">
-          <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
-            Serviço Desejado <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              required
-              value={serviceType}
-              onChange={(e) => setServiceType(e.target.value)}
-              className="w-full h-11 px-3.5 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-medium text-slate-800 bg-white"
-            >
-              <option value="">Selecione o serviço...</option>
-              <option value="Avaliação Gratuita">Avaliação Gratuita</option>
-              <option value="Clínico Geral">Clínico Geral</option>
-              <option value="Prótese e Implante">Prótese e Implante</option>
-              <option value="Aparelho Ortodôntico">Aparelho Ortodôntico</option>
-              <option value="Tratamento de Canal">Tratamento de Canal</option>
-              <option value="Estética e Clareamento">Estética e Clareamento</option>
-              <option value="Extração e Restauração">Extração e Restauração</option>
-              <option value="Outros">Outros</option>
-            </select>
-          </div>
-        </div>
+
         <div className="relative">
           <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
             Alguma observação ou sintoma? <span className="text-muted-foreground/60">(Opcional)</span>

@@ -74,15 +74,16 @@ export function HeaderHome() {
                         (51) 99158-1059
                     </a>
 
-                    <Link
-                        href="/agendar"
+                    <a
+                        href="/#agendamento"
+                        onClick={(e) => handleLinkClick(e, "/#agendamento")}
                         className={cn(
                             buttonVariants({ variant: "default" }),
                             "h-8 rounded-none bg-primary px-3 py-0 text-xs font-semibold leading-none text-primary-foreground shadow-none hover:bg-primary-deep hover:shadow-none hover:translate-y-0 inline-flex items-center justify-center"
                         )}
                     >
                         Agendar
-                    </Link>
+                    </a>
                 </div>
 
                 <button
@@ -106,16 +107,19 @@ export function HeaderHome() {
                                 {link.label}
                             </a>
                         ))}
-                        <Link
-                            href="/agendar"
-                            onClick={() => setIsOpen(false)}
+                        <a
+                            href="/#agendamento"
+                            onClick={(e) => {
+                                handleLinkClick(e, "/#agendamento");
+                                setIsOpen(false);
+                            }}
                             className={cn(
                                 buttonVariants({ variant: "default" }),
-                                "mt-2 rounded-none bg-primary text-primary-foreground hover:bg-primary-deep flex justify-center items-center"
+                                "mt-2 rounded-none bg-primary text-primary-foreground hover:bg-primary-deep flex justify-center items-center font-semibold"
                             )}
                         >
                             Agendar Consulta
-                        </Link>
+                        </a>
                         <a
                             href="tel:5551991581059"
                             onClick={() => setIsOpen(false)}
