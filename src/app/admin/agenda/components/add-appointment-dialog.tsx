@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Plus, Loader2, Search, AlertCircle, Info, UserCheck, UserX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-    Dialog,
     DialogContent,
     DialogDescription,
     DialogTitle,
@@ -321,7 +320,6 @@ export function AddAppointmentDialog({
                         <input
                             type="text"
                             inputMode="numeric"
-                            readOnly
                             value={estimatedValue}
                             onChange={(e) => {
                                 setEstimatedValue(maskCurrency(e.target.value));

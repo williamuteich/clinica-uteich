@@ -227,7 +227,6 @@ export function AppointmentDetailsDialog({
                             <input
                                 type="text"
                                 inputMode="numeric"
-                                readOnly
                                 value={estimatedValue}
                                 onChange={(e) => {
                                     setEstimatedValue(maskCurrency(e.target.value));

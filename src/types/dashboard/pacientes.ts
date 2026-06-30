@@ -105,6 +105,7 @@ export interface CreateAgendamentoInput {
   serviceType: string;
   estimatedValue: number;
   status?: Appointment["status"];
+  billingType?: string | null;
 }
 
 export interface UpdateAgendamentoInput {
@@ -112,6 +113,7 @@ export interface UpdateAgendamentoInput {
   serviceType?: string;
   estimatedValue?: number;
   status?: Appointment["status"];
+  billingType?: string | null;
 }
 
 export interface Budget {

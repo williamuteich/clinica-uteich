@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { CalendarDays, Search, X, UserCheck, UserX, Loader2, Plus, ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { CalendarDays, Search, X, UserCheck, UserX, Loader2, Plus, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PatientFound } from "@/src/types/dashboard/components";
 
