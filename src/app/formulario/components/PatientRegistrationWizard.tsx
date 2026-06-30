@@ -4,14 +4,40 @@ import { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, CheckCircle, ShieldAlert, Sparkles, User, MapPin, ClipboardList, Send } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import StandardAnamnesis from "./StandardAnamnesis";
 import OrthodonticAnamnesis from "./OrthodonticAnamnesis";
 import ChildAnamnesis from "./ChildAnamnesis";
 import SurgicalAnamnesis from "./SurgicalAnamnesis";
 import { AnamneseResponseValue } from "@/src/types/dashboard/anamnese";
-import { maskCPF, maskPhone, maskCEP } from "@/src/lib/masks";
+import { maskCPF, maskPhone, maskCEP, maskDate } from "@/src/lib/masks";
+
+const parseDateString = (dateStr: string) => {
+    const parts = dateStr.split("/");
+    if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        if (year >= 1900 && year <= new Date().getFullYear()) {
+            const d = new Date(year, month, day);
+            if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
+                return d;
+            }
+        }
+    }
+    return null;
+};
+
+const dateToIso = (dateStr: string) => {
+    const parsed = parseDateString(dateStr);
+    if (parsed) {
+        const y = parsed.getFullYear();
+        const m = String(parsed.getMonth() + 1).padStart(2, "0");
+        const d = String(parsed.getDate()).padStart(2, "0");
+        return `${y}-${m}-${d}`;
+    }
+    return "";
+};
 
 type PatientRegistrationWizardProps = {
     patientName: string;
@@ -60,13 +86,19 @@ export default function PatientRegistrationWizard({
 
     const [isMinor, setIsMinor] = useState(false);
     const [hasRepresentative, setHasRepresentative] = useState(false);
+    const [fillAddress, setFillAddress] = useState(false);
+    const [hasEmergencyContact, setHasEmergencyContact] = useState(false);
 
     useEffect(() => {
         if (!formData.birthDate) {
             setIsMinor(false);
             return;
         }
-        const birth = new Date(formData.birthDate);
+        const birth = parseDateString(formData.birthDate);
+        if (!birth) {
+            setIsMinor(false);
+            return;
+        }
         const today = new Date();
         let age = today.getFullYear() - birth.getFullYear();
         const m = today.getMonth() - birth.getMonth();
@@ -107,6 +139,7 @@ export default function PatientRegistrationWizard({
         if (field === "cpf" || field === "representativeCpf") masked = maskCPF(value);
         if (field === "phone" || field === "emergencyPhone") masked = maskPhone(value);
         if (field === "zipCode") masked = maskCEP(value);
+        if (field === "birthDate" || field === "representativeBirthDate") masked = maskDate(value);
 
         setFormData((prev) => ({
             ...prev,
@@ -115,17 +148,26 @@ export default function PatientRegistrationWizard({
     };
 
     const validateStep1 = () => {
-        const required = ["name", "birthDate", "phone", "gender", "zipCode", "state", "city", "neighborhood", "street", "number"];
+        const required = ["name", "birthDate", "phone", "gender"];
         if (formType !== "CHILD_ANAMNESIS") {
             required.push("cpf");
         }
         if (hasRepresentative) {
             required.push("representativeName", "representativeCpf", "representativeBirthDate");
         }
+        if (fillAddress) {
+            required.push("zipCode", "state", "city", "neighborhood", "street", "number");
+        }
+        if (hasEmergencyContact) {
+            required.push("emergencyName", "emergencyPhone");
+        }
 
         for (const f of required) {
             if (!formData[f as keyof typeof formData]) return false;
         }
+
+        if (!parseDateString(formData.birthDate)) return false;
+        if (hasRepresentative && !parseDateString(formData.representativeBirthDate)) return false;
         return true;
     };
 
@@ -137,7 +179,7 @@ export default function PatientRegistrationWizard({
         e.preventDefault();
 
         if (!validateStep1()) {
-            setSubmitError("Por favor, preencha todos os campos obrigatórios dos Dados Pessoais.");
+            setSubmitError("Por favor, preencha todos os campos obrigatórios com valores válidos dos Dados Pessoais.");
             setStep(1);
             return;
         }
@@ -151,6 +193,30 @@ export default function PatientRegistrationWizard({
         setIsSubmitting(true);
         setSubmitError(null);
 
+        const submissionData = {
+            ...formData,
+            birthDate: dateToIso(formData.birthDate),
+            representativeBirthDate: hasRepresentative ? dateToIso(formData.representativeBirthDate) : "",
+            ...(!fillAddress ? {
+                zipCode: "",
+                state: "",
+                city: "",
+                neighborhood: "",
+                street: "",
+                number: "",
+                complement: "",
+            } : {}),
+            ...(!hasEmergencyContact ? {
+                emergencyName: "",
+                emergencyPhone: "",
+            } : {}),
+            ...(!hasRepresentative ? {
+                representativeName: "",
+                representativeCpf: "",
+                representativeBirthDate: "",
+            } : {})
+        };
+
         try {
             const res = await fetch(`/api/formulario/${token}`, {
                 method: "POST",
@@ -158,7 +224,7 @@ export default function PatientRegistrationWizard({
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    formData,
+                    formData: submissionData,
                     queixaPrincipal,
                     responses,
                 }),
@@ -262,7 +328,7 @@ export default function PatientRegistrationWizard({
 
                                 <div className="space-y-2">
                                     <Label className="text-xs font-bold text-slate-700">
-                                        CPF {formType !== "CHILD_ANAMNESIS" && <span className="text-rose-500">*</span>}
+                                        CPF {formType !== "CHILD_ANAMNESIS" ? <span className="text-rose-500">*</span> : " (OPCIONAL)"}
                                     </Label>
                                     <Input
                                         value={formData.cpf}
@@ -277,7 +343,9 @@ export default function PatientRegistrationWizard({
                                 <div className="space-y-2">
                                     <Label className="text-xs font-bold text-slate-700">Data de Nascimento <span className="text-rose-500">*</span></Label>
                                     <Input
-                                        type="date"
+                                        type="text"
+                                        inputMode="numeric"
+                                        placeholder="DD/MM/YYYY"
                                         value={formData.birthDate}
                                         onChange={(e) => handleInputChange("birthDate", e.target.value)}
                                         className="h-10 text-sm focus-visible:ring-blue-500"
@@ -298,7 +366,7 @@ export default function PatientRegistrationWizard({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">E-mail</Label>
+                                    <Label className="text-xs font-bold text-slate-700">E-mail (OPCIONAL)</Label>
                                     <Input
                                         type="email"
                                         value={formData.email}
@@ -309,7 +377,7 @@ export default function PatientRegistrationWizard({
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">Profissão</Label>
+                                    <Label className="text-xs font-bold text-slate-700">Profissão (OPCIONAL)</Label>
                                     <Input
                                         value={formData.profession}
                                         onChange={(e) => handleInputChange("profession", e.target.value)}
@@ -320,47 +388,57 @@ export default function PatientRegistrationWizard({
 
                                 <div className="space-y-2">
                                     <Label className="text-xs font-bold text-slate-700">Gênero <span className="text-rose-500">*</span></Label>
-                                    <Select value={formData.gender} onValueChange={(val) => handleInputChange("gender", val)}>
-                                        <SelectTrigger className="h-10 text-sm">
-                                            <SelectValue placeholder="Selecione..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="MASCULINO">Masculino</SelectItem>
-                                            <SelectItem value="FEMININO">Feminino</SelectItem>
-                                            <SelectItem value="OUTRO">Outro / Não informar</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <select
+                                        value={formData.gender}
+                                        onChange={(e) => handleInputChange("gender", e.target.value)}
+                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 outline-none text-slate-800 font-medium"
+                                        required
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="MASCULINO">Masculino</option>
+                                        <option value="FEMININO">Feminino</option>
+                                        <option value="OUTRO">Outro / Não informar</option>
+                                    </select>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-slate-700">Como conheceu a clínica?</Label>
-                                    <Select value={formData.howKnewClinic} onValueChange={(val) => handleInputChange("howKnewClinic", val)}>
-                                        <SelectTrigger className="h-10 text-sm">
-                                            <SelectValue placeholder="Selecione..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="INDICAO">Indicação de amigo/familiar</SelectItem>
-                                            <SelectItem value="REDES_SOCIAIS">Redes Sociais (Instagram, Facebook)</SelectItem>
-                                            <SelectItem value="GOOGLE">Pesquisa Google / Maps</SelectItem>
-                                            <SelectItem value="OUTDOOR">Placa / Passou em frente</SelectItem>
-                                            <SelectItem value="OUTRO">Outro</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <Label className="text-xs font-bold text-slate-700">Como conheceu a clínica? (OPCIONAL)</Label>
+                                    <select
+                                        value={formData.howKnewClinic}
+                                        onChange={(e) => handleInputChange("howKnewClinic", e.target.value)}
+                                        className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 outline-none text-slate-800 font-medium"
+                                    >
+                                        <option value="">Selecione...</option>
+                                        <option value="INDICAO">Indicação de amigo/familiar</option>
+                                        <option value="REDES_SOCIAIS">Redes Sociais (Instagram, Facebook)</option>
+                                        <option value="GOOGLE">Pesquisa Google / Maps</option>
+                                        <option value="OUTDOOR">Placa / Passou em frente</option>
+                                        <option value="OUTRO">Outro</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            {(!isMinor && formType !== "CHILD_ANAMNESIS") && (
-                                <div className="flex items-center gap-2 pt-2 select-none">
+                            {(!isMinor && formType !== "CHILD_ANAMNESIS") ? (
+                                <div className="flex items-start gap-2 pt-2 select-none">
                                     <input
                                         type="checkbox"
                                         id="hasRepresentativeManual"
                                         checked={hasRepresentative}
                                         onChange={(e) => setHasRepresentative(e.target.checked)}
-                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                        className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                     />
-                                    <Label htmlFor="hasRepresentativeManual" className="text-xs font-bold text-slate-700 cursor-pointer">
-                                        Paciente possui responsável legal? (Tutela, curatela ou procuração)
-                                    </Label>
+                                    <div className="space-y-1">
+                                        <Label htmlFor="hasRepresentativeManual" className="text-xs font-bold text-slate-700 cursor-pointer leading-relaxed">
+                                            O cadastro está sendo preenchido por um Responsável, Tutor ou Familiar? (OPCIONAL)
+                                        </Label>
+                                        <p className="text-[10px] text-slate-500 font-normal leading-normal">
+                                            Marque esta opção se você for pai, mãe, tutor ou familiar preenchendo os dados do paciente (indicado para menores de idade, idosos ou quem necessita de auxílio).
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-3.5 bg-blue-50/50 border border-blue-100 rounded-2xl text-[11px] text-blue-700 font-medium leading-relaxed">
+                                    ℹ️ Cadastro de menor de idade: Como o paciente é menor de 18 anos, os dados do responsável legal (pai, mãe, tutor ou familiar responsável) são <strong>obrigatórios</strong> para continuar.
                                 </div>
                             )}
 
@@ -369,21 +447,22 @@ export default function PatientRegistrationWizard({
                                     <div className="flex items-center gap-2 text-amber-800">
                                         <ShieldAlert className="h-4 w-4 shrink-0" />
                                         <h4 className="text-xs font-bold uppercase tracking-wider">
-                                            Dados do Responsável Legal {(isMinor || formType === "CHILD_ANAMNESIS") && "(Obrigatório)"}
+                                            Dados do Responsável, Tutor ou Familiar (Quem está preenchendo)
                                         </h4>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-600">Nome do Responsável <span className="text-rose-500">*</span></Label>
+                                            <Label className="text-[10px] font-bold text-slate-600">Nome do Responsável / Tutor <span className="text-rose-500">*</span></Label>
                                             <Input
                                                 value={formData.representativeName}
                                                 onChange={(e) => handleInputChange("representativeName", e.target.value)}
                                                 className="h-9 text-xs"
+                                                placeholder="Ex: Maria da Silva (Mãe)"
                                                 required
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-600">CPF do Responsável <span className="text-rose-500">*</span></Label>
+                                            <Label className="text-[10px] font-bold text-slate-600">CPF do Responsável / Tutor <span className="text-rose-500">*</span></Label>
                                             <Input
                                                 value={formData.representativeCpf}
                                                 onChange={(e) => handleInputChange("representativeCpf", e.target.value)}
@@ -394,9 +473,11 @@ export default function PatientRegistrationWizard({
                                             />
                                         </div>
                                         <div className="space-y-1">
-                                            <Label className="text-[10px] font-bold text-slate-600">Data de Nasc. Responsável <span className="text-rose-500">*</span></Label>
+                                            <Label className="text-[10px] font-bold text-slate-600">Data de Nasc. do Responsável / Tutor <span className="text-rose-500">*</span></Label>
                                             <Input
-                                                type="date"
+                                                type="text"
+                                                inputMode="numeric"
+                                                placeholder="DD/MM/YYYY"
                                                 value={formData.representativeBirthDate}
                                                 onChange={(e) => handleInputChange("representativeBirthDate", e.target.value)}
                                                 className="h-9 text-xs"
@@ -408,106 +489,132 @@ export default function PatientRegistrationWizard({
                             )}
 
                             <div className="pt-4 border-t border-slate-100 space-y-4">
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                    <MapPin className="h-3 w-3" /> Endereço Residencial
-                                </h3>
-                                <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-                                    <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">CEP <span className="text-rose-500">*</span></Label>
-                                        <Input
-                                            value={formData.zipCode}
-                                            onChange={(e) => handleInputChange("zipCode", e.target.value)}
-                                            placeholder="00000-000"
-                                            className="h-9 text-xs"
-                                            required
-                                            maxLength={9}
-                                        />
-                                    </div>
-                                    <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">Estado (UF) <span className="text-rose-500">*</span></Label>
-                                        <Input
-                                            value={formData.state}
-                                            onChange={(e) => handleInputChange("state", e.target.value)}
-                                            className="h-9 text-xs"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">Cidade <span className="text-rose-500">*</span></Label>
-                                        <Input
-                                            value={formData.city}
-                                            onChange={(e) => handleInputChange("city", e.target.value)}
-                                            className="h-9 text-xs"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-1 md:col-span-3">
-                                        <Label className="text-[10px] font-bold text-slate-600">Bairro <span className="text-rose-500">*</span></Label>
-                                        <Input
-                                            value={formData.neighborhood}
-                                            onChange={(e) => handleInputChange("neighborhood", e.target.value)}
-                                            className="h-9 text-xs"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-1 md:col-span-3">
-                                        <Label className="text-[10px] font-bold text-slate-600">Endereço / Logradouro <span className="text-rose-500">*</span></Label>
-                                        <Input
-                                            value={formData.street}
-                                            onChange={(e) => handleInputChange("street", e.target.value)}
-                                            className="h-9 text-xs"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-1 md:col-span-2">
-                                        <Label className="text-[10px] font-bold text-slate-600">Número <span className="text-rose-500">*</span></Label>
-                                        <Input
-                                            value={formData.number}
-                                            onChange={(e) => handleInputChange("number", e.target.value)}
-                                            className="h-9 text-xs"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-1 md:col-span-4">
-                                        <Label className="text-[10px] font-bold text-slate-600">Complemento</Label>
-                                        <Input
-                                            value={formData.complement}
-                                            onChange={(e) => handleInputChange("complement", e.target.value)}
-                                            className="h-9 text-xs"
-                                        />
-                                    </div>
+                                <div className="flex items-center gap-2 select-none">
+                                    <input
+                                        type="checkbox"
+                                        id="fillAddressToggle"
+                                        checked={fillAddress}
+                                        onChange={(e) => setFillAddress(e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                    />
+                                    <Label htmlFor="fillAddressToggle" className="text-xs font-bold text-slate-700 cursor-pointer flex items-center gap-1.5">
+                                        <MapPin className="h-3.5 w-3.5 text-slate-500" /> Deseja informar seu endereço residencial? (OPCIONAL)
+                                    </Label>
                                 </div>
+
+                                {fillAddress && (
+                                    <div className="grid grid-cols-2 md:grid-cols-6 gap-3 p-4 bg-slate-50/50 border border-slate-150 rounded-2xl animate-in fade-in duration-300">
+                                        <div className="space-y-1 md:col-span-2">
+                                            <Label className="text-[10px] font-bold text-slate-600">CEP <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.zipCode}
+                                                onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                                                placeholder="00000-000"
+                                                className="h-9 text-xs"
+                                                required
+                                                maxLength={9}
+                                            />
+                                        </div>
+                                        <div className="space-y-1 md:col-span-2">
+                                            <Label className="text-[10px] font-bold text-slate-600">Estado (UF) <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.state}
+                                                onChange={(e) => handleInputChange("state", e.target.value)}
+                                                className="h-9 text-xs"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1 md:col-span-2">
+                                            <Label className="text-[10px] font-bold text-slate-600">Cidade <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.city}
+                                                onChange={(e) => handleInputChange("city", e.target.value)}
+                                                className="h-9 text-xs"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1 md:col-span-3">
+                                            <Label className="text-[10px] font-bold text-slate-600">Bairro <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.neighborhood}
+                                                onChange={(e) => handleInputChange("neighborhood", e.target.value)}
+                                                className="h-9 text-xs"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1 md:col-span-3">
+                                            <Label className="text-[10px] font-bold text-slate-600">Endereço / Logradouro <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.street}
+                                                onChange={(e) => handleInputChange("street", e.target.value)}
+                                                className="h-9 text-xs"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1 md:col-span-2">
+                                            <Label className="text-[10px] font-bold text-slate-600">Número <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.number}
+                                                onChange={(e) => handleInputChange("number", e.target.value)}
+                                                className="h-9 text-xs"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1 md:col-span-4">
+                                            <Label className="text-[10px] font-bold text-slate-600">Complemento (OPCIONAL)</Label>
+                                            <Input
+                                                value={formData.complement}
+                                                onChange={(e) => handleInputChange("complement", e.target.value)}
+                                                className="h-9 text-xs"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-4 border-t border-slate-100 space-y-4">
-                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-wider">
-                                    Contato de Emergência
-                                </h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] font-bold text-slate-600">Nome do Contato</Label>
-                                        <Input
-                                            value={formData.emergencyName}
-                                            onChange={(e) => handleInputChange("emergencyName", e.target.value)}
-                                            placeholder="Ex: Maria (Esposa)"
-                                            className="h-9 text-xs"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] font-bold text-slate-600">Telefone de Emergência</Label>
-                                        <Input
-                                            value={formData.emergencyPhone}
-                                            onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
-                                            placeholder="(00) 00000-0000"
-                                            className="h-9 text-xs"
-                                            maxLength={15}
-                                        />
-                                    </div>
+                                <div className="flex items-center gap-2 select-none">
+                                    <input
+                                        type="checkbox"
+                                        id="hasEmergencyContactToggle"
+                                        checked={hasEmergencyContact}
+                                        onChange={(e) => setHasEmergencyContact(e.target.checked)}
+                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                    />
+                                    <Label htmlFor="hasEmergencyContactToggle" className="text-xs font-bold text-slate-700 cursor-pointer">
+                                        Deseja informar um Contato de Emergência? (OPCIONAL)
+                                    </Label>
                                 </div>
+
+                                {hasEmergencyContact && (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-slate-50/50 border border-slate-150 rounded-2xl animate-in fade-in duration-300">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-600">Nome do Contato <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.emergencyName}
+                                                onChange={(e) => handleInputChange("emergencyName", e.target.value)}
+                                                placeholder="Ex: Maria (Esposa)"
+                                                className="h-9 text-xs"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] font-bold text-slate-600">Telefone de Emergência <span className="text-rose-500">*</span></Label>
+                                            <Input
+                                                value={formData.emergencyPhone}
+                                                onChange={(e) => handleInputChange("emergencyPhone", e.target.value)}
+                                                placeholder="(00) 00000-0000"
+                                                className="h-9 text-xs"
+                                                maxLength={15}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-4 border-t border-slate-100 space-y-2">
-                                <Label className="text-xs font-bold text-slate-700">Observações</Label>
+                                <Label className="text-xs font-bold text-slate-700">Observações (OPCIONAL)</Label>
                                 <textarea
                                     value={formData.observations}
                                     onChange={(e) => handleInputChange("observations", e.target.value)}
