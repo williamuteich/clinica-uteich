@@ -56,8 +56,8 @@ export function withAudit<Ctx extends AnyContext = AnyContext>(
                     ? await options.getUrl(ctx, data)
                     : `/${options.resource}`;
 
-                prisma.logAdmin
-                    .create({
+                prisma.$transaction(async (tx) => {
+                    await tx.logAdmin.create({
                         data: {
                             administratorId,
                             action,
@@ -66,7 +66,22 @@ export function withAudit<Ctx extends AnyContext = AnyContext>(
                             resourceName: resourceName ?? null,
                             url: resolvedUrl ?? `/${options.resource}`,
                         },
-                    })
+                    });
+
+                    const logs = await tx.logAdmin.findMany({
+                        orderBy: { createdAt: "desc" },
+                        select: { id: true },
+                    });
+
+                    if (logs.length > 20) {
+                        const idsToDelete = logs.slice(20).map((l) => l.id);
+                        await tx.logAdmin.deleteMany({
+                            where: {
+                                id: { in: idsToDelete },
+                            },
+                        });
+                    }
+                })
                     .then(() => revalidateTag("auditoria-list", "max"))
                     .catch((err) =>
                         console.error("[Audit] Erro ao salvar log de auditoria:", err)
